@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#2563eb">
-    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiU2Nhbm5lciBQYW5pdGlhIiwic2hvcnRfbmFtZSI6IlBhbml0aWEiLCJzdGFydF91cmwiOiIuIiwibWFya2V0aW5nX2NvbG9yIjoiIzI1NjNlYiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIn0=">
     <title>Scanner Panitia FGAS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -19,7 +17,7 @@
             <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl"><i class="fas fa-user-shield"></i></div>
             <h2 class="text-2xl font-bold text-slate-900 mb-2">Login Panitia</h2>
             <input type="text" id="user-name" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl mb-3 focus:ring-2 focus:ring-blue-500 outline-none text-center font-bold" placeholder="Nama Anda">
-            <input type="password" id="pwd" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl mb-4 focus:ring-2 focus:ring-blue-500 outline-none text-center tracking-widest text-xl" placeholder="***">
+            <input type="password" id="pwd" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl mb-4 focus:ring-2 focus:ring-blue-500 outline-none text-center tracking-widest text-xl" placeholder="Password">
             <button onclick="login()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg text-lg">Masuk Sistem</button>
         </div>
     </div>
@@ -27,7 +25,7 @@
     <div id="main-content" class="hidden min-h-screen flex flex-col">
         <div class="bg-blue-600 text-white px-6 py-4 flex justify-between items-center shadow-md sticky top-0 z-40">
             <h1 class="font-bold text-lg" id="header-name"><i class="fas fa-qrcode mr-2"></i>Scanner Panitia</h1>
-            <button onclick="location.reload()" class="bg-red-500 px-3 py-1.5 rounded text-sm font-bold"><i class="fas fa-power-off"></i></button>
+            <button onclick="logout()" class="bg-red-500 px-3 py-1.5 rounded text-sm font-bold"><i class="fas fa-power-off"></i></button>
         </div>
 
         <div class="flex-grow p-4 md:p-8 max-w-lg mx-auto w-full space-y-6">
@@ -48,26 +46,66 @@
                 
                 <div id="scan-result" class="mt-4 hidden p-4 rounded-xl text-center font-bold text-lg border-2"></div>
             </div>
+
+            <!-- List Pemenang / Pedagang Cepat -->
+            <div class="bg-white rounded-2xl shadow p-6">
+                <h3 class="font-bold text-slate-700 border-b pb-2 mb-2">Pendaftar UMKM & Lomba</h3>
+                <div id="list-pedagang" class="text-sm space-y-2 max-h-40 overflow-y-auto pr-2"></div>
+            </div>
             
-            <div class="text-center pt-4"><button onclick="fetchData()" class="text-blue-500 font-bold underline bg-white px-6 py-3 rounded-full shadow-sm"><i class="fas fa-sync-alt mr-1"></i> Sync DB Google Sheets</button></div>
         </div>
+    </div>
+
+    <!-- Sync Indicator -->
+    <div id="sync-badge" class="fixed bottom-4 left-4 bg-slate-800/90 backdrop-blur border border-slate-700 text-white px-3 py-1.5 rounded-full text-xs font-bold z-50 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Sync Active
     </div>
 
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwz3ebZOsF6qDjFlrcapiv-ElcUT1CKtFnhDkAMsLndQHGD8G3fldUrVBkBAfRMe7x1/exec'; 
         let html5QrCode;
-        let panitiaName = "";
+
+        window.onload = function() {
+            const savedPanitia = localStorage.getItem('panitia_auth');
+            if(savedPanitia) {
+                document.getElementById('header-name').innerHTML = `<i class="fas fa-user mr-2"></i> Panitia: ${savedPanitia}`;
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+                fetchData();
+                localStorage.setItem('online_panitia_' + savedPanitia, Date.now());
+            }
+        }
 
         function login() {
             const pwd = document.getElementById('pwd').value;
             const nm = document.getElementById('user-name').value;
             if(pwd === 'panitia123' && nm) {
-                panitiaName = nm;
-                document.getElementById('header-name').innerHTML = `<i class="fas fa-user mr-2"></i> Panitia: ${nm}`;
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('main-content').classList.remove('hidden');
-                fetchData();
-            } else { alert('Nama harus diisi dan Akses Ditolak!'); document.getElementById('pwd').value = ''; }
+                localStorage.setItem('panitia_auth', nm);
+                localStorage.setItem('online_panitia_' + nm, Date.now());
+                location.reload();
+            } else { alert('Nama harus diisi dan Password (panitia123)!'); document.getElementById('pwd').value = ''; }
+        }
+
+        function logout() {
+            const nm = localStorage.getItem('panitia_auth');
+            localStorage.removeItem('panitia_auth');
+            localStorage.removeItem('online_panitia_' + nm);
+            location.reload();
+        }
+
+        function renderLists() {
+            const visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
+            const listDiv = document.getElementById('list-pedagang');
+            listDiv.innerHTML = '';
+            
+            visitors.forEach(v => {
+                const type = v.Type || v.type || '';
+                if(type !== 'Pengunjung') {
+                    const nm = v.Nama || v.nama || '';
+                    const hp = v.HP || v.hp || '';
+                    listDiv.innerHTML += `<div class="bg-slate-50 p-2 rounded border border-slate-100"><p class="font-bold">${nm} <span class="text-xs text-blue-500">(${hp})</span></p><p class="text-xs text-slate-500">${type}</p></div>`;
+                }
+            });
         }
 
         function checkBarcode(scannedId) {
@@ -128,7 +166,7 @@
             html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, (decodedText) => {
                 checkBarcode(decodedText);
                 stopScanner(); 
-            }).catch(err => { alert("Error: " + err); stopScanner(); });
+            }).catch(err => { alert("Error Kamera: " + err); stopScanner(); });
         }
 
         function stopScanner() {
@@ -142,10 +180,18 @@
                 if (SCRIPT_URL.startsWith('http')) {
                     const res = await fetch(SCRIPT_URL);
                     const data = await res.json();
-                    if(data.visitors) localStorage.setItem('fgas_visitors', JSON.stringify(data.visitors));
-                    alert("Sync Berhasil!");
+                    if(data.visitors) {
+                        localStorage.setItem('fgas_visitors', JSON.stringify(data.visitors));
+                        renderLists();
+                    }
+                    
+                    // Update sync badge
+                    const badge = document.getElementById('sync-badge');
+                    badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Sync Active';
                 }
-            } catch (error) { console.log(error); }
+            } catch (error) { 
+                document.getElementById('sync-badge').innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> Offline';
+            }
         }
     </script>
 </body>

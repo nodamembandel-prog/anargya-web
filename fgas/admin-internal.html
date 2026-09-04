@@ -6,6 +6,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style> @media print { body * { visibility: hidden; } #print-area, #print-area * { visibility: visible; } #print-area { position: absolute; left: 0; top: 0; width: 100%; display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 10px; } } </style>
 </head>
 <body class="bg-gray-100 p-4 md:p-8">
 
@@ -18,53 +19,115 @@
         </div>
     </div>
 
-    <div id="main-content" class="hidden max-w-6xl mx-auto space-y-6">
+    <div id="main-content" class="hidden max-w-7xl mx-auto space-y-6">
         
         <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border">
             <h1 class="text-xl font-bold"><i class="fas fa-user-secret text-blue-500 mr-2"></i>Admin Internal (Master)</h1>
-            <a href="../superadmin.html" class="bg-gray-200 px-4 py-2 rounded font-bold text-sm">Kembali</a>
+            <div class="flex items-center gap-4">
+                <span id="sync-badge" class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold border border-green-500"><span class="w-2 h-2 inline-block rounded-full bg-green-500 animate-pulse mr-1"></span> Online: Sync Active</span>
+                <a href="../superadmin.html" class="bg-gray-200 px-4 py-2 rounded font-bold text-sm">Kembali</a>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <!-- VOUCHER GENERATOR -->
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-purple-200">
-                <h2 class="font-bold text-xl mb-2 text-purple-800"><i class="fas fa-ticket-alt mr-2"></i>Generator Voucher Makan</h2>
-                <p class="text-xs text-gray-500 mb-4 font-bold bg-purple-50 p-2 rounded border border-purple-100">Buat voucher Rp 10.000 untuk pengunjung. Otomatis tersinkron ke Spreadsheet.</p>
-                <div class="space-y-4">
-                    <input type="number" id="voucher-qty" class="w-full p-4 bg-gray-50 border border-gray-300 rounded-xl font-bold text-lg outline-none focus:border-purple-500" placeholder="Jumlah Voucher (Misal: 50)">
-                    <button id="btn-generate-voucher" onclick="generateVoucher()" class="w-full bg-purple-600 text-white py-4 rounded-xl font-black text-lg shadow-lg hover:bg-purple-700 transition">GENERATE & SIMPAN KE DB</button>
+            <!-- LEFT COLUMN -->
+            <div class="lg:col-span-8 space-y-6">
+                <!-- VOUCHER GENERATOR -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-purple-200">
+                    <div class="flex justify-between items-start mb-4">
+                        <h2 class="font-bold text-xl text-purple-800"><i class="fas fa-ticket-alt mr-2"></i>Generator Voucher Makan</h2>
+                        <button onclick="window.print()" class="bg-gray-800 text-white px-4 py-2 rounded text-xs font-bold"><i class="fas fa-print"></i> Print Vouchers</button>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-4 font-bold bg-purple-50 p-2 rounded border border-purple-100">Buat voucher Rp 10.000 untuk pengunjung. Otomatis tersinkron ke Spreadsheet.</p>
+                    <div class="flex gap-4 mb-4">
+                        <input type="number" id="voucher-qty" class="w-full p-4 bg-gray-50 border border-gray-300 rounded-xl font-bold text-lg outline-none focus:border-purple-500" placeholder="Jumlah (Cth: 50)">
+                        <button id="btn-generate-voucher" onclick="generateVoucher()" class="w-1/2 bg-purple-600 text-white rounded-xl font-black shadow-lg hover:bg-purple-700 transition">GENERATE</button>
+                    </div>
+                    <!-- Hidden area for print styling, visible locally inside a fixed height div -->
+                    <div class="border rounded bg-gray-50 h-40 overflow-y-auto p-4 hidden" id="voucher-preview-container">
+                        <div id="print-area" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+                    </div>
                 </div>
-                <div id="voucher-print-area" class="mt-4 grid grid-cols-2 gap-2 max-h-[300px] overflow-y-auto"></div>
+
+                <!-- Embedded Traffic Preview -->
+                <div class="bg-slate-900 rounded-2xl shadow-sm border overflow-hidden p-2">
+                    <div class="flex justify-between items-center px-4 py-2 text-white">
+                        <h2 class="font-bold"><i class="fas fa-chart-line mr-2"></i>Live Traffic Pendaftar</h2>
+                        <a href="preview.html" target="_blank" class="text-xs bg-blue-600 px-3 py-1 rounded">Buka Fullscreen</a>
+                    </div>
+                    <iframe src="preview.html" class="w-full h-[400px] border-none rounded-xl bg-slate-900 pointer-events-none"></iframe>
+                </div>
+                
+                <!-- Data Lists (Pedagang, Pemenang) -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border grid grid-cols-2 gap-4">
+                    <div>
+                        <h3 class="font-bold text-sm border-b pb-2 mb-2 text-orange-600">Daftar Tenant UMKM</h3>
+                        <div id="list-umkm" class="text-xs space-y-2 max-h-40 overflow-y-auto"></div>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-sm border-b pb-2 mb-2 text-blue-600">Pemenang Tersimpan</h3>
+                        <div id="list-pemenang" class="text-xs space-y-2 max-h-40 overflow-y-auto"></div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Winner Setup -->
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-blue-200">
-                <h2 class="font-bold text-xl mb-2 text-blue-800"><i class="fas fa-trophy mr-2"></i>Setup Pemenang Undian</h2>
-                <p class="text-xs text-gray-500 mb-6 font-bold bg-blue-50 p-2 rounded border border-blue-100">Kunci pemenang doorprize untuk verifikasi panitia & tayang LED.</p>
-                <div class="space-y-4">
-                    <input type="text" id="target-winner" class="w-full p-4 bg-gray-50 border border-gray-300 rounded-xl font-bold text-lg outline-none focus:border-blue-500" placeholder="Target ID / Nama Pemenang">
-                    <input type="text" id="target-prize" class="w-full p-4 bg-gray-50 border border-gray-300 rounded-xl font-bold text-lg outline-none focus:border-blue-500" placeholder="Target Hadiah">
-                    <button onclick="setWinner()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-lg shadow-lg hover:bg-blue-700">KUNCI PEMENANG</button>
-                    <a href="raffle.html" target="_blank" class="block w-full bg-slate-800 text-white py-3 rounded-xl font-bold text-center hover:bg-slate-700 mt-2 shadow"><i class="fas fa-desktop mr-2"></i> Buka Layar LED Undian</a>
+            <!-- RIGHT COLUMN -->
+            <div class="lg:col-span-4 space-y-6">
+                <!-- Online Presence -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-green-200">
+                    <h2 class="font-bold text-lg mb-4 text-green-700"><i class="fas fa-users mr-2"></i>Status Panitia & Pedagang</h2>
+                    <div id="online-staff" class="space-y-2 text-sm max-h-32 overflow-y-auto"></div>
                 </div>
-            </div>
 
-            <!-- Logistik & Visual -->
-            <div class="bg-white p-8 rounded-2xl shadow-sm border col-span-1 md:col-span-2">
-                <h2 class="font-bold text-lg mb-4 text-orange-800"><i class="fas fa-images mr-2"></i>Setup Visual Aset LED</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div class="border p-4 rounded-xl bg-gray-50">
-                        <label class="text-xs font-bold text-gray-500 block mb-2">Logo Utama (Tengah)</label>
-                        <input type="file" id="main-logo-upload" accept="image/*" class="w-full text-xs mb-2"><button onclick="setMainLogo()" class="bg-blue-600 text-white px-2 py-1 rounded text-xs w-full">Set Logo</button>
+                <!-- Doorprize Setup -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-200">
+                    <h2 class="font-bold text-lg mb-2 text-blue-800"><i class="fas fa-box-open mr-2"></i>Stok & Doorprize</h2>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Jumlah Hadiah Doorprize</label>
+                            <input type="number" id="doorprize-stock" class="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg font-bold" placeholder="Set Jumlah" onchange="localStorage.setItem('fgas_doorprize_stock', this.value)">
+                        </div>
+                        <div class="border-t pt-3 mt-3">
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Kunci Pemenang Selanjutnya</label>
+                            <input type="text" id="target-winner" class="w-full p-2 mb-2 bg-gray-50 border rounded-lg text-sm" placeholder="Nama / ID Tiket">
+                            <input type="text" id="target-prize" class="w-full p-2 mb-2 bg-gray-50 border rounded-lg text-sm" placeholder="Hadiah (Cth: NMAX)">
+                            <button onclick="setWinner()" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold text-sm shadow hover:bg-blue-700">SIMPAN & KURANGI STOK</button>
+                        </div>
                     </div>
-                    <div class="border p-4 rounded-xl bg-gray-50">
-                        <label class="text-xs font-bold text-gray-500 block mb-2">Logo Kanan Atas</label>
-                        <input type="file" id="top-logo-upload" accept="image/*" class="w-full text-xs mb-2"><button onclick="addTopLogo()" class="bg-green-600 text-white px-2 py-1 rounded text-xs w-full">Tambah</button>
-                    </div>
-                    <div class="border p-4 rounded-xl bg-gray-50">
-                        <label class="text-xs font-bold text-gray-500 block mb-2">Sponsor (Bawah)</label>
-                        <input type="file" id="sponsor-logo-upload" accept="image/*" class="w-full text-xs mb-2"><button onclick="addSponsorLogo()" class="bg-purple-600 text-white px-2 py-1 rounded text-xs w-full">Tambah</button>
+                </div>
+
+                <!-- Logo & Visual Settings -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border">
+                    <h2 class="font-bold text-lg mb-4 text-gray-800"><i class="fas fa-images mr-2"></i>Aset Visual</h2>
+                    <div class="space-y-4">
+                        <div class="border p-3 rounded-lg bg-gray-50">
+                            <label class="text-xs font-bold text-gray-500 block mb-2">BG Landing Page FGAS</label>
+                            <input type="file" id="bg-upload" accept="image/*" class="w-full text-xs mb-2">
+                            <div class="flex gap-2">
+                                <button onclick="compressAndSave('bg-upload', 'fgas_bg_image')" class="bg-gray-800 text-white px-2 py-1 rounded text-xs flex-1">Set BG</button>
+                                <button onclick="localStorage.removeItem('fgas_bg_image'); alert('Dihapus')" class="bg-red-500 text-white px-2 py-1 rounded text-xs">Hapus</button>
+                            </div>
+                        </div>
+                        <div class="border p-3 rounded-lg bg-gray-50">
+                            <label class="text-xs font-bold text-gray-500 block mb-2">Logo Utama (Tengah LED)</label>
+                            <input type="file" id="main-logo-upload" accept="image/*" class="w-full text-xs mb-2">
+                            <button onclick="compressAndSave('main-logo-upload', 'fgas_raffle_logo')" class="bg-blue-600 text-white px-2 py-1 rounded text-xs w-full">Set Logo</button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="border p-2 rounded-lg bg-gray-50 text-center">
+                                <label class="text-[10px] font-bold text-gray-500 block mb-1">Kanan Atas (Pemkab)</label>
+                                <input type="file" id="top-logo-upload" accept="image/*" class="w-full text-[10px] mb-1">
+                                <button onclick="compressAndSave('top-logo-upload', 'fgas_top_logos', true)" class="bg-green-600 text-white px-2 py-1 rounded text-[10px] w-full mb-1">Tambah</button>
+                                <button onclick="localStorage.removeItem('fgas_top_logos'); alert('Dihapus')" class="text-[10px] text-red-500 underline">Reset</button>
+                            </div>
+                            <div class="border p-2 rounded-lg bg-gray-50 text-center">
+                                <label class="text-[10px] font-bold text-gray-500 block mb-1">Sponsor Bawah LED</label>
+                                <input type="file" id="sponsor-logo-upload" accept="image/*" class="w-full text-[10px] mb-1">
+                                <button onclick="compressAndSave('sponsor-logo-upload', 'fgas_sponsor_logos', true)" class="bg-purple-600 text-white px-2 py-1 rounded text-[10px] w-full mb-1">Tambah</button>
+                                <button onclick="localStorage.removeItem('fgas_sponsor_logos'); alert('Dihapus')" class="text-[10px] text-red-500 underline">Reset</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -73,84 +136,131 @@
     </div>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwz3ebZOsF6qDjFlrcapiv-ElcUT1CKtFnhDkAMsLndQHGD8G3fldUrVBkBAfRMe7x1/exec'; 
+        const SCRIPT_URL = '{gscript_url}'; 
 
-        function login() {
-            if(document.getElementById('pwd').value === 'amansekali') {
+        function login() {{
+            if(document.getElementById('pwd').value === 'amansekali') {{
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-content').classList.remove('hidden');
-            } else { alert('Gagal'); document.getElementById('pwd').value = ''; }
-        }
+                document.getElementById('doorprize-stock').value = localStorage.getItem('fgas_doorprize_stock') || "";
+                renderData();
+                checkOnlineStatus();
+            }} else {{ alert('Gagal'); document.getElementById('pwd').value = ''; }}
+        }}
 
-        function setWinner() {
+        function setWinner() {{
             localStorage.setItem('fgas_target_winner', document.getElementById('target-winner').value);
             localStorage.setItem('fgas_target_prize', document.getElementById('target-prize').value);
-            alert('Pemenang berhasil dikunci!');
-        }
-
-        async function generateVoucher() {
-            const qty = parseInt(document.getElementById('voucher-qty').value);
-            if(!qty || qty < 1) { alert("Masukkan jumlah yang benar"); return; }
+            // Simulate adding to winners list
+            let w = JSON.parse(localStorage.getItem('fgas_winners')) || [];
+            w.push(document.getElementById('target-winner').value + " - " + document.getElementById('target-prize').value);
+            localStorage.setItem('fgas_winners', JSON.stringify(w));
             
+            // Decrease stock
+            let stock = parseInt(document.getElementById('doorprize-stock').value);
+            if(stock > 0) {{
+                stock--;
+                document.getElementById('doorprize-stock').value = stock;
+                localStorage.setItem('fgas_doorprize_stock', stock);
+            }}
+            alert('Pemenang dikunci & Stok Berkurang!');
+            renderData();
+        }}
+
+        async function generateVoucher() {{
+            const qty = parseInt(document.getElementById('voucher-qty').value);
+            if(!qty || qty < 1) return;
             const btn = document.getElementById('btn-generate-voucher');
-            btn.innerText = "MENYIMPAN KE DATABASE..."; btn.disabled = true;
+            btn.innerText = "MENYIMPAN..."; btn.disabled = true;
 
             const vouchers = [];
-            for(let i=0; i<qty; i++) {
-                vouchers.push('VOUCHER-FGAS-' + Math.floor(Math.random() * 10000000));
-            }
+            for(let i=0; i<qty; i++) vouchers.push('VOUCHER-FGAS-' + Math.floor(Math.random() * 10000000));
 
-            try {
-                const res = await fetch(SCRIPT_URL, {
-                    method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action: 'generate_voucher', vouchers: vouchers })
-                });
+            try {{
+                const res = await fetch(SCRIPT_URL, {{
+                    method: 'POST', headers: {{ 'Content-Type': 'text/plain;charset=utf-8' }},
+                    body: JSON.stringify({{ action: 'generate_voucher', vouchers: vouchers }})
+                }});
                 const result = await res.json();
-                
-                if(result.status === 'success') {
-                    alert(qty + " Voucher berhasil masuk database!");
-                    const container = document.getElementById('voucher-print-area');
+                if(result.status === 'success') {{
+                    alert(qty + " Voucher berhasil dibuat!");
+                    const container = document.getElementById('print-area');
+                    document.getElementById('voucher-preview-container').classList.remove('hidden');
                     container.innerHTML = '';
-                    vouchers.forEach(v => {
+                    vouchers.forEach(v => {{
                         const div = document.createElement('div');
-                        div.className = 'border p-2 bg-gray-50 flex flex-col items-center justify-center rounded';
-                        div.innerHTML = `<div id="qr-${v}" class="mb-1"></div><p class="text-[10px] font-mono font-bold">${v}</p>`;
+                        div.className = 'border p-2 bg-white flex flex-col items-center justify-center rounded text-center break-inside-avoid';
+                        div.innerHTML = `<div id="qr-${{v}}" class="mb-1 inline-block"></div><p class="text-[8px] font-mono font-bold">${{v}}</p><p class="text-[10px] text-green-600 font-bold border-t border-dashed mt-1 pt-1 w-full">Rp 10.000</p>`;
                         container.appendChild(div);
-                        new QRCode(document.getElementById(`qr-${v}`), { text: v, width: 80, height: 80 });
-                    });
-                }
-            } catch(e) { alert("Gagal koneksi ke database."); }
-            btn.innerText = "GENERATE & SIMPAN KE DB"; btn.disabled = false;
-        }
+                        new QRCode(document.getElementById(`qr-${{v}}`), {{ text: v, width: 64, height: 64 }});
+                    }});
+                }}
+            }} catch(e) {{ alert("Gagal koneksi ke database."); }}
+            btn.innerText = "GENERATE"; btn.disabled = false;
+        }}
 
-        function compressAndSave(fileInputId, storageKey, isArray = false) {
+        function checkOnlineStatus() {{
+            const div = document.getElementById('online-staff');
+            div.innerHTML = '';
+            for (let i = 0; i < localStorage.length; i++) {{
+                const key = localStorage.key(i);
+                if(key.startsWith('online_')) {{
+                    const time = parseInt(localStorage.getItem(key));
+                    const isOnline = (Date.now() - time) < 3600000; // 1 hour threshold for prototype
+                    if(isOnline) {{
+                        const name = key.replace('online_', '').replace('_', ' ');
+                        const icon = key.includes('panitia') ? 'fa-user-shield text-blue-500' : 'fa-store text-orange-500';
+                        div.innerHTML += `<div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> <i class="fas ${{icon}} w-4"></i> ${{name}}</div>`;
+                    }}
+                }}
+            }}
+            if(div.innerHTML==='') div.innerHTML = '<p class="text-gray-400 italic">Tidak ada staf terpantau.</p>';
+        }}
+
+        function renderData() {{
+            // UMKM
+            const visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
+            const umkmDiv = document.getElementById('list-umkm');
+            umkmDiv.innerHTML = '';
+            visitors.forEach(v => {{
+                if((v.type || v.Type || '').includes('UMKM')) {{
+                    umkmDiv.innerHTML += `<div class="bg-orange-50 p-2 rounded mb-1 border border-orange-100"><p class="font-bold">${{v.nama||v.Nama}}</p><p class="text-gray-500">${{v.hp||v.HP}} | ${{v.type||v.Type}}</p></div>`;
+                }}
+            }});
+            
+            // Winners
+            const winners = JSON.parse(localStorage.getItem('fgas_winners')) || [];
+            const winDiv = document.getElementById('list-pemenang');
+            winDiv.innerHTML = '';
+            winners.forEach(w => {{
+                winDiv.innerHTML += `<div class="bg-blue-50 p-2 rounded mb-1 border border-blue-100"><p class="font-bold text-blue-800">${{w}}</p></div>`;
+            }});
+        }}
+
+        function compressAndSave(fileInputId, storageKey, isArray = false) {{
             const fileInput = document.getElementById(fileInputId);
             if(!fileInput.files[0]) return;
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function(e) {{
                 const img = new Image();
-                img.onload = function() {
+                img.onload = function() {{
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 400; let width = img.width; let height = img.height;
-                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    const MAX_WIDTH = 600; let width = img.width; let height = img.height;
+                    if (width > MAX_WIDTH) {{ height *= MAX_WIDTH / width; width = MAX_WIDTH; }}
                     canvas.width = width; canvas.height = height;
                     const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
                     const base64Image = canvas.toDataURL('image/png', 0.8);
                     
-                    if(isArray) {
+                    if(isArray) {{
                         let arr = JSON.parse(localStorage.getItem(storageKey)) || [];
                         arr.push(base64Image); localStorage.setItem(storageKey, JSON.stringify(arr));
-                    } else { localStorage.setItem(storageKey, base64Image); }
-                    alert('Logo disimpan!'); fileInput.value = '';
-                }
+                    }} else {{ localStorage.setItem(storageKey, base64Image); }}
+                    alert('Gambar disimpan!'); fileInput.value = '';
+                }}
                 img.src = e.target.result;
-            };
+            }};
             reader.readAsDataURL(fileInput.files[0]);
-        }
-
-        function setMainLogo() { compressAndSave('main-logo-upload', 'fgas_raffle_logo', false); }
-        function addTopLogo() { compressAndSave('top-logo-upload', 'fgas_top_logos', true); }
-        function addSponsorLogo() { compressAndSave('sponsor-logo-upload', 'fgas_sponsor_logos', true); }
+        }}
     </script>
 </body>
 </html>

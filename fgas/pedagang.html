@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#ea580c">
     <title>Scanner Pedagang UMKM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -14,15 +15,16 @@
         <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center">
             <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl"><i class="fas fa-store"></i></div>
             <h2 class="text-2xl font-bold text-slate-900 mb-2">Login Pedagang/UMKM</h2>
-            <input type="password" id="pwd" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl mb-4 focus:ring-2 focus:ring-orange-500 outline-none text-center tracking-widest text-2xl" placeholder="***">
+            <input type="text" id="user-name" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl mb-3 focus:ring-2 focus:ring-orange-500 outline-none text-center font-bold" placeholder="Nama Stand UMKM">
+            <input type="password" id="pwd" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl mb-4 focus:ring-2 focus:ring-orange-500 outline-none text-center tracking-widest text-2xl" placeholder="Password">
             <button onclick="login()" class="w-full bg-orange-600 text-white py-4 rounded-xl font-bold hover:bg-orange-700 transition shadow-lg text-lg">Masuk</button>
         </div>
     </div>
 
     <div id="main-content" class="hidden min-h-screen flex flex-col">
         <div class="bg-orange-600 text-white px-6 py-4 flex justify-between items-center shadow-md sticky top-0 z-40">
-            <h1 class="font-bold text-lg"><i class="fas fa-store mr-2"></i>Pencairan Voucher</h1>
-            <button onclick="location.reload()" class="bg-red-500 px-3 py-1.5 rounded text-sm font-bold"><i class="fas fa-power-off"></i></button>
+            <h1 class="font-bold text-lg" id="header-name"><i class="fas fa-store mr-2"></i>Pencairan Voucher</h1>
+            <button onclick="logout()" class="bg-red-500 px-3 py-1.5 rounded text-sm font-bold"><i class="fas fa-power-off"></i></button>
         </div>
 
         <div class="flex-grow p-4 md:p-8 max-w-lg mx-auto w-full space-y-6">
@@ -40,15 +42,40 @@
         </div>
     </div>
 
+    <!-- Sync Indicator -->
+    <div id="sync-badge" class="fixed bottom-4 left-4 bg-slate-800/90 backdrop-blur border border-slate-700 text-white px-3 py-1.5 rounded-full text-xs font-bold z-50 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online: Sync Active
+    </div>
+
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwz3ebZOsF6qDjFlrcapiv-ElcUT1CKtFnhDkAMsLndQHGD8G3fldUrVBkBAfRMe7x1/exec'; 
         let html5QrCode;
 
-        function login() {
-            if(document.getElementById('pwd').value === 'umkm123') {
+        window.onload = function() {
+            const savedUser = localStorage.getItem('pedagang_auth');
+            if(savedUser) {
+                document.getElementById('header-name').innerHTML = `<i class="fas fa-store mr-2"></i> ${savedUser}`;
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-content').classList.remove('hidden');
-            } else { alert('Akses Ditolak!'); document.getElementById('pwd').value = ''; }
+                localStorage.setItem('online_pedagang_' + savedUser, Date.now());
+            }
+        }
+
+        function login() {
+            const pwd = document.getElementById('pwd').value;
+            const nm = document.getElementById('user-name').value;
+            if(pwd === 'umkm123' && nm) {
+                localStorage.setItem('pedagang_auth', nm);
+                localStorage.setItem('online_pedagang_' + nm, Date.now());
+                location.reload();
+            } else { alert('Akses Ditolak! Sandi: umkm123'); document.getElementById('pwd').value = ''; }
+        }
+
+        function logout() {
+            const nm = localStorage.getItem('pedagang_auth');
+            localStorage.removeItem('pedagang_auth');
+            localStorage.removeItem('online_pedagang_' + nm);
+            location.reload();
         }
 
         async function processVoucher(voucherId) {

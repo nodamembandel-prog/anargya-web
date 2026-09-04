@@ -7,66 +7,40 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: { brand: { 500: '#ff5e00', 600: '#e05300', 900: '#170800' } },
-                    fontFamily: { 
-                        sans: ['"Poppins"', 'sans-serif'], 
-                        display: ['"Montserrat"', 'sans-serif'] 
-                    }
-                }
-            }
-        }
-    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Poppins:wght@300;400;600;700&display=swap');
-        body { background-color: #050505; color: #ffffff; }
+        body { background-color: #050505; color: #ffffff; font-family: 'Poppins', sans-serif; }
+        .font-display { font-family: 'Montserrat', sans-serif; }
         .glass-nav { background: rgba(5, 5, 5, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .hero-bg { 
-            background-image: 
-                radial-gradient(circle at 15% 50%, rgba(255, 94, 0, 0.15), transparent 25%),
-                radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.15), transparent 25%);
-        }
-        .bento-card { 
-            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255,255,255,0.05); 
-            border-radius: 24px; transition: all 0.4s ease; backdrop-filter: blur(10px);
-        }
-        .bento-card:hover { 
-            background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 94, 0, 0.3); 
-            transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-        }
+        .hero-bg { background-image: radial-gradient(circle at 15% 50%, rgba(255, 94, 0, 0.15), transparent 25%), radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.15), transparent 25%); }
+        .bento-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; transition: all 0.4s ease; backdrop-filter: blur(10px); cursor:pointer; }
+        .bento-card:hover { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 94, 0, 0.3); transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
         .gradient-text { background: linear-gradient(to right, #ffffff, #a1a1aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .brand-gradient-text { background: linear-gradient(135deg, #ff5e00, #ffaa00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="font-sans selection:bg-brand-500 selection:text-white">
-    
+<body class="selection:bg-[#ff5e00] selection:text-white">
     <nav class="glass-nav fixed w-full z-50 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-6 lg:px-8">
             <div class="flex justify-between h-24 items-center">
                 <div class="flex-shrink-0">
-                    <img src="logo.png" alt="Anargya Logo" class="h-10 hover:scale-105 transition duration-300" onerror="this.style.display='none'">
+                    <img src="logo.png" alt="Anargya Logo" class="h-10 hover:scale-105 transition duration-300" onerror="document.getElementById('fallback-logo').style.display='block'; this.style.display='none';">
                     <span class="text-2xl font-display font-black tracking-widest brand-gradient-text" style="display: none;" id="fallback-logo">ANARGYA.</span>
                 </div>
                 <div class="hidden md:flex items-center space-x-8">
-                    <a href="#services" class="text-sm font-semibold text-gray-300 hover:text-brand-500 uppercase tracking-widest transition">Layanan</a>
-                    <a href="fgas/index.html" class="bg-brand-500 text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-brand-600 uppercase tracking-widest transition shadow-[0_0_15px_rgba(255,94,0,0.4)]">Event Terdekat</a>
+                    <a href="#services" class="text-sm font-semibold text-gray-300 hover:text-[#ff5e00] uppercase tracking-widest transition">Layanan</a>
+                    <a href="fgas/index.html" class="bg-[#ff5e00] text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-[#e05300] uppercase tracking-widest transition shadow-[0_0_15px_rgba(255,94,0,0.4)]">Event Terdekat</a>
                 </div>
             </div>
         </div>
     </nav>
-
     <header class="pt-40 pb-20 hero-bg min-h-screen flex items-center relative overflow-hidden">
-        <!-- Abstract Grid lines -->
         <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px); background-size: 50px 50px;"></div>
-
         <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 w-full flex flex-col items-center text-center">
-            <div data-aos="fade-down" class="inline-flex items-center justify-center px-5 py-2 rounded-full border border-brand-500/30 bg-brand-500/10 text-brand-500 text-xs font-bold tracking-[0.2em] mb-8">
-                <span class="w-2 h-2 rounded-full bg-brand-500 mr-3 animate-pulse"></span> PREMIER CREATIVE AGENCY
+            <div data-aos="fade-down" class="inline-flex items-center justify-center px-5 py-2 rounded-full border border-[#ff5e00]/30 bg-[#ff5e00]/10 text-[#ff5e00] text-xs font-bold tracking-[0.2em] mb-8">
+                <span class="w-2 h-2 rounded-full bg-[#ff5e00] mr-3 animate-pulse"></span> PREMIER CREATIVE AGENCY
             </div>
             <h1 data-aos="fade-up" data-aos-delay="100" class="text-5xl md:text-7xl lg:text-[6rem] font-display font-black leading-[1.05] mb-8 tracking-tighter">
                 <span class="gradient-text">Wujudkan</span> <span class="brand-gradient-text">Ide Brilian</span><br>
@@ -77,29 +51,25 @@
             </p>
             <div data-aos="fade-up" data-aos-delay="300" class="flex flex-col sm:flex-row justify-center gap-6 w-full sm:w-auto">
                 <a href="#services" class="bg-white text-black px-10 py-4 rounded-full font-bold tracking-wider hover:bg-gray-200 transition-all duration-300">Eksplorasi Layanan</a>
-                <a href="fgas/index.html" class="bg-transparent border border-gray-600 text-white px-10 py-4 rounded-full font-bold tracking-wider hover:border-brand-500 hover:text-brand-500 transition-all duration-300 flex items-center justify-center">
+                <a href="fgas/index.html" class="bg-transparent border border-gray-600 text-white px-10 py-4 rounded-full font-bold tracking-wider hover:border-[#ff5e00] hover:text-[#ff5e00] transition-all duration-300 flex items-center justify-center">
                     <i class="fas fa-calendar-alt mr-3"></i> Event Terdekat
                 </a>
             </div>
         </div>
     </header>
-
     <section id="services" class="py-32 relative z-10 border-t border-white/5">
         <div class="max-w-7xl mx-auto px-6 lg:px-8">
             <div class="mb-20 flex flex-col md:flex-row justify-between items-end gap-8" data-aos="fade-up">
                 <div>
                     <h2 class="text-4xl md:text-5xl font-display font-black text-white mb-4 tracking-tight">Solusi Profesional Kami</h2>
-                    <div class="w-24 h-1 bg-brand-500 rounded-full"></div>
+                    <div class="w-24 h-1 bg-[#ff5e00] rounded-full"></div>
                 </div>
-                <p class="text-gray-400 max-w-md text-sm leading-relaxed">Kami menghadirkan layanan terintegrasi yang dirancang khusus untuk memenuhi standar industri tertinggi dalam setiap proyek Anda.</p>
             </div>
-            
-            <!-- Bento Grid Layout -->
             <div class="grid grid-cols-1 md:grid-cols-12 gap-6" id="services-container"></div>
         </div>
     </section>
 
-    <!-- Modal Detail Layanan -->
+    <!-- Modal Layanan -->
     <div id="service-modal" class="hidden fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 transition-opacity duration-300 opacity-0">
         <div class="bg-[#111] border border-white/10 w-full max-w-5xl max-h-[90vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col transform scale-95 transition-transform duration-300" id="modal-content">
             <div class="p-6 border-b border-white/10 flex justify-between items-center bg-[#0a0a0a]">
@@ -108,32 +78,26 @@
             </div>
             <div class="p-8 overflow-y-auto no-scrollbar flex-grow">
                 <p id="modal-desc" class="text-lg text-gray-400 mb-10 leading-relaxed"></p>
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="w-8 h-1 bg-brand-500 rounded-full"></div>
-                    <h4 class="font-display font-bold text-xl text-white">Galeri Portofolio</h4>
-                </div>
+                <div class="flex items-center gap-3 mb-6"><div class="w-8 h-1 bg-[#ff5e00] rounded-full"></div><h4 class="font-display font-bold text-xl text-white">Galeri Portofolio</h4></div>
                 <div id="modal-gallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </div>
         </div>
     </div>
 
+    <!-- Footer Presisi Tengah -->
     <footer class="bg-black text-white py-24 relative overflow-hidden border-t border-white/5">
-        <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-500 to-transparent opacity-50"></div>
-        
+        <div class="absolute inset-0 opacity-5 bg-[url('data:image/svg+xml,%3Csvg width=\\'40\\' height=\\'40\\' viewBox=\\'0 0 40 40\\' xmlns=\\'http://www.w3.org/2000/svg\\'%3E%3Cpath d=\\'M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2z\\' fill=\\'%23ffffff\\' fill-opacity=\\'1\\' fill-rule=\\'evenodd\\'/%3E%3C/svg%3E')]"></div>
         <div class="relative z-10 w-full max-w-4xl mx-auto px-6 flex flex-col items-center text-center">
-            <div class="mb-10">
-                <img src="logo.png" alt="Anargya Logo" class="h-16 object-contain" onerror="document.getElementById('footer-fallback').style.display='block'; this.style.display='none';">
-                <span class="text-3xl font-display font-black tracking-widest brand-gradient-text" style="display: none;" id="footer-fallback">ANARGYA.</span>
+            <div class="mb-10 flex flex-col items-center">
+                <img src="logo.png" alt="Anargya Logo" class="h-20 object-contain mx-auto" onerror="document.getElementById('footer-fallback').style.display='block'; this.style.display='none';">
+                <span class="text-3xl font-display font-black tracking-widest brand-gradient-text mx-auto mt-4" style="display: none;" id="footer-fallback">ANARGYA.</span>
             </div>
-            
-            <p class="text-gray-400 text-lg mb-12 max-w-xl leading-relaxed font-light">Mitra strategis Anda dalam mewujudkan event berskala besar, pengadaan efisien, dan eksekusi visual tak terlupakan.</p>
-            
-            <div class="flex justify-center gap-6 mb-16">
-                <a id="ig-link" href="#" class="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:-translate-y-2 transition-all duration-300 border border-white/10"><i class="fab fa-instagram text-xl"></i></a>
+            <p class="text-gray-400 text-lg mb-12 max-w-xl leading-relaxed font-light mx-auto">Mitra strategis Anda dalam mewujudkan event berskala besar, pengadaan efisien, dan eksekusi visual tak terlupakan.</p>
+            <div class="flex justify-center gap-6 mb-16 mx-auto">
+                <a id="ig-link" href="#" class="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center text-white hover:bg-[#ff5e00] hover:-translate-y-2 transition-all duration-300 border border-white/10"><i class="fab fa-instagram text-xl"></i></a>
                 <a id="wa-link" href="#" class="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center text-white hover:bg-green-500 hover:-translate-y-2 transition-all duration-300 border border-white/10"><i class="fab fa-whatsapp text-xl"></i></a>
             </div>
-            
-            <div class="w-full pt-8 text-gray-600 font-semibold tracking-widest text-xs uppercase">
+            <div class="w-full pt-8 text-gray-600 font-semibold tracking-widest text-xs uppercase text-center mx-auto">
                 &copy; 2026 Anargya Kreativindo. Hak Cipta Dilindungi.
             </div>
         </div>
@@ -141,44 +105,29 @@
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        document.querySelector('img').onerror = function() {
-            document.getElementById('fallback-logo').style.display = 'block';
-            this.style.display = 'none';
-        };
-
         AOS.init({ duration: 800, once: true, offset: 50 });
-
         const defaultServices = [
-            { id: 'event', title: 'Event Organizer', desc: 'Manajemen acara end-to-end, tata panggung presisi, dan eksekusi acara berskala nasional.', icon: 'fa-layer-group', span: 'md:col-span-8' },
+            { id: 'event', title: 'Event Organizer', desc: 'Manajemen acara end-to-end, tata panggung presisi, dan eksekusi acara.', icon: 'fa-layer-group', span: 'md:col-span-8' },
             { id: 'pengadaan', title: 'Pengadaan Barang', desc: 'Sistem pengadaan vendor terintegrasi.', icon: 'fa-dolly-flatbed', span: 'md:col-span-4' },
             { id: 'tour', title: 'Tour & Travel', desc: 'Perencanaan perjalanan bisnis premium.', icon: 'fa-plane-arrival', span: 'md:col-span-4' },
             { id: 'video', title: 'Video & Foto', desc: 'Produksi visual sinematik & dokumentasi.', icon: 'fa-video', span: 'md:col-span-4' },
             { id: 'ads', title: 'Advertising', desc: 'Solusi periklanan OOH & digital marketing.', icon: 'fa-ad', span: 'md:col-span-4' }
         ];
-
         const customTexts = JSON.parse(localStorage.getItem('anargya_services_custom')) || {};
         const activeServices = defaultServices.map(srv => {
             if(customTexts[srv.id]) return { ...srv, title: customTexts[srv.id].title, desc: customTexts[srv.id].desc };
             return srv;
         });
-
         document.getElementById('wa-link').href = localStorage.getItem('anargya_wa') || 'https://wa.me/6281234567890';
         document.getElementById('ig-link').href = localStorage.getItem('anargya_ig') || 'https://instagram.com/anargya';
-
         const container = document.getElementById('services-container');
         activeServices.forEach((srv, idx) => {
-            const isEvent = srv.id === 'event';
-            const extraBtn = isEvent ? `<div class="mt-6"><a href="fgas/index.html" class="inline-flex items-center text-xs font-bold text-black uppercase tracking-widest bg-white px-5 py-2.5 rounded-full hover:bg-brand-500 hover:text-white transition-colors">Event Terdekat <i class="fas fa-chevron-right ml-2 text-[10px]"></i></a></div>` : '';
-            
+            const extraBtn = srv.id === 'event' ? `<div class="mt-6"><a href="fgas/index.html" class="inline-flex items-center text-xs font-bold text-black uppercase tracking-widest bg-white px-5 py-2.5 rounded-full hover:bg-[#ff5e00] hover:text-white transition-colors">Event Terdekat <i class="fas fa-chevron-right ml-2 text-[10px]"></i></a></div>` : '';
             container.innerHTML += `
                 <div data-aos="fade-up" data-aos-delay="${idx * 100}" onclick="openModal('${srv.id}')" class="bento-card p-8 flex flex-col justify-between ${srv.span} group relative overflow-hidden h-full min-h-[250px]">
-                    <div class="absolute -right-10 -bottom-10 opacity-5 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none">
-                        <i class="fas ${srv.icon} text-9xl"></i>
-                    </div>
+                    <div class="absolute -right-10 -bottom-10 opacity-5 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none"><i class="fas ${srv.icon} text-9xl"></i></div>
                     <div>
-                        <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6 border border-white/10 group-hover:bg-brand-500 transition-colors duration-300">
-                            <i class="fas ${srv.icon} text-xl text-white"></i>
-                        </div>
+                        <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mb-6 border border-white/10 group-hover:bg-[#ff5e00] transition-colors duration-300"><i class="fas ${srv.icon} text-xl text-white"></i></div>
                         <h3 class="text-2xl font-display font-bold mb-3 text-white tracking-tight">${srv.title}</h3>
                         <p class="text-gray-400 text-sm leading-relaxed font-light">${srv.desc}</p>
                     </div>
@@ -186,46 +135,29 @@
                 </div>
             `;
         });
-
         const galleries = JSON.parse(localStorage.getItem('anargya_galleries')) || {};
-        
         function openModal(id) {
             const srv = activeServices.find(s => s.id === id);
             document.getElementById('modal-title').innerText = srv.title;
             document.getElementById('modal-desc').innerText = srv.desc;
-            
             const galContainer = document.getElementById('modal-gallery');
             galContainer.innerHTML = '';
-            
             if(galleries[id] && galleries[id].length > 0) {
                 galleries[id].forEach(imgUrl => {
-                    galContainer.innerHTML += `
-                        <div class="relative group overflow-hidden rounded-2xl border border-white/10 aspect-[4/3]">
-                            <img src="${imgUrl}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
-                        </div>`;
+                    galContainer.innerHTML += `<div class="relative group overflow-hidden rounded-2xl border border-white/10 aspect-[4/3]"><img src="${imgUrl}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"></div>`;
                 });
             } else {
-                galContainer.innerHTML = `
-                    <div class="col-span-full flex flex-col items-center justify-center py-12 px-4 bg-white/5 rounded-2xl border border-dashed border-white/20">
-                        <i class="fas fa-image text-3xl text-gray-500 mb-3"></i>
-                        <p class="text-gray-400 text-sm">Belum ada foto portofolio.</p>
-                    </div>`;
+                galContainer.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center py-12 px-4 bg-white/5 rounded-2xl border border-dashed border-white/20"><i class="fas fa-image text-3xl text-gray-500 mb-3"></i><p class="text-gray-400 text-sm">Belum ada foto portofolio.</p></div>`;
             }
-
             const modal = document.getElementById('service-modal');
             const content = document.getElementById('modal-content');
             modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                content.classList.remove('scale-95');
-            }, 10);
+            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
         }
-
         function closeModal() {
             const modal = document.getElementById('service-modal');
             const content = document.getElementById('modal-content');
-            modal.classList.add('opacity-0');
-            content.classList.add('scale-95');
+            modal.classList.add('opacity-0'); content.classList.add('scale-95');
             setTimeout(() => { modal.classList.add('hidden'); }, 300);
         }
     </script>

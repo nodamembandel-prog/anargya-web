@@ -21,20 +21,33 @@
         .btn-sport { transition: all 0.3s ease; }
         .btn-sport:hover { transform: scale(1.02); filter: drop-shadow(0 0 20px rgba(6, 182, 212, 0.6)); }
         .activity-list::-webkit-scrollbar { width: 6px; } .activity-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; } .activity-list::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); border-radius: 4px; }
+        
+        /* Top Logos Positioning Fix */
+        .logos-container { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; padding: 1rem 1.5rem; position: absolute; top: 0; left: 0; z-index: 50; pointer-events: none; }
+        .logos-container .logo-left { flex: 1; display: flex; justify-content: flex-start; }
+        .logos-container .logo-center { flex: 1; display: flex; justify-content: center; }
+        .logos-container .logo-right { flex: 1; display: flex; justify-content: flex-end; }
     </style>
 </head>
 <body class="text-white min-h-screen flex flex-col relative pb-20">
     <div id="dynamic-bg" class="sport-bg"></div>
     <div class="grid-overlay"></div>
 
-    <!-- Top Logos (Absolute Layout per instructions) -->
-    <div class="absolute top-0 left-0 w-full p-4 lg:p-6 flex justify-between items-start z-50 pointer-events-none">
-        <img src="../logo_pengundian.png" class="h-10 md:h-16 object-contain drop-shadow-lg" onerror="this.style.display='none'">
-        <img src="../logo_fgas.png" class="h-14 md:h-24 object-contain drop-shadow-[0_0_20px_rgba(6,182,212,0.6)] absolute left-1/2 transform -translate-x-1/2" onerror="this.style.display='none'">
-        <img src="../logo_pemkab.jpg" class="h-10 md:h-14 object-contain rounded bg-white p-1 shadow-lg" onerror="this.style.display='none'">
+    <!-- Top Logos (Kiri: Pengundian, Tengah: FGAS, Kanan: Pemkab) -->
+    <div class="logos-container">
+        <div class="logo-left">
+            <img src="../logo_pengundian.png" class="h-10 md:h-16 object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]" onerror="this.style.display='none'">
+        </div>
+        <div class="logo-center">
+            <img src="../logo_fgas.png" class="h-14 md:h-24 object-contain drop-shadow-[0_0_20px_rgba(6,182,212,0.6)]" onerror="this.style.display='none'">
+        </div>
+        <div class="logo-right">
+            <img src="../logo_pemkab.jpg" class="h-10 md:h-14 object-contain rounded-xl bg-white p-1.5 shadow-lg" onerror="this.style.display='none'">
+        </div>
     </div>
 
     <div class="w-full max-w-7xl mx-auto flex-grow grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10 pt-28 lg:pt-36 px-4 lg:px-8 items-start">
+        
         <!-- Info Section -->
         <div class="lg:col-span-7 flex flex-col">
             <h1 class="title-sport text-5xl lg:text-7xl font-bold mb-4 uppercase text-transparent bg-clip-text bg-gradient-to-br from-white via-blue-100 to-blue-500 drop-shadow-2xl mt-4">
@@ -89,15 +102,15 @@
         </div>
 
         <!-- Form Section -->
-        <div class="lg:col-span-5 w-full pointer-events-auto">
+        <div class="lg:col-span-5 w-full pointer-events-auto mt-4 lg:mt-0">
             <div class="glass-panel p-6 md:p-8 rounded-3xl w-full">
                 <div id="form-section">
                     <div class="flex justify-between items-center mb-6 border-b border-blue-500/30 pb-4">
                         <div>
                             <h3 class="text-2xl title-sport uppercase text-cyan-400 tracking-wider mb-1">Tiket Masuk</h3>
                             <p class="text-xs md:text-sm text-blue-200 font-semibold">1 NIK / No. HP Berlaku untuk 1 Undian.</p>
+                            <p class="text-xs md:text-sm text-orange-400 font-bold mt-1">*Seluruh Pendaftaran Lomba 100% GRATIS</p>
                         </div>
-                        <div class="bg-orange-500 text-white font-black px-4 py-2 rounded-lg text-sm shadow-lg transform rotate-3">GRATIS!</div>
                     </div>
                     
                     <div class="space-y-4">
@@ -170,7 +183,7 @@
                         <p class="text-red-100 text-xs font-bold leading-tight">Simpan barcode ini dengan baik. Wajib diperlihatkan ke Panitia/Crew di lokasi.</p>
                     </div>
                     
-                    <div class="bg-white p-5 inline-block mx-auto rounded-3xl shadow-[0_0_40px_rgba(255,255,255,0.2)]">
+                    <div class="bg-white p-5 inline-block mx-auto rounded-3xl shadow-[0_0_40px_rgba(255,255,255,0.2)]" id="print-area">
                         <div id="qrcode" class="flex justify-center mb-3"></div>
                         <p class="text-[10px] text-gray-500 uppercase tracking-widest font-black mb-1">TICKET ID</p>
                         <p class="text-xl font-black text-gray-900 tracking-wider font-mono bg-gray-100 py-1 px-4 rounded" id="ticket-id-display"></p>
@@ -190,14 +203,19 @@
     <a href="panitia.html" class="fixed bottom-4 right-4 text-slate-800 hover:text-blue-500 transition duration-300 z-50"><i class="fas fa-user-shield"></i></a>
     <a href="pedagang.html" class="fixed bottom-4 right-12 text-slate-800 hover:text-orange-500 transition duration-300 z-50"><i class="fas fa-store"></i></a>
 
+    <!-- Sync Indicator -->
+    <div id="sync-badge" class="fixed bottom-4 left-4 bg-slate-800/80 backdrop-blur border border-slate-700 text-white px-3 py-1.5 rounded-full text-xs font-bold z-50 flex items-center gap-2 opacity-50">
+        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online
+    </div>
+
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwz3ebZOsF6qDjFlrcapiv-ElcUT1CKtFnhDkAMsLndQHGD8G3fldUrVBkBAfRMe7x1/exec'; 
+        const SCRIPT_URL = '{gscript_url}'; 
 
         const customBg = localStorage.getItem('fgas_bg_image');
-        if(customBg) { document.getElementById('dynamic-bg').style.backgroundImage = `url(${customBg})`; }
+        if(customBg) { document.getElementById('dynamic-bg').style.backgroundImage = `url(${{customBg}})`; }
 
         const countDownDate = new Date("Oct 10, 2026 08:00:00").getTime();
-        setInterval(function() {
+        setInterval(function() {{
             const now = new Date().getTime();
             const distance = countDownDate - now;
             if (distance < 0) return;
@@ -205,39 +223,39 @@
             document.getElementById("hours").innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
             document.getElementById("mins").innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
             document.getElementById("secs").innerText = Math.floor((distance % (1000 * 60)) / 1000).toString().padStart(2, '0');
-        }, 1000);
+        }}, 1000);
 
-        function checkQuotas() {
-            const quotas = JSON.parse(localStorage.getItem('fgas_quotas')) || {};
+        function checkQuotas() {{
+            const quotas = JSON.parse(localStorage.getItem('fgas_quotas')) || {{}};
             const visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
-            const counts = {};
-            visitors.forEach(v => {
+            const counts = {{}};
+            visitors.forEach(v => {{
                 const baseType = v.type.split(' - ')[0].split(' (')[0];
                 counts[baseType] = (counts[baseType] || 0) + 1;
-            });
+            }});
 
             const select = document.getElementById('reg-type');
-            Array.from(select.options).forEach(opt => {
+            Array.from(select.options).forEach(opt => {{
                 const type = opt.value;
-                if (type !== 'Pengunjung' && quotas[type]) {
+                if (type !== 'Pengunjung' && quotas[type]) {{
                     const max = parseInt(quotas[type]);
-                    if ((counts[type] || 0) >= max) {
+                    if ((counts[type] || 0) >= max) {{
                         opt.disabled = true;
                         opt.text = type + ' (KUOTA HABIS)';
                         opt.classList.add('text-red-400');
-                    }
-                }
-            });
-        }
+                    }}
+                }}
+            }});
+        }}
         window.addEventListener('DOMContentLoaded', checkQuotas);
 
-        function handleCategoryChange() {
+        function handleCategoryChange() {{
             const type = document.getElementById('reg-type').value;
             const container = document.getElementById('dynamic-fields');
             container.innerHTML = '';
             container.classList.remove('hidden');
 
-            if (type === 'Lomba Fashion Show Anak') {
+            if (type === 'Lomba Fashion Show Anak') {{
                 container.innerHTML = `
                     <p class="text-sm font-bold text-cyan-300 mb-2"><i class="fas fa-palette mr-1"></i> TEMA: Budaya Boyolali</p>
                     <label class="block text-xs font-bold text-cyan-300 uppercase mb-1">Kategori Umur</label>
@@ -247,11 +265,11 @@
                     </select>
                     <p class="text-xs text-orange-400 font-bold bg-orange-900/40 p-2 rounded-lg border border-orange-500/30"><i class="fas fa-id-card mr-1"></i> WAJIB bawa Akta Kelahiran asli saat di lokasi.</p>
                 `;
-            } else if (type === 'Lomba Mewarnai Anak') {
+            }} else if (type === 'Lomba Mewarnai Anak') {{
                 container.innerHTML = `<p class="text-xs text-orange-400 font-bold bg-orange-900/40 p-2 rounded-lg border border-orange-500/30"><i class="fas fa-info-circle mr-1"></i> Khusus anak usia 5-6 Tahun. WAJIB bawa Akta Kelahiran asli.</p>`;
-            } else if (type === 'Modifikasi Mobil/Motor' || type === 'Lomba Modifikasi Mobil' || type === 'Lomba Modifikasi Motor') {
+            }} else if (type === 'Modifikasi Mobil/Motor' || type === 'Lomba Modifikasi Mobil' || type === 'Lomba Modifikasi Motor') {{
                 container.classList.add('hidden');
-            } else if (type === 'Festival UMKM Boyolali') {
+            }} else if (type === 'Festival UMKM Boyolali') {{
                 container.innerHTML = `
                     <label class="block text-xs font-bold text-cyan-300 uppercase mb-1">Jenis UMKM</label>
                     <select id="sub-kategori" class="w-full p-3 input-dark rounded-xl mb-3 text-sm">
@@ -262,12 +280,12 @@
                     <label class="block text-xs font-bold text-cyan-300 uppercase mb-1">Keterangan Jualan</label>
                     <input type="text" id="detail-produk" class="w-full p-3 input-dark rounded-xl text-sm" placeholder="Cth: Baju Batik, Soto, dll...">
                 `;
-            } else {
+            }} else {{
                 container.classList.add('hidden');
-            }
-        }
+            }}
+        }}
 
-        async function register() {
+        async function register() {{
             const btn = document.getElementById('submit-btn');
             let baseType = document.getElementById('reg-type').value;
             const nama = document.getElementById('nama').value;
@@ -277,69 +295,73 @@
             const hp = document.getElementById('hp').value;
             const alamat = document.getElementById('alamat').value;
 
-            if(!nama || !hp || !nik || !umur) { alert("Data wajib belum lengkap!"); return; }
+            if(!nama || !hp || !nik || !umur) {{ alert("Data wajib belum lengkap!"); return; }}
 
             let visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
-            if(visitors.some(v => v.nik === nik || v.hp === hp) && baseType === 'Pengunjung') {
+            if(visitors.some(v => v.nik === nik || v.hp === hp) && baseType === 'Pengunjung') {{
                 alert("MAAF! NIK atau Nomor HP ini sudah terdaftar. 1 Identitas = 1 Undian."); return;
-            }
+            }}
 
-            const quotas = JSON.parse(localStorage.getItem('fgas_quotas')) || {};
-            const counts = {};
-            visitors.forEach(v => { counts[v.type.split(' - ')[0].split(' (')[0]] = (counts[v.type.split(' - ')[0].split(' (')[0]] || 0) + 1; });
-            if (baseType !== 'Pengunjung' && quotas[baseType] && counts[baseType] >= parseInt(quotas[baseType])) {
-                alert(`MAAF! Kuota pendaftaran untuk ${baseType} sudah penuh.`); return;
-            }
+            const quotas = JSON.parse(localStorage.getItem('fgas_quotas')) || {{}};
+            const counts = {{}};
+            visitors.forEach(v => {{ counts[v.type.split(' - ')[0].split(' (')[0]] = (counts[v.type.split(' - ')[0].split(' (')[0]] || 0) + 1; }});
+            if (baseType !== 'Pengunjung' && quotas[baseType] && counts[baseType] >= parseInt(quotas[baseType])) {{
+                alert(`MAAF! Kuota pendaftaran untuk ${{baseType}} sudah penuh.`); return;
+            }}
 
             let finalType = baseType;
             const subKategori = document.getElementById('sub-kategori');
             const detailProduk = document.getElementById('detail-produk');
-            if (subKategori) finalType += ` - ${subKategori.value}`;
-            if (detailProduk && detailProduk.value) finalType += ` (${detailProduk.value})`;
+            if (subKategori) finalType += ` - ${{subKategori.value}}`;
+            if (detailProduk && detailProduk.value) finalType += ` (${{detailProduk.value}})`;
 
             btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> MEMPROSES...';
             btn.disabled = true;
 
             const ticketId = 'FGAS-' + Math.floor(Math.random() * 1000000);
-            const data = { action: 'register', type: finalType, nama, nik, hp, alamat, umur, gender, ticketId };
+            const data = {{ action: 'register', type: finalType, nama, nik, hp, alamat, umur, gender, ticketId }};
 
-            try {
+            try {{
                 visitors.push(data);
                 localStorage.setItem('fgas_visitors', JSON.stringify(visitors));
 
-                if (SCRIPT_URL.startsWith('http')) {
-                    fetch(SCRIPT_URL, {
-                        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data)
-                    }).catch(e => console.log("Background sync error", e));
-                }
+                const syncBadge = document.getElementById('sync-badge');
+                syncBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span> Syncing...';
+
+                fetch(SCRIPT_URL, {{
+                    method: 'POST', headers: {{ 'Content-Type': 'text/plain;charset=utf-8' }}, body: JSON.stringify(data)
+                }}).then(() => {{
+                    syncBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Sync Active';
+                }}).catch(e => console.log("Sync error", e));
 
                 document.getElementById('form-section').classList.add('hidden');
                 document.getElementById('qrcode-container').classList.remove('hidden');
                 
                 document.getElementById('qrcode').innerHTML = '';
-                new QRCode(document.getElementById("qrcode"), {
+                new QRCode(document.getElementById("qrcode"), {{
                     text: ticketId, width: 220, height: 220, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
-                });
+                }});
                 document.getElementById('ticket-id-display').innerText = ticketId;
-            } catch (error) {
+
+            }} catch (error) {{
                 alert("Terjadi kesalahan sistem lokal.");
-            } finally {
+            }} finally {{
                 btn.innerHTML = '<i class="fas fa-qrcode mr-2"></i> Buat Barcode';
                 btn.disabled = false;
-            }
-        }
+            }}
+        }}
 
-        function downloadQR() {
+        function downloadQR() {{
             const img = document.querySelector('#qrcode img');
-            if(img && img.src) {
+            if(img && img.src) {{
                 const a = document.createElement('a');
                 a.href = img.src;
                 a.download = 'TICKET_FGAS_2026.png';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
-            } else { alert('Menunggu render...'); }
-        }
+            }} else {{ alert('Menunggu render...'); }}
+        }}
     </script>
 </body>
 </html>
