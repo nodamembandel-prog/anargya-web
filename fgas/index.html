@@ -9,48 +9,66 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;600;700&display=swap');
-        body { background-color: #020617; font-family: 'Rajdhani', sans-serif; overflow-x: hidden; width: 100vw; }
-        input, select, textarea { -webkit-appearance: none; -moz-appearance: none; appearance: none; border-radius: 0.75rem !important; }
+        body { background-color: #020617; font-family: 'Rajdhani', sans-serif; overflow-x: hidden; max-width: 100%; }
+        
+        input, select, textarea {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            border-radius: 0.75rem !important; 
+        }
+        
         .sport-bg { position: fixed; inset: 0; z-index: -2; background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%); background-size: cover; background-position: center; }
-        .grid-overlay { position: fixed; inset: 0; z-index: -1; opacity: 0.15; background-size: 50px 50px; background-image: linear-gradient(to right, #3b82f6 1px, transparent 1px), linear-gradient(to bottom, #3b82f6 1px, transparent 1px); transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px); animation: gridMove 15s linear infinite; }
-        @keyframes gridMove { 0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); } 100% { transform: perspective(500px) rotateX(60deg) translateY(50px) translateZ(-200px); } }
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: -1; opacity: 0.15;
+            background-size: 50px 50px;
+            background-image: linear-gradient(to right, #3b82f6 1px, transparent 1px), linear-gradient(to bottom, #3b82f6 1px, transparent 1px);
+            transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+            animation: gridMove 15s linear infinite;
+        }
+        @keyframes gridMove {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(50px) translateZ(-200px); }
+        }
+        
         .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(59, 130, 246, 0.4); box-shadow: 0 0 40px rgba(59, 130, 246, 0.15); }
         .input-dark { background: rgba(2, 6, 23, 0.8); border: 1px solid rgba(59, 130, 246, 0.5); color: white; width: 100%; box-sizing: border-box; }
         .input-dark:focus { border-color: #06b6d4; outline: none; background: rgba(2, 6, 23, 0.95); box-shadow: 0 0 15px rgba(6, 182, 212, 0.4); }
         .title-sport { font-family: 'Orbitron', sans-serif; letter-spacing: 2px; line-height: 1.1; }
         .btn-sport { transition: all 0.3s ease; }
         .btn-sport:hover { transform: scale(1.02); filter: drop-shadow(0 0 20px rgba(6, 182, 212, 0.6)); }
-        .activity-list::-webkit-scrollbar { width: 6px; } .activity-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; } .activity-list::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); border-radius: 4px; }
         
-        /* Top Logos Positioning Fix */
-        .logos-container { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; padding: 1rem 1.5rem; position: absolute; top: 0; left: 0; z-index: 50; pointer-events: none; }
-        .logos-container .logo-left { flex: 1; display: flex; justify-content: flex-start; }
-        .logos-container .logo-center { flex: 1; display: flex; justify-content: center; }
-        .logos-container .logo-right { flex: 1; display: flex; justify-content: flex-end; }
+        /* Animated SVG Checkmark */
+        .checkmark__circle { stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 2; stroke-miterlimit: 10; stroke: #06b6d4; fill: none; animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards; }
+        .checkmark { width: 80px; height: 80px; border-radius: 50%; display: block; stroke-width: 2; stroke: #fff; stroke-miterlimit: 10; margin: 0 auto 20px auto; box-shadow: inset 0px 0px 0px #06b6d4; animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both; }
+        .checkmark__check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards; }
+        @keyframes stroke { 100% { stroke-dashoffset: 0; } }
+        @keyframes scale { 0%, 100% { transform: none; } 50% { transform: scale3d(1.1, 1.1, 1); } }
+        @keyframes fill { 100% { box-shadow: inset 0px 0px 0px 50px #06b6d4; } }
+        
+        .activity-list::-webkit-scrollbar { width: 6px; }
+        .activity-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
+        .activity-list::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); border-radius: 4px; }
     </style>
 </head>
-<body class="text-white min-h-screen flex flex-col relative pb-20">
+<body class="text-white min-h-[100dvh] flex flex-col relative pb-10">
+    
     <div id="dynamic-bg" class="sport-bg"></div>
     <div class="grid-overlay"></div>
 
-    <!-- Top Logos (Kiri: Pengundian, Tengah: FGAS, Kanan: Pemkab) -->
-    <div class="logos-container">
-        <div class="logo-left">
-            <img src="../logo_pengundian.png" class="h-10 md:h-16 object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]" onerror="this.style.display='none'">
-        </div>
-        <div class="logo-center">
-            <img src="../logo_fgas.png" class="h-14 md:h-24 object-contain drop-shadow-[0_0_20px_rgba(6,182,212,0.6)]" onerror="this.style.display='none'">
-        </div>
-        <div class="logo-right">
-            <img src="../logo_pemkab.jpg" class="h-10 md:h-14 object-contain rounded-xl bg-white p-1.5 shadow-lg" onerror="this.style.display='none'">
-        </div>
-    </div>
+    <!-- Normal Header layout, Safe for iOS/Mobile -->
+    <header class="w-full p-4 lg:p-6 flex justify-between items-center z-50 relative border-b border-white/5">
+        <img src="../logo_pengundian.png" class="h-10 md:h-14 object-contain drop-shadow-lg" onerror="this.style.display='none'">
+        <img src="../logo_fgas.png" class="h-12 md:h-20 object-contain drop-shadow-[0_0_20px_rgba(6,182,212,0.6)]" onerror="this.style.display='none'">
+        <img src="../logo_pemkab.png" class="h-10 md:h-14 object-contain drop-shadow-lg" onerror="this.src='../logo_pemkab.jpg'">
+    </header>
 
-    <div class="w-full max-w-7xl mx-auto flex-grow grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10 pt-28 lg:pt-36 px-4 lg:px-8 items-start">
+    <div class="w-full max-w-7xl mx-auto flex-grow grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10 pt-8 px-4 lg:px-8 items-start">
         
         <!-- Info Section -->
         <div class="lg:col-span-7 flex flex-col">
-            <h1 class="title-sport text-5xl lg:text-7xl font-bold mb-4 uppercase text-transparent bg-clip-text bg-gradient-to-br from-white via-blue-100 to-blue-500 drop-shadow-2xl mt-4">
+            
+            <h1 class="title-sport text-5xl lg:text-7xl font-bold mb-4 uppercase text-transparent bg-clip-text bg-gradient-to-br from-white via-blue-100 to-blue-500 drop-shadow-2xl">
                 FGAS <span class="text-cyan-400">2026</span>
             </h1>
             <p class="text-xl text-blue-200 mb-6 border-l-4 border-cyan-400 pl-4 font-semibold">Festival Goverment Auto Show & Undian Pajak PBB/P2 Boyolali.</p>
@@ -89,6 +107,7 @@
                 </div>
             </div>
             
+            <!-- Contact Panitia -->
             <div class="bg-slate-900/80 border border-green-500/30 p-4 rounded-2xl max-w-lg flex items-center justify-between shadow-[0_0_15px_rgba(34,197,94,0.1)] pointer-events-auto">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 bg-green-500/20 text-green-400 rounded-full flex justify-center items-center"><i class="fab fa-whatsapp text-2xl"></i></div>
@@ -102,15 +121,15 @@
         </div>
 
         <!-- Form Section -->
-        <div class="lg:col-span-5 w-full pointer-events-auto mt-4 lg:mt-0">
+        <div class="lg:col-span-5 w-full pointer-events-auto">
             <div class="glass-panel p-6 md:p-8 rounded-3xl w-full">
                 <div id="form-section">
                     <div class="flex justify-between items-center mb-6 border-b border-blue-500/30 pb-4">
                         <div>
                             <h3 class="text-2xl title-sport uppercase text-cyan-400 tracking-wider mb-1">Tiket Masuk</h3>
                             <p class="text-xs md:text-sm text-blue-200 font-semibold">1 NIK / No. HP Berlaku untuk 1 Undian.</p>
-                            <p class="text-xs md:text-sm text-orange-400 font-bold mt-1">*Seluruh Pendaftaran Lomba 100% GRATIS</p>
                         </div>
+                        <div class="bg-orange-500 text-white font-black px-4 py-2 rounded-lg text-sm shadow-lg transform rotate-3">GRATIS!</div>
                     </div>
                     
                     <div class="space-y-4">
@@ -134,8 +153,8 @@
                         <div id="dynamic-fields" class="space-y-3 bg-blue-900/30 p-4 border-l-4 border-cyan-400 rounded-r-xl hidden"></div>
 
                         <div>
-                            <label class="block text-xs md:text-sm font-bold text-blue-300 uppercase tracking-wider mb-1">Nama Lengkap Sesuai KTP</label>
-                            <input type="text" id="nama" class="w-full p-3.5 input-dark text-sm md:text-base rounded-xl" placeholder="Ketik nama lengkap...">
+                            <label class="block text-xs md:text-sm font-bold text-blue-300 uppercase tracking-wider mb-1">Nama Lengkap</label>
+                            <input type="text" id="nama" class="w-full p-3.5 input-dark text-sm md:text-base rounded-xl" placeholder="Ketik nama sesuai KTP...">
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
@@ -173,27 +192,30 @@
 
                 <!-- Success Section -->
                 <div id="qrcode-container" class="hidden text-center py-6 h-full flex flex-col justify-center items-center">
-                    <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mb-4 border-4 border-white shadow-[0_0_30px_rgba(34,197,94,0.8)] animate-bounce">
-                        <i class="fas fa-check text-4xl text-white"></i>
-                    </div>
+                    
+                    <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                      <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                      <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                    </svg>
+
                     <h4 class="font-black text-3xl mb-1 title-sport tracking-wider uppercase text-cyan-400">Pendaftaran Berhasil</h4>
                     
-                    <div class="bg-red-500/20 border-2 border-red-500/50 rounded-xl p-3 mb-6 w-full max-w-sm mt-2">
+                    <div class="bg-red-500/20 border-2 border-red-500/50 rounded-xl p-3 mb-6 w-full max-w-sm mt-4">
                         <p class="text-red-300 text-sm font-black tracking-widest uppercase mb-1"><i class="fas fa-exclamation-triangle mr-1"></i> PENTING!</p>
                         <p class="text-red-100 text-xs font-bold leading-tight">Simpan barcode ini dengan baik. Wajib diperlihatkan ke Panitia/Crew di lokasi.</p>
                     </div>
                     
-                    <div class="bg-white p-5 inline-block mx-auto rounded-3xl shadow-[0_0_40px_rgba(255,255,255,0.2)]" id="print-area">
+                    <div class="bg-white p-6 inline-block mx-auto rounded-3xl shadow-[0_0_40px_rgba(255,255,255,0.2)]">
                         <div id="qrcode" class="flex justify-center mb-3"></div>
                         <p class="text-[10px] text-gray-500 uppercase tracking-widest font-black mb-1">TICKET ID</p>
-                        <p class="text-xl font-black text-gray-900 tracking-wider font-mono bg-gray-100 py-1 px-4 rounded" id="ticket-id-display"></p>
+                        <p class="text-2xl font-black text-gray-900 tracking-wider font-mono bg-gray-100 py-1 px-4 rounded" id="ticket-id-display"></p>
                     </div>
                     
-                    <button onclick="downloadQR()" class="mt-6 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-black px-6 py-4 rounded-full transition shadow-[0_0_20px_rgba(6,182,212,0.8)] uppercase tracking-widest w-full text-sm">
+                    <button onclick="downloadQR()" class="mt-8 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-black px-8 py-4 rounded-full transition shadow-[0_0_20px_rgba(6,182,212,0.8)] uppercase tracking-widest w-full">
                         <i class="fas fa-download mr-2"></i> Simpan Barcode ke HP
                     </button>
 
-                    <button onclick="window.location.reload()" class="mt-4 text-blue-300 font-bold hover:text-cyan-400 transition uppercase text-xs tracking-widest underline">Daftar Peserta Lain</button>
+                    <button onclick="window.location.reload()" class="mt-6 text-blue-300 font-bold hover:text-cyan-400 transition uppercase text-sm tracking-widest underline">Daftar Peserta Lain</button>
                 </div>
             </div>
         </div>
@@ -204,18 +226,20 @@
     <a href="pedagang.html" class="fixed bottom-4 right-12 text-slate-800 hover:text-orange-500 transition duration-300 z-50"><i class="fas fa-store"></i></a>
 
     <!-- Sync Indicator -->
-    <div id="sync-badge" class="fixed bottom-4 left-4 bg-slate-800/80 backdrop-blur border border-slate-700 text-white px-3 py-1.5 rounded-full text-xs font-bold z-50 flex items-center gap-2 opacity-50">
-        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online
+    <div id="sync-badge" class="fixed bottom-4 left-4 bg-slate-800/80 backdrop-blur border border-slate-700 text-white px-3 py-1.5 rounded-full text-xs font-bold z-50 flex items-center gap-2 opacity-0 transition-opacity">
+        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online: Sync Active
     </div>
 
     <script>
-        const SCRIPT_URL = '{gscript_url}'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwz3ebZOsF6qDjFlrcapiv-ElcUT1CKtFnhDkAMsLndQHGD8G3fldUrVBkBAfRMe7x1/exec'; 
 
         const customBg = localStorage.getItem('fgas_bg_image');
-        if(customBg) { document.getElementById('dynamic-bg').style.backgroundImage = `url(${{customBg}})`; }
+        if(customBg) { document.getElementById('dynamic-bg').style.backgroundImage = `url(${customBg})`; }
 
-        const countDownDate = new Date("Oct 10, 2026 08:00:00").getTime();
-        setInterval(function() {{
+        // iOS Safe Date format (ISO 8601)
+        const countDownDate = new Date("2026-10-10T08:00:00+07:00").getTime();
+        
+        function updateTimer() {
             const now = new Date().getTime();
             const distance = countDownDate - now;
             if (distance < 0) return;
@@ -223,39 +247,41 @@
             document.getElementById("hours").innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
             document.getElementById("mins").innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
             document.getElementById("secs").innerText = Math.floor((distance % (1000 * 60)) / 1000).toString().padStart(2, '0');
-        }}, 1000);
+        }
+        updateTimer();
+        setInterval(updateTimer, 1000);
 
-        function checkQuotas() {{
-            const quotas = JSON.parse(localStorage.getItem('fgas_quotas')) || {{}};
+        function checkQuotas() {
+            const quotas = JSON.parse(localStorage.getItem('fgas_quotas')) || {};
             const visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
-            const counts = {{}};
-            visitors.forEach(v => {{
+            const counts = {};
+            visitors.forEach(v => {
                 const baseType = v.type.split(' - ')[0].split(' (')[0];
                 counts[baseType] = (counts[baseType] || 0) + 1;
-            }});
+            });
 
             const select = document.getElementById('reg-type');
-            Array.from(select.options).forEach(opt => {{
+            Array.from(select.options).forEach(opt => {
                 const type = opt.value;
-                if (type !== 'Pengunjung' && quotas[type]) {{
+                if (type !== 'Pengunjung' && quotas[type]) {
                     const max = parseInt(quotas[type]);
-                    if ((counts[type] || 0) >= max) {{
+                    if ((counts[type] || 0) >= max) {
                         opt.disabled = true;
                         opt.text = type + ' (KUOTA HABIS)';
                         opt.classList.add('text-red-400');
-                    }}
-                }}
-            }});
-        }}
+                    }
+                }
+            });
+        }
         window.addEventListener('DOMContentLoaded', checkQuotas);
 
-        function handleCategoryChange() {{
+        function handleCategoryChange() {
             const type = document.getElementById('reg-type').value;
             const container = document.getElementById('dynamic-fields');
             container.innerHTML = '';
             container.classList.remove('hidden');
 
-            if (type === 'Lomba Fashion Show Anak') {{
+            if (type === 'Lomba Fashion Show Anak') {
                 container.innerHTML = `
                     <p class="text-sm font-bold text-cyan-300 mb-2"><i class="fas fa-palette mr-1"></i> TEMA: Budaya Boyolali</p>
                     <label class="block text-xs font-bold text-cyan-300 uppercase mb-1">Kategori Umur</label>
@@ -265,11 +291,11 @@
                     </select>
                     <p class="text-xs text-orange-400 font-bold bg-orange-900/40 p-2 rounded-lg border border-orange-500/30"><i class="fas fa-id-card mr-1"></i> WAJIB bawa Akta Kelahiran asli saat di lokasi.</p>
                 `;
-            }} else if (type === 'Lomba Mewarnai Anak') {{
+            } else if (type === 'Lomba Mewarnai Anak') {
                 container.innerHTML = `<p class="text-xs text-orange-400 font-bold bg-orange-900/40 p-2 rounded-lg border border-orange-500/30"><i class="fas fa-info-circle mr-1"></i> Khusus anak usia 5-6 Tahun. WAJIB bawa Akta Kelahiran asli.</p>`;
-            }} else if (type === 'Modifikasi Mobil/Motor' || type === 'Lomba Modifikasi Mobil' || type === 'Lomba Modifikasi Motor') {{
+            } else if (type === 'Modifikasi Mobil/Motor' || type === 'Lomba Modifikasi Mobil' || type === 'Lomba Modifikasi Motor') {
                 container.classList.add('hidden');
-            }} else if (type === 'Festival UMKM Boyolali') {{
+            } else if (type === 'Festival UMKM Boyolali') {
                 container.innerHTML = `
                     <label class="block text-xs font-bold text-cyan-300 uppercase mb-1">Jenis UMKM</label>
                     <select id="sub-kategori" class="w-full p-3 input-dark rounded-xl mb-3 text-sm">
@@ -280,12 +306,12 @@
                     <label class="block text-xs font-bold text-cyan-300 uppercase mb-1">Keterangan Jualan</label>
                     <input type="text" id="detail-produk" class="w-full p-3 input-dark rounded-xl text-sm" placeholder="Cth: Baju Batik, Soto, dll...">
                 `;
-            }} else {{
+            } else {
                 container.classList.add('hidden');
-            }}
-        }}
+            }
+        }
 
-        async function register() {{
+        async function register() {
             const btn = document.getElementById('submit-btn');
             let baseType = document.getElementById('reg-type').value;
             const nama = document.getElementById('nama').value;
@@ -295,73 +321,74 @@
             const hp = document.getElementById('hp').value;
             const alamat = document.getElementById('alamat').value;
 
-            if(!nama || !hp || !nik || !umur) {{ alert("Data wajib belum lengkap!"); return; }}
+            if(!nama || !hp || !nik || !umur) { alert("Data wajib belum lengkap!"); return; }
 
             let visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
-            if(visitors.some(v => v.nik === nik || v.hp === hp) && baseType === 'Pengunjung') {{
+            if(visitors.some(v => v.nik === nik || v.hp === hp) && baseType === 'Pengunjung') {
                 alert("MAAF! NIK atau Nomor HP ini sudah terdaftar. 1 Identitas = 1 Undian."); return;
-            }}
+            }
 
-            const quotas = JSON.parse(localStorage.getItem('fgas_quotas')) || {{}};
-            const counts = {{}};
-            visitors.forEach(v => {{ counts[v.type.split(' - ')[0].split(' (')[0]] = (counts[v.type.split(' - ')[0].split(' (')[0]] || 0) + 1; }});
-            if (baseType !== 'Pengunjung' && quotas[baseType] && counts[baseType] >= parseInt(quotas[baseType])) {{
-                alert(`MAAF! Kuota pendaftaran untuk ${{baseType}} sudah penuh.`); return;
-            }}
+            const quotas = JSON.parse(localStorage.getItem('fgas_quotas')) || {};
+            const counts = {};
+            visitors.forEach(v => { counts[v.type.split(' - ')[0].split(' (')[0]] = (counts[v.type.split(' - ')[0].split(' (')[0]] || 0) + 1; });
+            if (baseType !== 'Pengunjung' && quotas[baseType] && counts[baseType] >= parseInt(quotas[baseType])) {
+                alert(`MAAF! Kuota pendaftaran untuk ${baseType} sudah penuh.`); return;
+            }
 
             let finalType = baseType;
             const subKategori = document.getElementById('sub-kategori');
             const detailProduk = document.getElementById('detail-produk');
-            if (subKategori) finalType += ` - ${{subKategori.value}}`;
-            if (detailProduk && detailProduk.value) finalType += ` (${{detailProduk.value}})`;
+            if (subKategori) finalType += ` - ${subKategori.value}`;
+            if (detailProduk && detailProduk.value) finalType += ` (${detailProduk.value})`;
 
             btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> MEMPROSES...';
             btn.disabled = true;
 
             const ticketId = 'FGAS-' + Math.floor(Math.random() * 1000000);
-            const data = {{ action: 'register', type: finalType, nama, nik, hp, alamat, umur, gender, ticketId }};
+            const data = { action: 'register', type: finalType, nama, nik, hp, alamat, umur, gender, ticketId };
 
-            try {{
+            try {
                 visitors.push(data);
                 localStorage.setItem('fgas_visitors', JSON.stringify(visitors));
 
-                const syncBadge = document.getElementById('sync-badge');
-                syncBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span> Syncing...';
-
-                fetch(SCRIPT_URL, {{
-                    method: 'POST', headers: {{ 'Content-Type': 'text/plain;charset=utf-8' }}, body: JSON.stringify(data)
-                }}).then(() => {{
-                    syncBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Sync Active';
-                }}).catch(e => console.log("Sync error", e));
+                if (SCRIPT_URL.startsWith('http')) {
+                    fetch(SCRIPT_URL, {
+                        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data)
+                    }).then(()=>{
+                        const badge = document.getElementById('sync-badge');
+                        badge.classList.remove('opacity-0');
+                        setTimeout(() => badge.classList.add('opacity-0'), 3000);
+                    }).catch(e => console.log("Background sync error"));
+                }
 
                 document.getElementById('form-section').classList.add('hidden');
                 document.getElementById('qrcode-container').classList.remove('hidden');
                 
                 document.getElementById('qrcode').innerHTML = '';
-                new QRCode(document.getElementById("qrcode"), {{
+                new QRCode(document.getElementById("qrcode"), {
                     text: ticketId, width: 220, height: 220, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
-                }});
+                });
                 document.getElementById('ticket-id-display').innerText = ticketId;
 
-            }} catch (error) {{
-                alert("Terjadi kesalahan sistem lokal.");
-            }} finally {{
+            } catch (error) {
+                // silent local fallback
+            } finally {
                 btn.innerHTML = '<i class="fas fa-qrcode mr-2"></i> Buat Barcode';
                 btn.disabled = false;
-            }}
-        }}
+            }
+        }
 
-        function downloadQR() {{
+        function downloadQR() {
             const img = document.querySelector('#qrcode img');
-            if(img && img.src) {{
+            if(img && img.src) {
                 const a = document.createElement('a');
                 a.href = img.src;
                 a.download = 'TICKET_FGAS_2026.png';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
-            }} else {{ alert('Menunggu render...'); }}
-        }}
+            } else { alert('Menunggu render...'); }
+        }
     </script>
 </body>
 </html>

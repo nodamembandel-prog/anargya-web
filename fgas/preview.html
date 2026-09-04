@@ -9,12 +9,9 @@
 </head>
 <body class="text-white p-4 md:p-8 min-h-screen relative">
     
-    <!-- Background Grid -->
     <div class="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwb2x5Z29uIHBvaW50cz0iMCAwIDQwIDAgNDAgMSA0MCAxIDAgMSIgZmlsbD0iIzBiYmZlZSIvPjxwb2x5Z29uIHBvaW50cz0iMCAwIDEgMCAxIDQwIDEgNDAgMCA0MCIgZmlsbD0iIzBiYmZlZSIvPjwvc3ZnPg==')] pointer-events-none"></div>
 
     <div class="max-w-7xl mx-auto relative z-10">
-        
-        <!-- Top Logos -->
         <div class="flex justify-between items-center mb-8 border-b border-slate-700/50 pb-6">
             <div class="flex items-center gap-4">
                 <img src="../logo_pengundian.png" class="h-10 md:h-12 object-contain" onerror="this.style.display='none'">
@@ -24,7 +21,7 @@
                 <p class="text-xs text-slate-400 mt-2 tracking-widest uppercase">Live Traffic Dashboard</p>
             </div>
             <div class="flex items-center gap-4">
-                <img src="../logo_pemkab.jpg" class="h-10 md:h-12 object-contain bg-white rounded p-1" onerror="this.style.display='none'">
+                <img src="../logo_pemkab.png" class="h-10 md:h-12 object-contain drop-shadow-lg" onerror="this.src='../logo_pemkab.jpg'">
             </div>
         </div>
 
@@ -53,47 +50,51 @@
         </div>
 
         <div class="text-center mt-6">
-            <span id="sync-status" class="inline-flex items-center gap-2 bg-slate-800/80 text-green-400 px-4 py-2 rounded-full text-xs font-bold border border-slate-700">
+            <span id="sync-status" class="inline-flex items-center gap-2 bg-slate-800/80 text-green-400 px-4 py-2 rounded-full text-xs font-bold border border-slate-700 opacity-0 transition-opacity">
                 <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online: Sync Active
             </span>
         </div>
     </div>
 
     <script>
-        const SCRIPT_URL = '{gscript_url}'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwz3ebZOsF6qDjFlrcapiv-ElcUT1CKtFnhDkAMsLndQHGD8G3fldUrVBkBAfRMe7x1/exec'; 
         let typeChartInstance, ageChartInstance;
 
-        async function fetchLive() {{
-            try {{
+        async function fetchLive() {
+            try {
                 const res = await fetch(SCRIPT_URL);
                 const data = await res.json();
                 if(data.visitors) renderDashboard(data.visitors);
-                document.getElementById('sync-status').innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online: Sync Active';
-            }} catch(e) {{
-                document.getElementById('sync-status').innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> Offline: Koneksi Terputus';
-            }}
-        }}
+                
+                const s = document.getElementById('sync-status');
+                s.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online: Sync Active';
+                s.classList.remove('opacity-0');
+                setTimeout(() => s.classList.add('opacity-0'), 3000);
+            } catch(e) {
+                // silent fail, don't interrupt UI
+            }
+        }
 
-        function renderDashboard(visitors) {{
+        function renderDashboard(visitors) {
             document.getElementById('total-count').innerText = visitors.length;
-            let typeCounts = {{}}; let ageCounts = {{ 'Anak (0-12)': 0, 'Remaja (13-20)': 0, 'Dewasa (21-40)': 0, 'Orang Tua (>40)': 0 }};
+            let typeCounts = {}; let ageCounts = { 'Anak (0-12)': 0, 'Remaja (13-20)': 0, 'Dewasa (21-40)': 0, 'Orang Tua (>40)': 0 };
             let countVisitor = 0; let countParticipant = 0; let countL = 0; let countP = 0;
 
-            visitors.forEach(v => {{
+            visitors.forEach(v => {
                 const baseType = v.Type ? v.Type.split(' - ')[0].split(' (')[0] : "Unknown"; 
                 typeCounts[baseType] = (typeCounts[baseType] || 0) + 1;
                 if(baseType === 'Pengunjung') countVisitor++; else countParticipant++;
 
                 const age = parseInt(v.Umur);
-                if(!isNaN(age)) {{
+                if(!isNaN(age)) {
                     if(age <= 12) ageCounts['Anak (0-12)']++;
                     else if(age <= 20) ageCounts['Remaja (13-20)']++;
                     else if(age <= 40) ageCounts['Dewasa (21-40)']++;
                     else ageCounts['Orang Tua (>40)']++;
-                }}
+                }
 
                 if(v.Gender === 'Laki-laki') countL++; else if(v.Gender === 'Perempuan') countP++;
-            }});
+            });
 
             document.getElementById('visitor-count').innerText = countVisitor;
             document.getElementById('participant-count').innerText = countParticipant;
@@ -104,17 +105,17 @@
             Chart.defaults.font.family = 'Inter';
             
             if(typeChartInstance) typeChartInstance.destroy();
-            typeChartInstance = new Chart(document.getElementById('typeChart'), {{
-                type: 'bar', data: {{ labels: Object.keys(typeCounts), datasets: [{{ data: Object.values(typeCounts), backgroundColor: '#06b6d4', borderRadius: 6 }}] }},
-                options: {{ maintainAspectRatio: false, plugins: {{ legend: {{ display: false }} }}, scales: {{ y: {{ beginAtZero: true, grid: {{ color: 'rgba(255,255,255,0.05)' }} }}, x: {{ grid: {{ display: false }} }} }} }}
-            }});
+            typeChartInstance = new Chart(document.getElementById('typeChart'), {
+                type: 'bar', data: { labels: Object.keys(typeCounts), datasets: [{ data: Object.values(typeCounts), backgroundColor: '#06b6d4', borderRadius: 6 }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } }
+            });
 
             if(ageChartInstance) ageChartInstance.destroy();
-            ageChartInstance = new Chart(document.getElementById('ageChart'), {{
-                type: 'polarArea', data: {{ labels: Object.keys(ageCounts), datasets: [{{ data: Object.values(ageCounts), backgroundColor: ['#f472b6', '#3b82f6', '#34d399', '#fbbf24'], borderWidth: 0 }}] }},
-                options: {{ maintainAspectRatio: false, plugins: {{ legend: {{ position: 'right', labels: {{ padding: 20 }} }} }}, cutout: '65%' }}
-            }});
-        }}
+            ageChartInstance = new Chart(document.getElementById('ageChart'), {
+                type: 'polarArea', data: { labels: Object.keys(ageCounts), datasets: [{ data: Object.values(ageCounts), backgroundColor: ['#f472b6', '#3b82f6', '#34d399', '#fbbf24'], borderWidth: 0 }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { padding: 20 } } }, cutout: '65%' }
+            });
+        }
 
         fetchLive();
         setInterval(fetchLive, 15000);
