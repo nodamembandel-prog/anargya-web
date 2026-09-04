@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FGAS Crew Scanner</title>
+    <link rel="manifest" href="manifest.json">
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; text-align: center; }
+        #reader { width: 100%; max-width: 500px; margin: 0 auto; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); background:#fff; }
+        .result-box { margin-top: 20px; padding: 15px; background: #fff; border-radius: 8px; font-weight: bold; color: #2c3e50; border-left: 5px solid #3498db; }
+        .header { background: #2c3e50; color: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2 style="margin:0;">📷 FGAS Crew Scanner</h2>
+        <p style="margin:5px 0 0 0; font-size:12px;">PWA Ready - Add to Home Screen</p>
+    </div>
+    
+    <div id="reader"></div>
+    <div class="result-box" id="scanResult">Kamera siap. Arahkan ke barcode peserta...</div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+
+        const html5QrCode = new Html5Qrcode("reader");
+        const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+            document.getElementById('scanResult').innerHTML = "✅ Tiket Terbaca:<br><span style='color:#27ae60; font-size:1.2em;'>" + decodedText + "</span>";
+            // Bunyikan beep sukses
+            const audio = new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3');
+            audio.play();
+            // Jeda sebentar sebelum scan selanjutnya
+            setTimeout(() => { document.getElementById('scanResult').innerHTML = "Menunggu scan berikutnya..."; }, 3000);
+        };
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+        html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback);
+    </script>
+</body>
+</html>

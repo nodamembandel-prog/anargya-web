@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Setup | FGAS</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 50px; background: #ecf0f1; }
+        .card { background: #fff; padding: 30px; border-radius: 10px; max-width: 500px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        input { width: 100%; padding: 10px; margin: 10px 0 20px; box-sizing: border-box; }
+        button { background: #27ae60; color: #fff; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h3>Setting Tampilan Raffle (Doorprize)</h3>
+        <label>Masukkan URL Logo Event:</label>
+        <input type="text" id="logoUrl" placeholder="Contoh: https://domain.com/logo.png">
+        <button onclick="saveLogo()">Simpan Pengaturan Logo</button>
+    </div>
+    <script>
+        document.getElementById('logoUrl').value = localStorage.getItem('adminRaffleLogo') || '';
+        function saveLogo() {
+            const url = document.getElementById('logoUrl').value;
+            localStorage.setItem('adminRaffleLogo', url);
+            alert("Logo berhasil disimpan! Buka layar Raffle.html untuk melihat hasilnya.");
+        }
+    </script>
+</body>
+</html>
