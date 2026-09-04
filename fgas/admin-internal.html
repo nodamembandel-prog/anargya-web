@@ -5,6 +5,7 @@
     <title>Master Admin FGAS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body class="bg-gray-100 p-4 md:p-8">
 
@@ -26,72 +27,44 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             
+            <!-- VOUCHER GENERATOR -->
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-purple-200">
+                <h2 class="font-bold text-xl mb-2 text-purple-800"><i class="fas fa-ticket-alt mr-2"></i>Generator Voucher Makan</h2>
+                <p class="text-xs text-gray-500 mb-4 font-bold bg-purple-50 p-2 rounded border border-purple-100">Buat voucher Rp 10.000 untuk pengunjung. Otomatis tersinkron ke Spreadsheet.</p>
+                <div class="space-y-4">
+                    <input type="number" id="voucher-qty" class="w-full p-4 bg-gray-50 border border-gray-300 rounded-xl font-bold text-lg outline-none focus:border-purple-500" placeholder="Jumlah Voucher (Misal: 50)">
+                    <button id="btn-generate-voucher" onclick="generateVoucher()" class="w-full bg-purple-600 text-white py-4 rounded-xl font-black text-lg shadow-lg hover:bg-purple-700 transition">GENERATE & SIMPAN KE DB</button>
+                </div>
+                <div id="voucher-print-area" class="mt-4 grid grid-cols-2 gap-2 max-h-[300px] overflow-y-auto"></div>
+            </div>
+
             <!-- Winner Setup -->
             <div class="bg-white p-8 rounded-2xl shadow-sm border border-blue-200">
                 <h2 class="font-bold text-xl mb-2 text-blue-800"><i class="fas fa-trophy mr-2"></i>Setup Pemenang Undian</h2>
-                <p class="text-xs text-gray-500 mb-6 font-bold bg-blue-50 p-2 rounded border border-blue-100">Hanya bisa diset dari halaman ini. Data akan langsung terhubung ke Scanner Panitia.</p>
+                <p class="text-xs text-gray-500 mb-6 font-bold bg-blue-50 p-2 rounded border border-blue-100">Kunci pemenang doorprize untuk verifikasi panitia & tayang LED.</p>
                 <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Target Pemenang (ID Tiket / Nama)</label>
-                        <input type="text" id="target-winner" class="w-full p-4 bg-gray-50 border border-gray-300 rounded-xl font-bold text-lg outline-none focus:border-blue-500" placeholder="Cth: FGAS-123456">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1">Target Hadiah</label>
-                        <input type="text" id="target-prize" class="w-full p-4 bg-gray-50 border border-gray-300 rounded-xl font-bold text-lg outline-none focus:border-blue-500" placeholder="Cth: Sepeda Motor NMAX">
-                    </div>
-                    <button onclick="setWinner()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-lg shadow-lg hover:bg-blue-700 transform transition active:scale-95">KUNCI PEMENANG</button>
-                    <a href="raffle.html" target="_blank" class="block w-full bg-slate-800 text-white py-4 rounded-xl font-bold text-center hover:bg-slate-700 mt-2 shadow-lg"><i class="fas fa-desktop mr-2"></i> Buka Layar LED Undian</a>
+                    <input type="text" id="target-winner" class="w-full p-4 bg-gray-50 border border-gray-300 rounded-xl font-bold text-lg outline-none focus:border-blue-500" placeholder="Target ID / Nama Pemenang">
+                    <input type="text" id="target-prize" class="w-full p-4 bg-gray-50 border border-gray-300 rounded-xl font-bold text-lg outline-none focus:border-blue-500" placeholder="Target Hadiah">
+                    <button onclick="setWinner()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-lg shadow-lg hover:bg-blue-700">KUNCI PEMENANG</button>
+                    <a href="raffle.html" target="_blank" class="block w-full bg-slate-800 text-white py-3 rounded-xl font-bold text-center hover:bg-slate-700 mt-2 shadow"><i class="fas fa-desktop mr-2"></i> Buka Layar LED Undian</a>
                 </div>
             </div>
 
-            <!-- Quota Setup -->
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-orange-200">
-                <h2 class="font-bold text-lg mb-2 text-orange-800"><i class="fas fa-users mr-2"></i>Pengaturan Kuota Pendaftaran</h2>
-                <p class="text-xs text-gray-500 mb-4">Membatasi jumlah maksimal peserta tiap lomba/UMKM. Kosongkan jika tidak terbatas.</p>
-                
-                <div id="quota-container" class="space-y-3 max-h-[300px] overflow-y-auto pr-2">
-                    <!-- Injected via JS -->
-                </div>
-                
-                <button onclick="saveQuotas()" class="w-full bg-orange-600 text-white py-3 rounded-lg font-bold shadow hover:bg-orange-700 mt-6">Simpan Kuota</button>
-            </div>
-
-            <div class="space-y-6">
-                <!-- Background Landing Page -->
-                <div class="bg-white p-8 rounded-2xl shadow-sm border">
-                    <h2 class="font-bold text-lg mb-4 text-gray-800"><i class="fas fa-image mr-2"></i>Background Landing Page FGAS</h2>
-                    <input type="file" id="bg-upload" accept="image/*" class="w-full text-sm border p-2 bg-gray-50 rounded mb-4">
-                    <button onclick="setBackground()" class="bg-gray-800 text-white px-4 py-2 rounded font-bold w-full text-sm hover:bg-gray-700">Ganti Background Utama</button>
-                    <div class="mt-4"><img id="bg-preview" src="" class="h-20 w-full object-cover hidden rounded border"></div>
-                    <button onclick="clearArray('fgas_bg_image', 'bg-preview', true)" class="text-xs text-red-500 underline mt-2 block w-full text-center">Hapus Background</button>
-                </div>
-
-                <!-- Main Center Logo -->
-                <div class="bg-white p-8 rounded-2xl shadow-sm border">
-                    <h2 class="font-bold text-lg mb-2"><i class="fas fa-star mr-2 text-yellow-400"></i>Logo Utama Undian (Tengah Atas)</h2>
-                    <input type="file" id="main-logo-upload" accept="image/*" class="w-full text-sm border p-2 bg-gray-50 rounded-lg mb-4">
-                    <button onclick="setMainLogo()" class="bg-blue-600 text-white px-4 py-3 rounded-lg font-bold w-full text-sm hover:bg-blue-700 shadow">Set Logo Utama LED</button>
-                    <div class="bg-gray-800 p-2 rounded-lg mt-4 w-max mx-auto"><img id="main-logo-preview" src="" class="h-12 object-contain hidden"></div>
-                </div>
-            </div>
-
-            <div class="bg-white p-8 rounded-2xl shadow-sm border h-max">
-                <h2 class="font-bold text-lg mb-2"><i class="fas fa-building mr-2 text-gray-400"></i>Logo Pemkab / Sponsor (Layar Undian)</h2>
-                <p class="text-xs text-gray-500 mb-4">Atur logo yang tampil di layar undian utama (Kanan Atas / Bawah).</p>
-                <input type="file" id="top-logo-upload" accept="image/*" class="w-full text-sm border p-2 bg-gray-50 rounded-lg mb-4">
-                <button onclick="addTopLogo()" class="bg-green-600 text-white px-4 py-3 rounded-lg font-bold w-full text-sm hover:bg-green-700 shadow mb-2">Tambah Logo Kanan Atas</button>
-                <button onclick="addSponsorLogo()" class="bg-purple-600 text-white px-4 py-3 rounded-lg font-bold w-full text-sm hover:bg-purple-700 shadow">Tambah Logo Sponsor Bawah</button>
-                
-                <div class="mt-6 space-y-4">
-                    <div>
-                        <p class="text-xs font-bold text-gray-500 mb-1">Logo Kanan Atas:</p>
-                        <div id="top-logos-list" class="flex gap-2 overflow-x-auto bg-gray-50 p-2 border min-h-[50px] rounded"></div>
-                        <button onclick="clearArray('fgas_top_logos', 'top-logos-list')" class="text-xs text-red-500 underline mt-1 block w-full text-left font-bold">Hapus Semua</button>
+            <!-- Logistik & Visual -->
+            <div class="bg-white p-8 rounded-2xl shadow-sm border col-span-1 md:col-span-2">
+                <h2 class="font-bold text-lg mb-4 text-orange-800"><i class="fas fa-images mr-2"></i>Setup Visual Aset LED</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="border p-4 rounded-xl bg-gray-50">
+                        <label class="text-xs font-bold text-gray-500 block mb-2">Logo Utama (Tengah)</label>
+                        <input type="file" id="main-logo-upload" accept="image/*" class="w-full text-xs mb-2"><button onclick="setMainLogo()" class="bg-blue-600 text-white px-2 py-1 rounded text-xs w-full">Set Logo</button>
                     </div>
-                    <div>
-                        <p class="text-xs font-bold text-gray-500 mb-1">Logo Bawah Layar:</p>
-                        <div id="sponsor-logos-list" class="flex gap-2 overflow-x-auto bg-gray-50 p-2 border min-h-[50px] rounded"></div>
-                        <button onclick="clearArray('fgas_sponsor_logos', 'sponsor-logos-list')" class="text-xs text-red-500 underline mt-1 block w-full text-left font-bold">Hapus Semua</button>
+                    <div class="border p-4 rounded-xl bg-gray-50">
+                        <label class="text-xs font-bold text-gray-500 block mb-2">Logo Kanan Atas</label>
+                        <input type="file" id="top-logo-upload" accept="image/*" class="w-full text-xs mb-2"><button onclick="addTopLogo()" class="bg-green-600 text-white px-2 py-1 rounded text-xs w-full">Tambah</button>
+                    </div>
+                    <div class="border p-4 rounded-xl bg-gray-50">
+                        <label class="text-xs font-bold text-gray-500 block mb-2">Sponsor (Bawah)</label>
+                        <input type="file" id="sponsor-logo-upload" accept="image/*" class="w-full text-xs mb-2"><button onclick="addSponsorLogo()" class="bg-purple-600 text-white px-2 py-1 rounded text-xs w-full">Tambah</button>
                     </div>
                 </div>
             </div>
@@ -100,18 +73,12 @@
     </div>
 
     <script>
-        const categories = [
-            "Lomba Modifikasi Mobil", "Lomba Modifikasi Motor", "Lomba Komunitas Mobil",
-            "Lomba Komunitas Motor", "Festival UMKM Boyolali", "BMX Freestyle",
-            "Lomba Mewarnai Anak", "Lomba Fashion Show Anak", "Senam Sehat", "Lomba Kostum Unik Senam"
-        ];
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwz3ebZOsF6qDjFlrcapiv-ElcUT1CKtFnhDkAMsLndQHGD8G3fldUrVBkBAfRMe7x1/exec'; 
 
         function login() {
             if(document.getElementById('pwd').value === 'amansekali') {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-content').classList.remove('hidden');
-                renderLists();
-                renderQuotaInputs();
             } else { alert('Gagal'); document.getElementById('pwd').value = ''; }
         }
 
@@ -121,105 +88,69 @@
             alert('Pemenang berhasil dikunci!');
         }
 
-        function renderQuotaInputs() {
-            const container = document.getElementById('quota-container');
-            const quotas = JSON.parse(localStorage.getItem('fgas_quotas')) || {};
-            container.innerHTML = '';
-            categories.forEach(cat => {
-                const val = quotas[cat] || '';
-                const id = cat.replace(/\s+/g, '-').replace(/\//g, '-');
-                container.innerHTML += `
-                    <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                        <label class="text-xs font-semibold text-gray-700 leading-tight pr-2">${cat}</label>
-                        <input type="number" id="q-${id}" class="w-20 p-2 bg-gray-50 border border-gray-300 rounded-lg text-center text-sm font-bold" placeholder="Max" value="${val}">
-                    </div>
-                `;
-            });
-        }
-
-        function saveQuotas() {
-            const quotas = {};
-            categories.forEach(cat => {
-                const id = cat.replace(/\s+/g, '-').replace(/\//g, '-');
-                const val = document.getElementById(`q-${id}`).value;
-                if(val) quotas[cat] = val;
-            });
-            localStorage.setItem('fgas_quotas', JSON.stringify(quotas));
-            alert('Kuota Pendaftaran berhasil disimpan!');
-        }
-
-        function compressAndSave(fileInputId, storageKey, isArray = false, previewId = null) {
-            const fileInput = document.getElementById(fileInputId);
-            if(!fileInput.files[0]) { alert('Pilih gambar dulu!'); return; }
+        async function generateVoucher() {
+            const qty = parseInt(document.getElementById('voucher-qty').value);
+            if(!qty || qty < 1) { alert("Masukkan jumlah yang benar"); return; }
             
+            const btn = document.getElementById('btn-generate-voucher');
+            btn.innerText = "MENYIMPAN KE DATABASE..."; btn.disabled = true;
+
+            const vouchers = [];
+            for(let i=0; i<qty; i++) {
+                vouchers.push('VOUCHER-FGAS-' + Math.floor(Math.random() * 10000000));
+            }
+
+            try {
+                const res = await fetch(SCRIPT_URL, {
+                    method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'generate_voucher', vouchers: vouchers })
+                });
+                const result = await res.json();
+                
+                if(result.status === 'success') {
+                    alert(qty + " Voucher berhasil masuk database!");
+                    const container = document.getElementById('voucher-print-area');
+                    container.innerHTML = '';
+                    vouchers.forEach(v => {
+                        const div = document.createElement('div');
+                        div.className = 'border p-2 bg-gray-50 flex flex-col items-center justify-center rounded';
+                        div.innerHTML = `<div id="qr-${v}" class="mb-1"></div><p class="text-[10px] font-mono font-bold">${v}</p>`;
+                        container.appendChild(div);
+                        new QRCode(document.getElementById(`qr-${v}`), { text: v, width: 80, height: 80 });
+                    });
+                }
+            } catch(e) { alert("Gagal koneksi ke database."); }
+            btn.innerText = "GENERATE & SIMPAN KE DB"; btn.disabled = false;
+        }
+
+        function compressAndSave(fileInputId, storageKey, isArray = false) {
+            const fileInput = document.getElementById(fileInputId);
+            if(!fileInput.files[0]) return;
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 800; // slightly higher for BG
-                    let width = img.width;
-                    let height = img.height;
+                    const MAX_WIDTH = 400; let width = img.width; let height = img.height;
                     if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
                     const base64Image = canvas.toDataURL('image/png', 0.8);
                     
                     if(isArray) {
                         let arr = JSON.parse(localStorage.getItem(storageKey)) || [];
-                        arr.push(base64Image);
-                        localStorage.setItem(storageKey, JSON.stringify(arr));
-                        renderLists();
-                    } else {
-                        localStorage.setItem(storageKey, base64Image);
-                        if(previewId) {
-                            document.getElementById(previewId).src = base64Image;
-                            document.getElementById(previewId).classList.remove('hidden');
-                        }
-                    }
-                    alert('Gambar berhasil disimpan!');
-                    fileInput.value = '';
+                        arr.push(base64Image); localStorage.setItem(storageKey, JSON.stringify(arr));
+                    } else { localStorage.setItem(storageKey, base64Image); }
+                    alert('Logo disimpan!'); fileInput.value = '';
                 }
                 img.src = e.target.result;
             };
             reader.readAsDataURL(fileInput.files[0]);
         }
 
-        function setMainLogo() { compressAndSave('main-logo-upload', 'fgas_raffle_logo', false, 'main-logo-preview'); }
-        function setBackground() { compressAndSave('bg-upload', 'fgas_bg_image', false, 'bg-preview'); }
+        function setMainLogo() { compressAndSave('main-logo-upload', 'fgas_raffle_logo', false); }
         function addTopLogo() { compressAndSave('top-logo-upload', 'fgas_top_logos', true); }
         function addSponsorLogo() { compressAndSave('sponsor-logo-upload', 'fgas_sponsor_logos', true); }
-
-        function clearArray(key, listId, isSingle=false) {
-            localStorage.removeItem(key);
-            if(isSingle) {
-                document.getElementById(listId).src = '';
-                document.getElementById(listId).classList.add('hidden');
-            } else {
-                document.getElementById(listId).innerHTML = '';
-            }
-        }
-
-        function renderLists() {
-            const tops = JSON.parse(localStorage.getItem('fgas_top_logos')) || [];
-            const sponsors = JSON.parse(localStorage.getItem('fgas_sponsor_logos')) || [];
-            
-            document.getElementById('top-logos-list').innerHTML = tops.map(src => `<img src="${src}" class="h-8 bg-white border border-gray-300 p-1 rounded">`).join('');
-            document.getElementById('sponsor-logos-list').innerHTML = sponsors.map(src => `<img src="${src}" class="h-8 bg-white border border-gray-300 p-1 rounded">`).join('');
-            
-            const main = localStorage.getItem('fgas_raffle_logo');
-            if(main) {
-                document.getElementById('main-logo-preview').src = main;
-                document.getElementById('main-logo-preview').classList.remove('hidden');
-            }
-            const bg = localStorage.getItem('fgas_bg_image');
-            if(bg) {
-                document.getElementById('bg-preview').src = bg;
-                document.getElementById('bg-preview').classList.remove('hidden');
-            }
-        }
     </script>
 </body>
 </html>
