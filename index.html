@@ -1,92 +1,132 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anargya KREATIVINDO</title>
+    <title>Anargya KREATIVINDO | Creative Agency</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        orange: { 500: '#F97316', 600: '#EA580C' }
-                    }
+                    colors: { brand: { 500: '#ff6b00', 600: '#e65c00', 900: '#1a0b00' } },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Syne', 'sans-serif'] }
                 }
             }
         }
     </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Syne:wght@600;800&display=swap');
+        .glass-nav { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .hero-bg { background-color: #fafafa; background-image: radial-gradient(#ff6b00 0.5px, transparent 0.5px); background-size: 24px 24px; }
+        .card-premium { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-premium:hover { transform: translateY(-12px); box-shadow: 0 30px 60px -15px rgba(255, 107, 0, 0.15); border-color: #ff6b00; }
+        .gradient-text { background: linear-gradient(135deg, #ff6b00, #ff9900); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans">
-    <nav class="bg-white shadow-md fixed w-full z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-20">
-                <div class="flex-shrink-0 flex items-center">
-                    <img src="Logo Anargya Kreativindo.png" alt="Anargya Logo" class="h-12" onerror="this.src='https://via.placeholder.com/150x50?text=ANARGYA'">
+<body class="bg-white text-gray-800 font-sans selection:bg-brand-500 selection:text-white">
+    
+    <nav class="glass-nav fixed w-full z-50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="flex justify-between h-24 items-center">
+                <div class="flex-shrink-0">
+                    <img src="Logo Anargya Kreativindo.png" alt="Anargya Logo" class="h-12 hover:scale-105 transition duration-300" onerror="this.src='https://via.placeholder.com/200x60?text=ANARGYA'">
                 </div>
-                <div class="flex items-center space-x-4">
-                    <a href="#services" class="text-gray-600 hover:text-orange-500 font-semibold">Layanan</a>
-                    <a href="superadmin.html" class="text-gray-600 hover:text-orange-500 font-semibold">Login Admin</a>
-                    <a id="wa-link" href="#" class="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition"><i class="fab fa-whatsapp"></i> Hubungi Kami</a>
+                <div class="hidden md:flex items-center space-x-10">
+                    <a href="#services" class="text-sm font-bold text-gray-800 hover:text-brand-500 uppercase tracking-widest transition">Layanan</a>
+                    <a href="fgas/scan.html" class="text-sm font-bold text-gray-800 hover:text-brand-500 uppercase tracking-widest transition">Event Terdekat</a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <header class="pt-32 pb-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <h1 class="text-5xl font-bold text-gray-900 mb-6">Solusi Kreatif Tanpa Batas</h1>
-            <p class="text-xl text-gray-600 mb-10">Mewujudkan visi Anda melalui layanan Event, Pengadaan, Travel, Fotografi, dan Advertising.</p>
-            <a href="#services" class="bg-orange-500 text-white px-8 py-3 rounded-full text-lg font-bold hover:bg-orange-600 transition shadow-lg">Jelajahi Layanan Kami</a>
+    <header class="pt-40 pb-32 hero-bg min-h-screen flex items-center relative">
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-white/50 to-white"></div>
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 w-full text-center">
+            <div data-aos="fade-down" class="inline-flex items-center justify-center px-4 py-1.5 rounded-full border border-brand-500/30 bg-brand-50 text-brand-600 text-xs font-bold tracking-[0.2em] mb-8">
+                <span class="w-2 h-2 rounded-full bg-brand-500 mr-2 animate-pulse"></span> THE CREATIVE AGENCY
+            </div>
+            <h1 data-aos="fade-up" data-aos-delay="100" class="text-6xl md:text-8xl font-display font-extrabold text-gray-900 leading-[1.1] mb-8">
+                Ciptakan <span class="gradient-text">Momen</span><br>Tanpa Batas.
+            </h1>
+            <p data-aos="fade-up" data-aos-delay="200" class="text-xl text-gray-600 mb-12 max-w-2xl mx-auto leading-relaxed">
+                Manajemen Event, Pengadaan Barang, Tour & Travel, hingga Produksi Visual Profesional untuk kebutuhan bisnis Anda.
+            </p>
+            <div data-aos="fade-up" data-aos-delay="300" class="flex flex-col sm:flex-row justify-center gap-6">
+                <a href="#services" class="bg-gray-900 text-white px-10 py-5 rounded-full font-bold tracking-wide hover:bg-brand-500 hover:shadow-2xl hover:shadow-brand-500/40 transition-all duration-300">Eksplorasi Layanan</a>
+                <a href="fgas/scan.html" class="bg-white border-2 border-gray-200 text-gray-900 px-10 py-5 rounded-full font-bold tracking-wide hover:border-brand-500 hover:text-brand-500 transition-all duration-300 flex items-center justify-center">
+                    <i class="fas fa-ticket-alt mr-3 text-brand-500"></i> Event Terdekat
+                </a>
+            </div>
         </div>
     </header>
 
-    <section id="services" class="py-20 bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center mb-12 text-gray-900">Bidang Layanan Utama</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="services-container">
-                <!-- Services will be loaded here via JS -->
+    <section id="services" class="py-32 bg-white relative">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="text-center mb-24" data-aos="fade-up">
+                <h2 class="text-4xl md:text-5xl font-display font-extrabold text-gray-900 mb-6">Keahlian Kami</h2>
+                <div class="w-24 h-2 bg-brand-500 mx-auto rounded-full"></div>
             </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10" id="services-container"></div>
         </div>
     </section>
 
-    <footer class="bg-gray-900 text-white py-10">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p>&copy; 2026 Anargya KREATIVINDO. All rights reserved.</p>
-            <div class="mt-4 space-x-4">
-                <a id="ig-link" href="#" class="text-gray-400 hover:text-white text-2xl"><i class="fab fa-instagram"></i></a>
+    <!-- PERFECTLY CENTERED FOOTER -->
+    <footer class="bg-brand-900 text-white py-24 relative overflow-hidden flex flex-col items-center justify-center text-center">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml,%3Csvg width=\\'40\\' height=\\'40\\' viewBox=\\'0 0 40 40\\' xmlns=\\'http://www.w3.org/2000/svg\\'%3E%3Cpath d=\\'M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2z\\' fill=\\'%23ffffff\\' fill-opacity=\\'1\\' fill-rule=\\'evenodd\\'/%3E%3C/svg%3E')]"></div>
+        
+        <div class="relative z-10 w-full max-w-4xl px-6 flex flex-col items-center">
+            <!-- Centered Logo -->
+            <img src="Logo Anargya Kreativindo.png" alt="Anargya Logo" class="h-20 mb-8 brightness-0 invert" onerror="this.style.display='none'">
+            
+            <h3 class="text-3xl font-display font-bold mb-6">Anargya KREATIVINDO</h3>
+            <p class="text-gray-400 text-lg mb-12 max-w-xl mx-auto leading-relaxed">Kolaborator terpercaya untuk mengeksekusi ide dan proyek profesional Anda dengan standar terbaik.</p>
+            
+            <!-- Centered Social Icons -->
+            <div class="flex justify-center gap-8 mb-16">
+                <a id="ig-link" href="#" class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-gradient-to-tr hover:from-brand-500 hover:to-pink-500 hover:scale-110 transition-all duration-300 shadow-xl border border-white/10"><i class="fab fa-instagram text-3xl"></i></a>
+                <a id="wa-link" href="#" class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-green-500 hover:scale-110 transition-all duration-300 shadow-xl border border-white/10"><i class="fab fa-whatsapp text-3xl"></i></a>
+            </div>
+            
+            <!-- Centered Copyright -->
+            <div class="w-full border-t border-white/10 pt-8">
+                <p class="text-gray-500 font-medium tracking-wider text-sm uppercase">&copy; 2026 Anargya Kreativindo. Hak Cipta Dilindungi.</p>
             </div>
         </div>
     </footer>
 
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        // Load data from localStorage or default
-        const defaultServices = [
-            { title: 'Event Organizer', desc: 'Pengelolaan acara profesional dari konsep hingga pelaksanaan.', icon: 'fa-calendar-check' },
-            { title: 'Pengadaan Barang', desc: 'Solusi pengadaan barang terpercaya dan berkualitas.', icon: 'fa-box' },
-            { title: 'Tour & Travel', desc: 'Perjalanan aman dan nyaman untuk personal & korporasi.', icon: 'fa-plane' },
-            { title: 'Video & Fotografi', desc: 'Dokumentasi momen terbaik dengan kualitas visual tinggi.', icon: 'fa-camera' },
-            { title: 'Advertising', desc: 'Strategi periklanan modern untuk meningkatkan brand awareness.', icon: 'fa-bullhorn' }
+        AOS.init({ duration: 800, once: true, offset: 50 });
+
+        const services = [
+            { title: 'Event Organizer', desc: 'Tata panggung, konsep acara, hingga eksekusi eksekutif.', icon: 'fa-star' },
+            { title: 'Pengadaan Barang', desc: 'Distribusi dan vendor terpercaya sesuai standar kualitas.', icon: 'fa-box-open' },
+            { title: 'Tour & Travel', desc: 'Itinerary profesional untuk liburan dan korporasi.', icon: 'fa-globe-asia' },
+            { title: 'Video & Fotografi', desc: 'Produksi sinematik dan dokumentasi kelas atas.', icon: 'fa-camera-retro' },
+            { title: 'Advertising', desc: 'Iklan luar ruang dan digital untuk meroketkan brand.', icon: 'fa-bullseye' }
         ];
 
-        let services = JSON.parse(localStorage.getItem('anargya_services')) || defaultServices;
-        let waLink = localStorage.getItem('anargya_wa') || 'https://wa.me/6281234567890';
-        let igLink = localStorage.getItem('anargya_ig') || 'https://instagram.com/anargya';
-
-        document.getElementById('wa-link').href = waLink;
-        document.getElementById('ig-link').href = igLink;
+        document.getElementById('wa-link').href = localStorage.getItem('anargya_wa') || 'https://wa.me/6281234567890';
+        document.getElementById('ig-link').href = localStorage.getItem('anargya_ig') || 'https://instagram.com/anargya';
 
         const container = document.getElementById('services-container');
-        services.forEach(srv => {
+        services.forEach((srv, idx) => {
+            const isEvent = srv.title.includes('Event');
+            const extraBtn = isEvent ? `<div class="pt-6 mt-6 border-t border-gray-100"><a href="fgas/scan.html" class="inline-flex items-center text-sm font-bold text-brand-500 hover:text-brand-600 uppercase tracking-wider">Event Terdekat <i class="fas fa-arrow-right ml-2"></i></a></div>` : '';
+            
             container.innerHTML += `
-                <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 text-center">
-                    <div class="w-16 h-16 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                <div data-aos="fade-up" data-aos-delay="${idx * 100}" class="bg-white p-10 rounded-[2rem] border border-gray-100 card-premium group">
+                    <div class="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center text-3xl mb-8 group-hover:bg-brand-500 group-hover:text-white text-brand-500 transition-colors duration-300">
                         <i class="fas ${srv.icon}"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-2">${srv.title}</h3>
-                    <p class="text-gray-600">${srv.desc}</p>
-                    ${srv.title.includes('Event') ? '<a href="fgas/index.html" class="inline-block mt-4 text-orange-500 font-semibold hover:underline">Lihat Event FGAS 2026 &rarr;</a>' : ''}
+                    <h3 class="text-2xl font-display font-bold mb-4 text-gray-900">${srv.title}</h3>
+                    <p class="text-gray-500 leading-relaxed text-lg">${srv.desc}</p>
+                    ${extraBtn}
                 </div>
             `;
         });

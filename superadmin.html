@@ -2,38 +2,65 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Superadmin - Anargya</title>
+    <title>Superadmin System</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100">
-    <div class="max-w-3xl mx-auto py-10 px-4">
-        <h1 class="text-3xl font-bold mb-8 text-gray-800">Superadmin Anargya</h1>
-        
-        <div class="bg-white p-6 rounded-lg shadow mb-8">
-            <h2 class="text-xl font-bold mb-4">Pengaturan Social Media</h2>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-gray-700">Link WhatsApp</label>
-                    <input type="text" id="wa-input" class="w-full border p-2 rounded mt-1">
-                </div>
-                <div>
-                    <label class="block text-gray-700">Link Instagram</label>
-                    <input type="text" id="ig-input" class="w-full border p-2 rounded mt-1">
-                </div>
-                <button onclick="saveSocial()" class="bg-orange-500 text-white px-4 py-2 rounded">Simpan Sosmed</button>
-            </div>
-        </div>
-
-        <div class="bg-white p-6 rounded-lg shadow">
-            <h2 class="text-xl font-bold mb-4">Kembali ke Web</h2>
-            <a href="index.html" class="text-blue-500 underline">Lihat Website Utama</a>
+<body class="bg-gray-100 text-gray-800">
+    <div id="login-screen" class="min-h-screen flex items-center justify-center bg-gray-900 absolute inset-0 z-50">
+        <div class="bg-white p-10 rounded-3xl shadow-xl w-full max-w-sm text-center">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fas fa-lock"></i></div>
+            <h2 class="text-xl font-bold mb-6">Akses Master Control</h2>
+            <input type="password" id="pwd" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl mb-4 text-center tracking-widest outline-none focus:border-red-500" placeholder="***">
+            <button onclick="login()" class="w-full bg-red-600 text-white py-4 rounded-xl font-bold hover:bg-red-700 shadow-lg transition">Masuk</button>
+            <a href="index.html" class="block mt-6 text-sm text-gray-400">Kembali ke Beranda</a>
         </div>
     </div>
-
+    <div id="main-content" class="hidden max-w-4xl mx-auto py-10 px-4">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl font-bold"><i class="fas fa-cogs mr-2 text-gray-400"></i> Global Settings</h1>
+            <button onclick="location.reload()" class="bg-gray-800 text-white px-4 py-2 rounded-lg font-bold text-sm shadow">Logout</button>
+        </div>
+        <div class="bg-white p-8 rounded-2xl shadow-sm border mb-6">
+            <h2 class="font-bold mb-4">Pengaturan Social Media URL</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-500 mb-1">WhatsApp URL</label>
+                    <input type="text" id="wa-input" class="w-full border p-3 rounded-lg bg-gray-50 outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-500 mb-1">Instagram URL</label>
+                    <input type="text" id="ig-input" class="w-full border p-3 rounded-lg bg-gray-50 outline-none focus:border-blue-500">
+                </div>
+                <button onclick="saveSocial()" class="bg-gray-900 text-white px-8 py-3 rounded-xl font-bold shadow hover:bg-gray-800 transition">Simpan Perubahan</button>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <a href="fgas/admin.html" class="bg-blue-600 text-white p-8 rounded-2xl shadow hover:shadow-lg transition flex items-center gap-4">
+                <i class="fas fa-mobile-alt text-4xl opacity-80"></i>
+                <div>
+                    <h3 class="font-bold text-xl">Scanner Panitia (App)</h3>
+                    <p class="text-blue-200 text-sm">Buka via HP Panitia</p>
+                </div>
+            </a>
+            <a href="fgas/admin-internal.html" class="bg-purple-600 text-white p-8 rounded-2xl shadow hover:shadow-lg transition flex items-center gap-4">
+                <i class="fas fa-desktop text-4xl opacity-80"></i>
+                <div>
+                    <h3 class="font-bold text-xl">Admin Layar LED</h3>
+                    <p class="text-purple-200 text-sm">Ganti Logo Undian Raffle</p>
+                </div>
+            </a>
+        </div>
+    </div>
     <script>
-        document.getElementById('wa-input').value = localStorage.getItem('anargya_wa') || '';
-        document.getElementById('ig-input').value = localStorage.getItem('anargya_ig') || '';
-
+        function login() {
+            if(document.getElementById('pwd').value === 'amansekali') {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+                document.getElementById('wa-input').value = localStorage.getItem('anargya_wa') || '';
+                document.getElementById('ig-input').value = localStorage.getItem('anargya_ig') || '';
+            } else { alert('Gagal'); document.getElementById('pwd').value = ''; }
+        }
         function saveSocial() {
             localStorage.setItem('anargya_wa', document.getElementById('wa-input').value);
             localStorage.setItem('anargya_ig', document.getElementById('ig-input').value);

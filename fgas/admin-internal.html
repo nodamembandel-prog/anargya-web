@@ -2,26 +2,55 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Internal - Panitia</title>
+    <title>Setup Visual Event</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 p-8">
-    <div class="max-w-4xl mx-auto bg-white p-8 rounded shadow">
-        <h1 class="text-3xl font-bold mb-6">Admin Internal Panitia FGAS</h1>
-        <p class="mb-6 text-gray-600">Halaman khusus untuk setup Logo Penyelenggara dan Sponsor Acara.</p>
+    <div class="max-w-2xl mx-auto bg-white p-10 rounded-3xl shadow-xl border">
+        <h1 class="text-2xl font-bold mb-2"><i class="fas fa-tv text-blue-500 mr-2"></i>Pengaturan Layar LED</h1>
+        <p class="mb-8 text-gray-500 text-sm">Logo yang diupload di sini akan otomatis tampil di tengah atas halaman Layar Undian (Raffle).</p>
         
-        <div class="border p-4 rounded mb-4">
-            <h2 class="font-bold mb-2">Upload Logo Penyelenggara</h2>
-            <input type="file" class="mb-2">
-            <button class="bg-blue-600 text-white px-4 py-2 rounded text-sm">Simpan Logo</button>
+        <div class="border-2 border-dashed border-blue-200 p-8 rounded-2xl mb-6 bg-blue-50 text-center">
+            <i class="fas fa-cloud-upload-alt text-5xl text-blue-400 mb-4 block"></i>
+            <h2 class="font-bold text-gray-800 mb-2">Upload Logo Penyelenggara</h2>
+            <input type="file" id="logo-upload" accept="image/*" class="text-sm text-gray-500 mx-auto block mt-4 border p-2 bg-white rounded cursor-pointer">
+            <button onclick="saveLogo()" class="mt-6 bg-blue-600 text-white px-8 py-3 rounded-xl font-bold shadow hover:bg-blue-700 w-full transition">Terapkan ke Layar LED</button>
         </div>
 
-        <div class="border p-4 rounded">
-            <h2 class="font-bold mb-2">Tambah Sponsor</h2>
-            <input type="text" placeholder="Nama Sponsor" class="border p-2 rounded mb-2 w-full">
-            <input type="file" class="mb-2 block">
-            <button class="bg-green-600 text-white px-4 py-2 rounded text-sm">Tambah Sponsor</button>
+        <div id="preview-box" class="hidden mt-6 text-center">
+            <p class="text-sm font-bold text-green-600 mb-2"><i class="fas fa-check-circle"></i> Logo Aktif Saat Ini:</p>
+            <img id="logo-preview" src="" class="h-20 mx-auto object-contain border p-2 rounded bg-black">
+        </div>
+        
+        <div class="mt-10 pt-6 border-t text-center">
+            <a href="../superadmin.html" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-bold hover:bg-gray-300 transition">Kembali ke Superadmin</a>
         </div>
     </div>
+
+    <script>
+        // Cek logo existing
+        const existing = localStorage.getItem('fgas_raffle_logo');
+        if(existing) {
+            document.getElementById('preview-box').classList.remove('hidden');
+            document.getElementById('logo-preview').src = existing;
+        }
+
+        function saveLogo() {
+            const fileInput = document.getElementById('logo-upload');
+            if(!fileInput.files[0]) { alert('Pilih gambar dulu!'); return; }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Image = e.target.result;
+                localStorage.setItem('fgas_raffle_logo', base64Image);
+                alert('Logo berhasil dipasang di layar undian!');
+                
+                document.getElementById('preview-box').classList.remove('hidden');
+                document.getElementById('logo-preview').src = base64Image;
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        }
+    </script>
 </body>
 </html>

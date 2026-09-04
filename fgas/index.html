@@ -2,115 +2,238 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>FGAS 2026 - Boyolali</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrasi FGAS 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: { colors: { blue: { 600: '#2563EB', 800: '#1E40AF' } } }
-            }
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Teko:wght@400;600;700&family=Inter:wght@400;600;800&display=swap');
+        body { background-color: #020617; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .sport-bg { position: fixed; inset: 0; z-index: -2; background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%); }
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: -1; opacity: 0.15;
+            background-size: 50px 50px;
+            background-image: linear-gradient(to right, #3b82f6 1px, transparent 1px), linear-gradient(to bottom, #3b82f6 1px, transparent 1px);
+            transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+            animation: gridMove 15s linear infinite;
         }
-    </script>
+        @keyframes gridMove {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(50px) translateZ(-200px); }
+        }
+        .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(59, 130, 246, 0.4); box-shadow: 0 0 40px rgba(59, 130, 246, 0.15); transform: skewX(-2deg); }
+        .glass-panel > div { transform: skewX(2deg); }
+        .input-dark { background: rgba(2, 6, 23, 0.8); border: 1px solid rgba(59, 130, 246, 0.5); color: white; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+        .input-dark:focus { border-color: #06b6d4; outline: none; background: rgba(2, 6, 23, 0.95); box-shadow: 0 0 15px rgba(6, 182, 212, 0.4); }
+        .title-sport { font-family: 'Teko', sans-serif; letter-spacing: 2px; line-height: 0.9; }
+        .btn-sport { clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px); transition: all 0.3s ease; }
+        .btn-sport:hover { transform: scale(1.02); filter: drop-shadow(0 0 20px rgba(6, 182, 212, 0.6)); }
+    </style>
 </head>
-<body class="bg-blue-50">
-    <header class="bg-blue-800 text-white py-16 text-center">
-        <h1 class="text-4xl font-bold mb-4">Festival Goverment Auto Show 2026</h1>
-        <h2 class="text-2xl">& Pengundian Pajak PBB/P2 Boyolali</h2>
-        <p class="mt-4 text-blue-200">Daftar sekarang untuk pengunjung, lomba, dan dapatkan doorprize menarik!</p>
-    </header>
+<body class="text-white min-h-screen flex items-center justify-center p-4">
+    <div class="sport-bg"></div>
+    <div class="grid-overlay"></div>
 
-    <div class="max-w-4xl mx-auto py-10 px-4">
-        <div class="bg-white p-8 rounded-xl shadow-lg border-t-4 border-blue-600">
-            <h3 class="text-2xl font-bold mb-6 text-blue-800">Formulir Pendaftaran</h3>
-            
-            <select id="reg-type" class="w-full p-3 border rounded mb-6 text-lg">
-                <option value="Pengunjung">Pengunjung (Doorprize)</option>
-                <option value="Lomba Fashion Show">Lomba Fashion Show</option>
-                <option value="Lomba Mewarnai">Lomba Mewarnai</option>
-                <option value="Booth UMKM">Booth UMKM</option>
-                <option value="Modifikasi Mobil/Motor">Modifikasi Mobil/Motor</option>
-            </select>
+    <div class="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 relative z-10 py-10 items-center">
+        <!-- Info Section -->
+        <div class="flex flex-col justify-center">
+            <div class="inline-flex items-center space-x-2 mb-6">
+                <div class="w-12 h-1 bg-cyan-400 shadow-[0_0_10px_#22d3ee]"></div>
+                <span class="text-cyan-400 font-bold tracking-[0.2em] text-sm uppercase text-shadow">Official Registration</span>
+            </div>
+            <h1 class="title-sport text-6xl lg:text-8xl font-bold mb-4 uppercase text-transparent bg-clip-text bg-gradient-to-br from-white via-blue-100 to-blue-500 drop-shadow-2xl">
+                FGAS <span class="text-cyan-400">2026</span>
+            </h1>
+            <p class="text-xl text-blue-200 mb-8 border-l-4 border-cyan-400 pl-4 font-light">Festival Goverment Auto Show & Undian Pajak PBB/P2 Boyolali.</p>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-blue-900/40 border border-blue-500/30 p-4 rounded-lg flex items-center gap-4"><i class="fas fa-car-side text-3xl text-cyan-400"></i><span class="font-bold text-sm">Auto Show</span></div>
+                <div class="bg-blue-900/40 border border-blue-500/30 p-4 rounded-lg flex items-center gap-4"><i class="fas fa-store text-3xl text-orange-400"></i><span class="font-bold text-sm">Bazar UMKM</span></div>
+            </div>
+        </div>
 
-            <div class="space-y-4">
-                <input type="text" id="nama" placeholder="Nama Lengkap" class="w-full p-3 border rounded">
-                <input type="text" id="nik" placeholder="NIK" class="w-full p-3 border rounded">
-                <input type="text" id="hp" placeholder="Nomor HP" class="w-full p-3 border rounded">
-                <textarea id="alamat" placeholder="Alamat" class="w-full p-3 border rounded"></textarea>
+        <!-- Form Section -->
+        <div class="glass-panel p-8 md:p-10">
+            <div id="form-section">
+                <h3 class="text-3xl font-black mb-2 uppercase text-cyan-400 tracking-wider">Tiket Masuk</h3>
+                <p class="text-sm text-blue-200 mb-8">Pilih kategori & dapatkan akses barcode Anda.</p>
                 
-                <button id="submit-btn" onclick="register()" class="w-full bg-blue-600 text-white font-bold py-3 rounded hover:bg-blue-700 transition">Daftar & Generate Barcode</button>
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-xs font-bold text-blue-300 uppercase tracking-wider mb-2">Kategori Pendaftaran</label>
+                        <select id="reg-type" onchange="handleCategoryChange()" class="w-full p-4 input-dark font-bold text-blue-100">
+                            <option value="Pengunjung" class="bg-slate-900">Pengunjung (Doorprize Umum)</option>
+                            <option value="Lomba Fashion Show" class="bg-slate-900">Peserta Lomba Fashion Show</option>
+                            <option value="Lomba Mewarnai" class="bg-slate-900">Peserta Lomba Mewarnai</option>
+                            <option value="Modifikasi Mobil/Motor" class="bg-slate-900">Peserta Modifikasi Auto Show</option>
+                            <option value="Booth UMKM" class="bg-slate-900">Pendaftaran Booth UMKM</option>
+                        </select>
+                    </div>
+                    
+                    <div id="dynamic-fields" class="space-y-4 bg-blue-900/30 p-4 border-l-2 border-cyan-400 hidden"></div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-blue-300 uppercase tracking-wider mb-2">Nama Lengkap Sesuai KTP</label>
+                        <input type="text" id="nama" class="w-full p-4 input-dark" placeholder="Nama Pendaftar...">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs font-bold text-blue-300 uppercase tracking-wider mb-2">NIK / No. Kartu Pelajar</label>
+                            <input type="text" id="nik" class="w-full p-4 input-dark" placeholder="Masukkan Nomor Identitas">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-blue-300 uppercase tracking-wider mb-2">No WhatsApp / HP</label>
+                            <input type="number" id="hp" class="w-full p-4 input-dark" placeholder="08...">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-blue-300 uppercase tracking-wider mb-2">Alamat Domisili</label>
+                        <textarea id="alamat" rows="2" class="w-full p-4 input-dark" placeholder="Alamat lengkap..."></textarea>
+                    </div>
+                    
+                    <button id="submit-btn" onclick="register()" class="w-full btn-sport bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black py-5 uppercase tracking-widest mt-6 text-xl">
+                        <i class="fas fa-qrcode mr-2"></i> Buat Barcode
+                    </button>
+                </div>
             </div>
 
-            <div id="qrcode-container" class="mt-8 text-center hidden">
-                <h4 class="font-bold text-green-600 mb-2">Berhasil Terdaftar! Simpan Barcode/QR ini:</h4>
-                <div id="qrcode" class="flex justify-center mb-4"></div>
-                <p class="text-xl font-bold text-gray-800 mt-2" id="ticket-id-display"></p>
-                <p class="text-sm text-gray-500 mt-1">Tunjukkan barcode ini saat registrasi ulang di lokasi.</p>
+            <!-- Success Section -->
+            <div id="qrcode-container" class="hidden text-center py-6 h-full flex flex-col justify-center items-center">
+                <div class="w-20 h-20 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mb-4 text-4xl border border-green-400 shadow-[0_0_30px_rgba(74,222,128,0.5)]">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h4 class="font-black text-3xl mb-1 title-sport tracking-wider uppercase text-cyan-400">Barcode Siap</h4>
+                
+                <div class="bg-red-500/20 border border-red-500/50 rounded-lg p-3 mb-6 max-w-sm">
+                    <p class="text-red-200 text-sm font-bold"><i class="fas fa-exclamation-triangle mr-1"></i> PENTING!</p>
+                    <p class="text-red-100 text-xs mt-1">Simpan barcode ini dengan baik dan wajib diperlihatkan ke Panitia / Crew saat di lokasi untuk verifikasi.</p>
+                </div>
+                
+                <div class="bg-white p-6 inline-block mx-auto shadow-[0_0_40px_rgba(255,255,255,0.2)] relative" style="clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);">
+                    <div id="qrcode" class="flex justify-center mb-3"></div>
+                    <p class="text-xs text-gray-500 uppercase tracking-widest font-black mb-1">TICKET ID</p>
+                    <p class="text-2xl font-black text-gray-900 tracking-wider font-mono" id="ticket-id-display"></p>
+                </div>
+                
+                <button onclick="downloadQR()" class="mt-6 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold px-6 py-3 rounded-full transition shadow-[0_0_15px_rgba(6,182,212,0.5)]">
+                    <i class="fas fa-download mr-2"></i> Simpan Barcode ke HP
+                </button>
+
+                <button onclick="window.location.reload()" class="mt-6 text-blue-300 font-medium hover:text-cyan-400 transition uppercase text-xs tracking-widest underline">Daftar Peserta Lain</button>
             </div>
         </div>
     </div>
 
+    <!-- Hidden admin link -->
+    <a href="admin.html" class="fixed bottom-4 right-4 text-slate-800 hover:text-blue-500 transition duration-300 z-50"><i class="fas fa-cog"></i></a>
+
     <script>
-        // GANTI URL DI BAWAH INI DENGAN URL GOOGLE APPS SCRIPT ANDA
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzgcuZCaXL5lnXV8PpQYFrNiMZc2B4ZQcaMxR6mzSAw9c27AkVZT4GYzK1AwhdIagSc/exec'; 
+
+        function handleCategoryChange() {
+            const type = document.getElementById('reg-type').value;
+            const container = document.getElementById('dynamic-fields');
+            container.innerHTML = '';
+            container.classList.remove('hidden');
+
+            if (type === 'Lomba Fashion Show') {
+                container.innerHTML = `
+                    <label class="block text-xs font-bold text-cyan-300 uppercase mb-2">Pilih Kategori Umur</label>
+                    <select id="sub-kategori" class="w-full p-3 input-dark mb-2">
+                        <option value="Umur 5-7 Tahun">Umur 5-7 Tahun</option>
+                        <option value="Umur 7-9 Tahun">Umur 7-9 Tahun</option>
+                    </select>
+                    <p class="text-xs text-orange-400 font-bold bg-orange-900/40 p-2 rounded border border-orange-500/30"><i class="fas fa-id-card mr-1"></i> WAJIB memperlihatkan Akta Kelahiran asli saat verifikasi ulang di lokasi.</p>
+                `;
+            } else if (type === 'Lomba Mewarnai') {
+                container.innerHTML = `<p class="text-sm font-bold text-cyan-300 bg-cyan-900/40 p-3 rounded border border-cyan-500/30"><i class="fas fa-info-circle mr-2"></i> Lomba ini khusus untuk anak rentang usia 5-6 Tahun.</p>`;
+            } else if (type === 'Modifikasi Mobil/Motor') {
+                container.innerHTML = `
+                    <label class="block text-xs font-bold text-cyan-300 uppercase mb-2">Kategori Kendaraan</label>
+                    <select id="sub-kategori" class="w-full p-3 input-dark">
+                        <option value="Mobil">Mobil</option>
+                        <option value="Motor">Motor</option>
+                    </select>
+                `;
+            } else if (type === 'Booth UMKM') {
+                container.innerHTML = `
+                    <label class="block text-xs font-bold text-cyan-300 uppercase mb-2">Pilih Jenis Stand</label>
+                    <select id="sub-kategori" class="w-full p-3 input-dark mb-3">
+                        <option value="Makanan">Makanan</option>
+                        <option value="Minuman">Minuman</option>
+                        <option value="Lainnya">Lainnya (Baju, Souvenir, Jasa, dll)</option>
+                    </select>
+                    <label class="block text-xs font-bold text-cyan-300 uppercase mb-2">Detail Jualan Spesifik</label>
+                    <input type="text" id="detail-produk" class="w-full p-3 input-dark" placeholder="Contoh: Es Teh Solo, Burger, Thrift Baju...">
+                `;
+            } else {
+                container.classList.add('hidden');
+            }
+        }
 
         async function register() {
             const btn = document.getElementById('submit-btn');
-            const type = document.getElementById('reg-type').value;
+            let baseType = document.getElementById('reg-type').value;
             const nama = document.getElementById('nama').value;
             const nik = document.getElementById('nik').value;
             const hp = document.getElementById('hp').value;
             const alamat = document.getElementById('alamat').value;
 
-            if(!nama || !hp) {
-                alert("Nama dan No HP wajib diisi!");
-                return;
-            }
+            if(!nama || !hp || !nik) { alert("Data wajib belum lengkap (Nama, NIK, HP)!"); return; }
 
-            btn.innerText = "Memproses...";
+            let finalType = baseType;
+            const subKategori = document.getElementById('sub-kategori');
+            const detailProduk = document.getElementById('detail-produk');
+            
+            if (subKategori) finalType += ` - ${subKategori.value}`;
+            if (detailProduk && detailProduk.value) finalType += ` (${detailProduk.value})`;
+            if (baseType === 'Lomba Mewarnai') finalType += ` - Usia 5-6 Thn`;
+
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> GENERATING...';
             btn.disabled = true;
 
             const ticketId = 'FGAS-' + Math.floor(Math.random() * 1000000);
-            
-            const data = { type, nama, nik, hp, alamat, ticketId };
+            const data = { type: finalType, nama, nik, hp, alamat, ticketId };
 
             try {
-                // Backup ke LocalStorage
                 let visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
                 visitors.push(data);
                 localStorage.setItem('fgas_visitors', JSON.stringify(visitors));
 
-                // Kirim ke Google Sheets Backend jika URL sudah diatur
                 if (SCRIPT_URL.startsWith('http')) {
-                    await fetch(SCRIPT_URL, {
+                    fetch(SCRIPT_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify(data)
-                    });
-                } else {
-                    console.warn("URL Backend belum diatur, data hanya disimpan di browser lokal.");
+                    }).catch(e => console.log("Background sync error", e));
                 }
 
-                // Tampilkan QR Code
+                document.getElementById('form-section').classList.add('hidden');
                 document.getElementById('qrcode-container').classList.remove('hidden');
+                
                 document.getElementById('qrcode').innerHTML = '';
-                new QRCode(document.getElementById("qrcode"), ticketId);
+                new QRCode(document.getElementById("qrcode"), {
+                    text: ticketId, width: 220, height: 220, colorDark : "#000000", colorLight : "#ffffff"
+                });
                 document.getElementById('ticket-id-display').innerText = ticketId;
-                
-                alert('Pendaftaran Berhasil!');
-                
-                // Clear form
-                document.getElementById('nama').value = '';
-                document.getElementById('nik').value = '';
-                document.getElementById('hp').value = '';
-                document.getElementById('alamat').value = '';
 
             } catch (error) {
-                console.error("Error saving data:", error);
-                alert("Terjadi kesalahan, namun data tersimpan di HP/PC ini.");
+                alert("Terjadi kesalahan sistem lokal.");
             } finally {
-                btn.innerText = "Daftar & Generate Barcode";
+                btn.innerHTML = '<i class="fas fa-qrcode mr-2"></i> Buat Barcode';
                 btn.disabled = false;
+            }
+        }
+
+        function downloadQR() {
+            const img = document.querySelector('#qrcode img');
+            if(img && img.src) {
+                const a = document.createElement('a');
+                a.href = img.src;
+                a.download = 'Barcode_FGAS_2026.png';
+                a.click();
+            } else {
+                alert('Menunggu barcode selesai di-render. Coba lagi dalam 1 detik.');
             }
         }
     </script>

@@ -2,137 +2,126 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Event FGAS 2026</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#2563eb">
+    <title>Scanner Panitia FGAS</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style> .glass-card { background: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; } </style>
 </head>
-<body class="bg-gray-100 p-8">
-    <div class="max-w-6xl mx-auto">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-bold">Dashboard Admin FGAS 2026</h1>
-            <button onclick="fetchData()" id="refresh-btn" class="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700">Refresh Data Cloud</button>
+<body class="bg-slate-50 text-slate-800 font-sans">
+    
+    <div id="login-screen" class="min-h-screen flex items-center justify-center bg-slate-900 absolute inset-0 z-50 px-4">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center">
+            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl"><i class="fas fa-shield-alt"></i></div>
+            <h2 class="text-2xl font-bold text-slate-900 mb-2">Panel Panitia</h2>
+            <input type="password" id="pwd" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl mb-4 focus:ring-2 focus:ring-blue-500 outline-none text-center tracking-widest" placeholder="***">
+            <button onclick="login()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg">Login</button>
         </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <div class="bg-white p-6 rounded shadow">
-                <h2 class="text-xl font-bold mb-4">Statistik Pendaftar</h2>
-                <ul id="stats" class="space-y-2">
-                    <li class="text-gray-500">Memuat data...</li>
-                </ul>
-            </div>
-            
-            <div class="bg-white p-6 rounded shadow border-l-4 border-blue-500">
-                <h2 class="text-xl font-bold mb-4">Setting Doorprize (Raffle)</h2>
-                <div class="space-y-4">
-                    <input type="text" id="target-winner" placeholder="Nama Pemenang / Nomer Tiket Settingan" class="w-full p-2 border rounded">
-                    <input type="text" id="target-prize" placeholder="Hadiah (cth: Sepeda Motor)" class="w-full p-2 border rounded">
-                    <button onclick="setWinner()" class="bg-blue-600 text-white px-4 py-2 rounded">Set Pemenang untuk Layar LED</button>
-                    <a href="raffle.html" target="_blank" class="block text-center mt-4 bg-gray-800 text-white px-4 py-2 rounded">Buka Layar Pengundian LED</a>
-                </div>
-            </div>
+    </div>
+
+    <div id="main-content" class="hidden min-h-screen flex flex-col">
+        <div class="bg-blue-600 text-white px-6 py-4 flex justify-between items-center shadow-md sticky top-0 z-40">
+            <h1 class="font-bold text-lg"><i class="fas fa-qrcode mr-2"></i>FGAS Scanner App</h1>
+            <button onclick="location.reload()" class="bg-red-500 px-3 py-1.5 rounded text-sm font-bold"><i class="fas fa-power-off"></i></button>
         </div>
 
-        <div class="bg-white p-6 rounded shadow">
-            <h2 class="text-xl font-bold mb-4">Daftar Kontak Peserta</h2>
-            <div class="overflow-x-auto max-h-96">
-                <table class="w-full text-left border-collapse">
-                    <thead class="sticky top-0 bg-white shadow-sm">
-                        <tr>
-                            <th class="border-b p-2">Waktu Daftar</th>
-                            <th class="border-b p-2">Tipe</th>
-                            <th class="border-b p-2">Nama</th>
-                            <th class="border-b p-2">No HP</th>
-                            <th class="border-b p-2">Ticket ID</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body">
-                        <tr><td colspan="5" class="text-center p-4 text-gray-500">Memuat data...</td></tr>
-                    </tbody>
-                </table>
+        <div class="flex-grow p-4 md:p-8 max-w-lg mx-auto w-full space-y-6">
+            
+            <div class="glass-card p-6 text-center border-t-4 border-t-green-500">
+                <h2 class="font-bold text-slate-800 mb-2 text-xl">Verifikasi Barcode Kamera</h2>
+                <p class="text-xs text-slate-500 mb-4">Arahkan kamera ke HP Pengunjung</p>
+                
+                <div id="reader" class="w-full rounded-xl overflow-hidden shadow-inner border-2 border-slate-200 mb-4 bg-black"></div>
+                
+                <button onclick="startScanner()" id="startScanBtn" class="bg-green-600 text-white w-full py-3 rounded-xl font-bold hover:bg-green-700 shadow-md mb-2"><i class="fas fa-camera mr-2"></i> Buka Kamera</button>
+                <button onclick="stopScanner()" id="stopScanBtn" class="bg-red-500 text-white w-full py-3 rounded-xl font-bold hidden"><i class="fas fa-stop mr-2"></i> Tutup Kamera</button>
+                
+                <div id="scan-result" class="mt-4 hidden p-4 rounded-xl text-center font-bold text-lg"></div>
             </div>
+
+            <div class="glass-card p-6 border-t-4 border-t-blue-500">
+                <h2 class="font-bold text-slate-800 mb-4">Remote Layar Undian</h2>
+                <div class="space-y-4">
+                    <input type="text" id="target-winner" class="w-full p-3 bg-slate-50 border rounded-lg text-sm" placeholder="ID Pemenang / Nama">
+                    <input type="text" id="target-prize" class="w-full p-3 bg-slate-50 border rounded-lg text-sm" placeholder="Hadiah (Motor, Kulkas)">
+                    <button onclick="setWinner()" class="w-full bg-blue-600 text-white py-3 rounded-lg text-sm font-bold shadow">Set Pemenang LED</button>
+                </div>
+            </div>
+            
+            <div class="text-center pt-4"><button onclick="fetchData()" class="text-blue-500 font-bold underline"><i class="fas fa-sync-alt mr-1"></i> Tarik Data DB Terbaru</button></div>
         </div>
     </div>
 
     <script>
-        // GANTI URL DI BAWAH INI DENGAN URL GOOGLE APPS SCRIPT ANDA
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzgcuZCaXL5lnXV8PpQYFrNiMZc2B4ZQcaMxR6mzSAw9c27AkVZT4GYzK1AwhdIagSc/exec'; 
+        let html5QrCode;
 
-        async function fetchData() {
-            const btn = document.getElementById('refresh-btn');
-            btn.innerText = "Memuat...";
+        function login() {
+            if(document.getElementById('pwd').value === 'amansekali') {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+                fetchData();
+            } else { alert('Akses Ditolak!'); document.getElementById('pwd').value = ''; }
+        }
+
+        function checkBarcode(scannedId) {
+            const currentWinnerId = localStorage.getItem('fgas_target_winner') || "";
+            const resDiv = document.getElementById('scan-result');
+            resDiv.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'bg-red-100', 'text-red-700', 'bg-blue-100', 'text-blue-700');
             
-            let visitors = [];
-
-            try {
-                if (SCRIPT_URL.startsWith('http')) {
-                    // Ambil dari Google Sheets (Cloud Backend)
-                    const response = await fetch(SCRIPT_URL);
-                    visitors = await response.json();
-                } else {
-                    // Fallback ambil dari LocalStorage
-                    visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
-                }
-                
-                renderData(visitors);
-            } catch (error) {
-                console.error("Gagal mengambil data dari server:", error);
-                alert("Gagal koneksi ke server, menampilkan data lokal.");
-                visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
-                renderData(visitors);
-            } finally {
-                btn.innerText = "Refresh Data Cloud";
+            // Verifikasi Khusus Pemenang Undian
+            if(scannedId !== "" && (scannedId === currentWinnerId || currentWinnerId.includes(scannedId))) {
+                resDiv.classList.add('bg-green-100', 'text-green-700');
+                resDiv.innerHTML = '<i class="fas fa-check-circle text-4xl mb-2 block"></i> PEMENANG TERVERIFIKASI!<br><span class="text-sm font-normal">Sesuai dengan data Layar LED.</span>';
+            } else {
+                // Pengunjung biasa
+                resDiv.classList.add('bg-blue-100', 'text-blue-700');
+                resDiv.innerHTML = '<i class="fas fa-user-check text-4xl mb-2 block"></i> TIKET VALID.<br><span class="text-sm font-normal">ID: ' + scannedId + '</span>';
             }
         }
 
-        function renderData(visitors) {
-            // Stats
-            const types = ['Pengunjung', 'Lomba Fashion Show', 'Lomba Mewarnai', 'Booth UMKM', 'Modifikasi Mobil/Motor'];
-            const statsEl = document.getElementById('stats');
-            statsEl.innerHTML = ''; // clear
-            let total = 0;
+        function startScanner() {
+            document.getElementById('startScanBtn').classList.add('hidden');
+            document.getElementById('stopScanBtn').classList.remove('hidden');
+            document.getElementById('scan-result').classList.add('hidden');
             
-            types.forEach(t => {
-                const count = visitors.filter(v => v.type === t || v.Type === t).length;
-                total += count;
-                statsEl.innerHTML += `<li><span class="capitalize font-semibold">${t}</span>: ${count} orang</li>`;
+            html5QrCode = new Html5Qrcode("reader");
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            
+            html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
+                checkBarcode(decodedText);
+                stopScanner(); // auto stop after scan
+            }).catch(err => {
+                alert("Gagal membuka kamera: " + err);
+                stopScanner();
             });
-            statsEl.innerHTML += `<li class="border-t pt-2 mt-2 font-bold text-blue-600">Total Pendaftar: ${total}</li>`;
+        }
 
-            // Table
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = '';
-            
-            // Reverse so newest is on top
-            visitors.reverse().forEach(v => {
-                // Handling key differences (Google Sheets keys vs LocalStorage keys)
-                const date = v.Timestamp ? new Date(v.Timestamp).toLocaleString('id-ID') : 'Local Data';
-                const type = v.Type || v.type || '-';
-                const nama = v.Nama || v.nama || '-';
-                const hp = v.HP || v.hp || '-';
-                const ticket = v.TicketID || v.ticketId || '-';
+        function stopScanner() {
+            if(html5QrCode) { html5QrCode.stop().catch(e=>console.log(e)); }
+            document.getElementById('startScanBtn').classList.remove('hidden');
+            document.getElementById('stopScanBtn').classList.add('hidden');
+        }
 
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="p-2 border-b text-sm text-gray-500">${date}</td>
-                        <td class="p-2 border-b capitalize">${type}</td>
-                        <td class="p-2 border-b font-semibold">${nama}</td>
-                        <td class="p-2 border-b">${hp}</td>
-                        <td class="p-2 border-b text-blue-600">${ticket}</td>
-                    </tr>`;
-            });
-            
-            if(visitors.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-500">Belum ada pendaftar.</td></tr>`;
-            }
+        async function fetchData() {
+            try {
+                if (SCRIPT_URL.startsWith('http')) {
+                    const response = await fetch(SCRIPT_URL);
+                    const data = await response.json();
+                    alert("Data berhasil ditarik. Total: " + data.length);
+                }
+            } catch (error) { console.log(error); }
         }
 
         function setWinner() {
             localStorage.setItem('fgas_target_winner', document.getElementById('target-winner').value);
             localStorage.setItem('fgas_target_prize', document.getElementById('target-prize').value);
-            alert('Pemenang berhasil di setting. Silahkan mulai undian di Layar LED.');
+            alert('Data pemenang diset. Verifikasi Camera Scanner sekarang mengincar ID ini.');
         }
-
-        // Auto load on page load
-        fetchData();
     </script>
 </body>
 </html>
