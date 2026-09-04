@@ -11,13 +11,13 @@
     <div id="login-screen" class="min-h-screen flex items-center justify-center bg-gray-900 absolute inset-0 z-50 px-4">
         <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm text-center">
             <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl"><i class="fas fa-lock"></i></div>
-            <h2 class="text-xl font-bold mb-6">Akses Master Internal</h2>
-            <input type="password" id="pwd" class="w-full p-4 bg-gray-50 border rounded-xl mb-4 text-center tracking-widest text-2xl outline-none focus:border-red-500" placeholder="***">
+            <h2 class="text-xl font-bold mb-6">Akses Admin Internal</h2>
+            <input type="password" id="pwd" class="w-full p-4 bg-gray-50 border rounded-xl mb-4 text-center tracking-widest text-xl outline-none focus:border-red-500" placeholder="***">
             <button onclick="login()" class="w-full bg-red-600 text-white py-4 rounded-xl font-bold shadow-lg transition text-lg hover:bg-red-700">Masuk</button>
         </div>
     </div>
 
-    <div id="main-content" class="hidden max-w-4xl mx-auto space-y-6">
+    <div id="main-content" class="hidden max-w-6xl mx-auto space-y-6">
         
         <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border">
             <h1 class="text-xl font-bold"><i class="fas fa-user-secret text-blue-500 mr-2"></i>Admin Internal (Master)</h1>
@@ -44,35 +44,55 @@
                 </div>
             </div>
 
+            <!-- Quota Setup -->
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-orange-200">
+                <h2 class="font-bold text-lg mb-2 text-orange-800"><i class="fas fa-users mr-2"></i>Pengaturan Kuota Pendaftaran</h2>
+                <p class="text-xs text-gray-500 mb-4">Membatasi jumlah maksimal peserta tiap lomba/UMKM. Kosongkan jika tidak terbatas.</p>
+                
+                <div id="quota-container" class="space-y-3 max-h-[300px] overflow-y-auto pr-2">
+                    <!-- Injected via JS -->
+                </div>
+                
+                <button onclick="saveQuotas()" class="w-full bg-orange-600 text-white py-3 rounded-lg font-bold shadow hover:bg-orange-700 mt-6">Simpan Kuota</button>
+            </div>
+
             <div class="space-y-6">
-                <!-- Top Right Logos (Pemkab/BKD) -->
+                <!-- Background Landing Page -->
                 <div class="bg-white p-8 rounded-2xl shadow-sm border">
-                    <h2 class="font-bold text-lg mb-2"><i class="fas fa-building mr-2 text-gray-400"></i>Logo Pemkab / Sponsor Atas</h2>
-                    <p class="text-xs text-gray-500 mb-4">Akan tampil di pojok kanan atas layar undian.</p>
-                    <input type="file" id="top-logo-upload" accept="image/*" class="w-full text-sm border p-2 bg-gray-50 rounded-lg mb-4">
-                    <button onclick="addTopLogo()" class="bg-green-600 text-white px-4 py-3 rounded-lg font-bold w-full text-sm hover:bg-green-700 shadow">Tambah Logo</button>
-                    
-                    <div id="top-logos-list" class="flex gap-2 mt-4 overflow-x-auto bg-gray-50 p-2 rounded-lg border min-h-[60px]"></div>
-                    <button onclick="clearArray('fgas_top_logos', 'top-logos-list')" class="text-xs text-red-500 underline mt-2 block w-full text-center font-bold">Hapus Semua Logo Atas</button>
+                    <h2 class="font-bold text-lg mb-4 text-gray-800"><i class="fas fa-image mr-2"></i>Background Landing Page FGAS</h2>
+                    <input type="file" id="bg-upload" accept="image/*" class="w-full text-sm border p-2 bg-gray-50 rounded mb-4">
+                    <button onclick="setBackground()" class="bg-gray-800 text-white px-4 py-2 rounded font-bold w-full text-sm hover:bg-gray-700">Ganti Background Utama</button>
+                    <div class="mt-4"><img id="bg-preview" src="" class="h-20 w-full object-cover hidden rounded border"></div>
+                    <button onclick="clearArray('fgas_bg_image', 'bg-preview', true)" class="text-xs text-red-500 underline mt-2 block w-full text-center">Hapus Background</button>
                 </div>
 
                 <!-- Main Center Logo -->
                 <div class="bg-white p-8 rounded-2xl shadow-sm border">
-                    <h2 class="font-bold text-lg mb-2"><i class="fas fa-star mr-2 text-yellow-400"></i>Logo Utama (Tengah Atas)</h2>
+                    <h2 class="font-bold text-lg mb-2"><i class="fas fa-star mr-2 text-yellow-400"></i>Logo Utama Undian (Tengah Atas)</h2>
                     <input type="file" id="main-logo-upload" accept="image/*" class="w-full text-sm border p-2 bg-gray-50 rounded-lg mb-4">
-                    <button onclick="setMainLogo()" class="bg-blue-600 text-white px-4 py-3 rounded-lg font-bold w-full text-sm hover:bg-blue-700 shadow">Set Logo Utama</button>
+                    <button onclick="setMainLogo()" class="bg-blue-600 text-white px-4 py-3 rounded-lg font-bold w-full text-sm hover:bg-blue-700 shadow">Set Logo Utama LED</button>
                     <div class="bg-gray-800 p-2 rounded-lg mt-4 w-max mx-auto"><img id="main-logo-preview" src="" class="h-12 object-contain hidden"></div>
                 </div>
+            </div>
 
-                <!-- Sponsor Logos (Bottom) -->
-                <div class="bg-white p-8 rounded-2xl shadow-sm border">
-                    <h2 class="font-bold text-lg mb-2"><i class="fas fa-handshake mr-2 text-gray-400"></i>Logo Sponsor (Bawah Layar)</h2>
-                    <p class="text-xs text-gray-500 mb-4">Akan berjejer di bagian bawah layar undian.</p>
-                    <input type="file" id="sponsor-logo-upload" accept="image/*" class="w-full text-sm border p-2 bg-gray-50 rounded-lg mb-4">
-                    <button onclick="addSponsorLogo()" class="bg-purple-600 text-white px-4 py-3 rounded-lg font-bold w-full text-sm hover:bg-purple-700 shadow">Tambah Logo Sponsor</button>
-                    
-                    <div id="sponsor-logos-list" class="flex gap-2 mt-4 overflow-x-auto bg-gray-50 p-2 rounded-lg border min-h-[60px]"></div>
-                    <button onclick="clearArray('fgas_sponsor_logos', 'sponsor-logos-list')" class="text-xs text-red-500 underline mt-2 block w-full text-center font-bold">Hapus Semua Sponsor</button>
+            <div class="bg-white p-8 rounded-2xl shadow-sm border h-max">
+                <h2 class="font-bold text-lg mb-2"><i class="fas fa-building mr-2 text-gray-400"></i>Logo Pemkab / Sponsor (Layar Undian)</h2>
+                <p class="text-xs text-gray-500 mb-4">Atur logo yang tampil di layar undian utama (Kanan Atas / Bawah).</p>
+                <input type="file" id="top-logo-upload" accept="image/*" class="w-full text-sm border p-2 bg-gray-50 rounded-lg mb-4">
+                <button onclick="addTopLogo()" class="bg-green-600 text-white px-4 py-3 rounded-lg font-bold w-full text-sm hover:bg-green-700 shadow mb-2">Tambah Logo Kanan Atas</button>
+                <button onclick="addSponsorLogo()" class="bg-purple-600 text-white px-4 py-3 rounded-lg font-bold w-full text-sm hover:bg-purple-700 shadow">Tambah Logo Sponsor Bawah</button>
+                
+                <div class="mt-6 space-y-4">
+                    <div>
+                        <p class="text-xs font-bold text-gray-500 mb-1">Logo Kanan Atas:</p>
+                        <div id="top-logos-list" class="flex gap-2 overflow-x-auto bg-gray-50 p-2 border min-h-[50px] rounded"></div>
+                        <button onclick="clearArray('fgas_top_logos', 'top-logos-list')" class="text-xs text-red-500 underline mt-1 block w-full text-left font-bold">Hapus Semua</button>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-gray-500 mb-1">Logo Bawah Layar:</p>
+                        <div id="sponsor-logos-list" class="flex gap-2 overflow-x-auto bg-gray-50 p-2 border min-h-[50px] rounded"></div>
+                        <button onclick="clearArray('fgas_sponsor_logos', 'sponsor-logos-list')" class="text-xs text-red-500 underline mt-1 block w-full text-left font-bold">Hapus Semua</button>
+                    </div>
                 </div>
             </div>
 
@@ -80,21 +100,54 @@
     </div>
 
     <script>
+        const categories = [
+            "Lomba Modifikasi Mobil", "Lomba Modifikasi Motor", "Lomba Komunitas Mobil",
+            "Lomba Komunitas Motor", "Festival UMKM Boyolali", "BMX Freestyle",
+            "Lomba Mewarnai Anak", "Lomba Fashion Show Anak", "Senam Sehat", "Lomba Kostum Unik Senam"
+        ];
+
         function login() {
             if(document.getElementById('pwd').value === 'amansekali') {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-content').classList.remove('hidden');
                 renderLists();
+                renderQuotaInputs();
             } else { alert('Gagal'); document.getElementById('pwd').value = ''; }
         }
 
         function setWinner() {
             localStorage.setItem('fgas_target_winner', document.getElementById('target-winner').value);
             localStorage.setItem('fgas_target_prize', document.getElementById('target-prize').value);
-            alert('Pemenang berhasil dikunci dan terhubung ke Scanner Panitia!');
+            alert('Pemenang berhasil dikunci!');
         }
 
-        // Image Compression & Saving Helper
+        function renderQuotaInputs() {
+            const container = document.getElementById('quota-container');
+            const quotas = JSON.parse(localStorage.getItem('fgas_quotas')) || {};
+            container.innerHTML = '';
+            categories.forEach(cat => {
+                const val = quotas[cat] || '';
+                const id = cat.replace(/\s+/g, '-').replace(/\//g, '-');
+                container.innerHTML += `
+                    <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                        <label class="text-xs font-semibold text-gray-700 leading-tight pr-2">${cat}</label>
+                        <input type="number" id="q-${id}" class="w-20 p-2 bg-gray-50 border border-gray-300 rounded-lg text-center text-sm font-bold" placeholder="Max" value="${val}">
+                    </div>
+                `;
+            });
+        }
+
+        function saveQuotas() {
+            const quotas = {};
+            categories.forEach(cat => {
+                const id = cat.replace(/\s+/g, '-').replace(/\//g, '-');
+                const val = document.getElementById(`q-${id}`).value;
+                if(val) quotas[cat] = val;
+            });
+            localStorage.setItem('fgas_quotas', JSON.stringify(quotas));
+            alert('Kuota Pendaftaran berhasil disimpan!');
+        }
+
         function compressAndSave(fileInputId, storageKey, isArray = false, previewId = null) {
             const fileInput = document.getElementById(fileInputId);
             if(!fileInput.files[0]) { alert('Pilih gambar dulu!'); return; }
@@ -104,7 +157,7 @@
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 400; 
+                    const MAX_WIDTH = 800; // slightly higher for BG
                     let width = img.width;
                     let height = img.height;
                     if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
@@ -126,7 +179,7 @@
                             document.getElementById(previewId).classList.remove('hidden');
                         }
                     }
-                    alert('Logo berhasil disimpan!');
+                    alert('Gambar berhasil disimpan!');
                     fileInput.value = '';
                 }
                 img.src = e.target.result;
@@ -135,25 +188,36 @@
         }
 
         function setMainLogo() { compressAndSave('main-logo-upload', 'fgas_raffle_logo', false, 'main-logo-preview'); }
+        function setBackground() { compressAndSave('bg-upload', 'fgas_bg_image', false, 'bg-preview'); }
         function addTopLogo() { compressAndSave('top-logo-upload', 'fgas_top_logos', true); }
         function addSponsorLogo() { compressAndSave('sponsor-logo-upload', 'fgas_sponsor_logos', true); }
 
-        function clearArray(key, listId) {
+        function clearArray(key, listId, isSingle=false) {
             localStorage.removeItem(key);
-            document.getElementById(listId).innerHTML = '';
+            if(isSingle) {
+                document.getElementById(listId).src = '';
+                document.getElementById(listId).classList.add('hidden');
+            } else {
+                document.getElementById(listId).innerHTML = '';
+            }
         }
 
         function renderLists() {
             const tops = JSON.parse(localStorage.getItem('fgas_top_logos')) || [];
             const sponsors = JSON.parse(localStorage.getItem('fgas_sponsor_logos')) || [];
             
-            document.getElementById('top-logos-list').innerHTML = tops.map(src => `<img src="${src}" class="h-10 bg-white border border-gray-300 p-1 rounded">`).join('');
-            document.getElementById('sponsor-logos-list').innerHTML = sponsors.map(src => `<img src="${src}" class="h-10 bg-white border border-gray-300 p-1 rounded">`).join('');
+            document.getElementById('top-logos-list').innerHTML = tops.map(src => `<img src="${src}" class="h-8 bg-white border border-gray-300 p-1 rounded">`).join('');
+            document.getElementById('sponsor-logos-list').innerHTML = sponsors.map(src => `<img src="${src}" class="h-8 bg-white border border-gray-300 p-1 rounded">`).join('');
             
             const main = localStorage.getItem('fgas_raffle_logo');
             if(main) {
                 document.getElementById('main-logo-preview').src = main;
                 document.getElementById('main-logo-preview').classList.remove('hidden');
+            }
+            const bg = localStorage.getItem('fgas_bg_image');
+            if(bg) {
+                document.getElementById('bg-preview').src = bg;
+                document.getElementById('bg-preview').classList.remove('hidden');
             }
         }
     </script>
