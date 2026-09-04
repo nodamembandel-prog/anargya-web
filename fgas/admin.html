@@ -34,26 +34,17 @@
             
             <div class="glass-card p-6 text-center border-t-4 border-t-green-500">
                 <h2 class="font-bold text-slate-800 mb-1 text-xl">Verifikasi Hadiah / Tiket</h2>
-                <p class="text-xs text-slate-500 mb-4 bg-yellow-50 text-yellow-700 p-2 rounded">Digunakan Panitia untuk verifikasi pemenang Doorprize.</p>
+                <p class="text-xs text-slate-500 mb-4 bg-yellow-50 text-yellow-700 p-2 rounded font-bold">Panitia dapat memverifikasi Pemenang Undian atau Kehadiran Peserta di sini.</p>
                 
                 <div id="reader" class="w-full rounded-xl overflow-hidden shadow-inner border-2 border-slate-200 mb-4 bg-black"></div>
                 
                 <button onclick="startScanner()" id="startScanBtn" class="bg-green-600 text-white w-full py-4 rounded-xl font-bold hover:bg-green-700 shadow-md mb-2 text-lg"><i class="fas fa-camera mr-2"></i> BUKA KAMERA SCANNER</button>
                 <button onclick="stopScanner()" id="stopScanBtn" class="bg-red-500 text-white w-full py-4 rounded-xl font-bold hidden text-lg"><i class="fas fa-stop mr-2"></i> TUTUP KAMERA</button>
                 
-                <div id="scan-result" class="mt-4 hidden p-4 rounded-xl text-center font-bold text-lg"></div>
-            </div>
-
-            <div class="glass-card p-6 border-t-4 border-t-blue-500">
-                <h2 class="font-bold text-slate-800 mb-4">Set Pemenang Undian LED</h2>
-                <div class="space-y-4">
-                    <input type="text" id="target-winner" class="w-full p-3 bg-slate-50 border rounded-lg text-sm" placeholder="ID Tiket Pemenang / Nama">
-                    <input type="text" id="target-prize" class="w-full p-3 bg-slate-50 border rounded-lg text-sm" placeholder="Hadiah (Contoh: Kulkas)">
-                    <button onclick="setWinner()" class="w-full bg-blue-600 text-white py-3 rounded-lg text-sm font-bold shadow">Kunci Pemenang</button>
-                </div>
+                <div id="scan-result" class="mt-4 hidden p-4 rounded-xl text-center font-bold text-lg border-2"></div>
             </div>
             
-            <div class="text-center pt-4"><button onclick="fetchData()" class="text-blue-500 font-bold underline"><i class="fas fa-sync-alt mr-1"></i> Sync Database Terbaru</button></div>
+            <div class="text-center pt-4"><button onclick="fetchData()" class="text-blue-500 font-bold underline bg-white px-6 py-3 rounded-full shadow-sm"><i class="fas fa-sync-alt mr-1"></i> Tarik Data DB Terbaru</button></div>
         </div>
     </div>
 
@@ -62,23 +53,23 @@
         let html5QrCode;
 
         function login() {
-            if(document.getElementById('pwd').value === 'amansekali') {
+            if(document.getElementById('pwd').value === 'adminfgas123') {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-content').classList.remove('hidden');
             } else { alert('Akses Ditolak!'); document.getElementById('pwd').value = ''; }
         }
 
         function checkBarcode(scannedId) {
-            const currentWinnerId = localStorage.getItem('fgas_target_winner') || "";
+            const currentWinnerId = localStorage.getItem('fgas_target_winner') || "NOT_SET";
             const resDiv = document.getElementById('scan-result');
-            resDiv.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'bg-red-100', 'text-red-700', 'bg-blue-100', 'text-blue-700');
+            resDiv.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'border-green-500', 'bg-blue-100', 'text-blue-700', 'border-blue-500');
             
             if(scannedId !== "" && (scannedId === currentWinnerId || currentWinnerId.includes(scannedId))) {
-                resDiv.classList.add('bg-green-100', 'text-green-700');
-                resDiv.innerHTML = '<i class="fas fa-check-circle text-4xl mb-2 block"></i> PEMENANG TERVERIFIKASI!<br><span class="text-sm font-normal">Sesuai dengan data Layar LED. Sah!</span>';
+                resDiv.classList.add('bg-green-100', 'text-green-700', 'border-green-500');
+                resDiv.innerHTML = '<i class="fas fa-check-circle text-5xl mb-3 block animate-bounce"></i> <span class="text-2xl font-black">PEMENANG TERVERIFIKASI!</span><br><span class="text-sm font-bold text-green-900 mt-2 block">Sah! Sesuai dengan data Layar LED.</span>';
             } else {
-                resDiv.classList.add('bg-blue-100', 'text-blue-700');
-                resDiv.innerHTML = '<i class="fas fa-user-check text-4xl mb-2 block"></i> TIKET VALID.<br><span class="text-sm font-normal">Bukan pemenang saat ini. ID: ' + scannedId + '</span>';
+                resDiv.classList.add('bg-blue-100', 'text-blue-700', 'border-blue-500');
+                resDiv.innerHTML = '<i class="fas fa-user-check text-5xl mb-3 block"></i> <span class="text-2xl font-black">TIKET VALID.</span><br><span class="text-sm font-bold text-blue-900 mt-2 block">Kehadiran tercatat. ID: ' + scannedId + '</span>';
             }
         }
 
@@ -110,15 +101,9 @@
                 if (SCRIPT_URL.startsWith('http')) {
                     const response = await fetch(SCRIPT_URL);
                     const data = await response.json();
-                    alert("Sinkronisasi Sukses. Total: " + data.length);
+                    alert("Sinkronisasi Sukses. Total Data: " + data.length);
                 }
             } catch (error) { console.log(error); }
-        }
-
-        function setWinner() {
-            localStorage.setItem('fgas_target_winner', document.getElementById('target-winner').value);
-            localStorage.setItem('fgas_target_prize', document.getElementById('target-prize').value);
-            alert('Pemenang diset. Verifikasi Camera Scanner sekarang mengincar ID ini.');
         }
     </script>
 </body>

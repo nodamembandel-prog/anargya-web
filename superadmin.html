@@ -23,72 +23,142 @@
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <!-- Sosmed Settings -->
+            
             <div class="bg-white p-8 rounded-2xl shadow-sm border">
-                <h2 class="font-bold mb-4">Pengaturan Social Media URL</h2>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm text-gray-500 mb-1">WhatsApp URL</label>
-                        <input type="text" id="wa-input" class="w-full border p-3 rounded-lg bg-gray-50 outline-none focus:border-blue-500">
+                <h2 class="font-bold mb-4">Pengaturan Teks Layanan (Halaman Utama)</h2>
+                <p class="text-xs text-gray-500 mb-4">Ubah judul dan deskripsi layanan pada halaman depan Anargya.</p>
+                
+                <div class="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                    <div class="border p-3 rounded">
+                        <label class="font-bold text-xs">Event Organizer</label>
+                        <input type="text" id="t-event" class="w-full text-sm bg-gray-50 border rounded p-2 mb-1">
+                        <textarea id="d-event" class="w-full text-sm bg-gray-50 border rounded p-2" rows="2"></textarea>
                     </div>
-                    <div>
-                        <label class="block text-sm text-gray-500 mb-1">Instagram URL</label>
-                        <input type="text" id="ig-input" class="w-full border p-3 rounded-lg bg-gray-50 outline-none focus:border-blue-500">
+                    <div class="border p-3 rounded">
+                        <label class="font-bold text-xs">Pengadaan Barang</label>
+                        <input type="text" id="t-pengadaan" class="w-full text-sm bg-gray-50 border rounded p-2 mb-1">
+                        <textarea id="d-pengadaan" class="w-full text-sm bg-gray-50 border rounded p-2" rows="2"></textarea>
                     </div>
-                    <button onclick="saveSocial()" class="bg-gray-900 text-white px-8 py-3 rounded-xl font-bold shadow hover:bg-gray-800 w-full">Simpan Sosmed</button>
+                    <div class="border p-3 rounded">
+                        <label class="font-bold text-xs">Tour & Travel</label>
+                        <input type="text" id="t-tour" class="w-full text-sm bg-gray-50 border rounded p-2 mb-1">
+                        <textarea id="d-tour" class="w-full text-sm bg-gray-50 border rounded p-2" rows="2"></textarea>
+                    </div>
+                    <div class="border p-3 rounded">
+                        <label class="font-bold text-xs">Video & Fotografi</label>
+                        <input type="text" id="t-video" class="w-full text-sm bg-gray-50 border rounded p-2 mb-1">
+                        <textarea id="d-video" class="w-full text-sm bg-gray-50 border rounded p-2" rows="2"></textarea>
+                    </div>
+                    <div class="border p-3 rounded">
+                        <label class="font-bold text-xs">Advertising</label>
+                        <input type="text" id="t-ads" class="w-full text-sm bg-gray-50 border rounded p-2 mb-1">
+                        <textarea id="d-ads" class="w-full text-sm bg-gray-50 border rounded p-2" rows="2"></textarea>
+                    </div>
                 </div>
+                <button onclick="saveTexts()" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold shadow hover:bg-blue-700 w-full mt-4">Simpan Teks</button>
             </div>
 
-            <!-- Upload Foto Layanan (Gallery) -->
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-orange-200">
-                <h2 class="font-bold mb-4 text-orange-600"><i class="fas fa-images mr-2"></i>Upload Foto Layanan</h2>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm text-gray-500 mb-1">Pilih Bidang Layanan</label>
-                        <select id="gallery-category" class="w-full border p-3 rounded-lg bg-gray-50 outline-none font-bold">
-                            <option value="event">Event Organizer</option>
-                            <option value="pengadaan">Pengadaan Barang</option>
-                            <option value="tour">Tour & Travel</option>
-                            <option value="video">Video & Fotografi</option>
-                            <option value="ads">Advertising</option>
-                        </select>
+            <div class="space-y-6">
+                <!-- Sosmed Settings -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border">
+                    <h2 class="font-bold mb-4">Social Media URL</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-gray-500 mb-1">WhatsApp URL</label>
+                            <input type="text" id="wa-input" class="w-full border p-3 rounded-lg bg-gray-50 outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-500 mb-1">Instagram URL</label>
+                            <input type="text" id="ig-input" class="w-full border p-3 rounded-lg bg-gray-50 outline-none focus:border-blue-500">
+                        </div>
+                        <button onclick="saveSocial()" class="bg-gray-900 text-white px-8 py-3 rounded-xl font-bold shadow hover:bg-gray-800 w-full">Simpan Sosmed</button>
                     </div>
-                    <div>
-                        <label class="block text-sm text-gray-500 mb-1">Pilih Foto Kegiatan</label>
-                        <input type="file" id="gallery-upload" accept="image/*" class="w-full border p-2 rounded-lg bg-gray-50">
+                </div>
+
+                <!-- Upload Foto Layanan (Gallery) -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-orange-200">
+                    <h2 class="font-bold mb-4 text-orange-600"><i class="fas fa-images mr-2"></i>Upload Foto Layanan</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-gray-500 mb-1">Pilih Bidang Layanan</label>
+                            <select id="gallery-category" class="w-full border p-3 rounded-lg bg-gray-50 outline-none font-bold">
+                                <option value="event">Event Organizer</option>
+                                <option value="pengadaan">Pengadaan Barang</option>
+                                <option value="tour">Tour & Travel</option>
+                                <option value="video">Video & Fotografi</option>
+                                <option value="ads">Advertising</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-500 mb-1">Pilih Foto Kegiatan</label>
+                            <input type="file" id="gallery-upload" accept="image/*" class="w-full border p-2 rounded-lg bg-gray-50">
+                        </div>
+                        <button onclick="uploadServicePhoto()" class="bg-orange-500 text-white px-8 py-3 rounded-xl font-bold shadow hover:bg-orange-600 w-full">Tambah ke Galeri Layanan</button>
+                        <button onclick="clearGallery()" class="text-xs text-red-500 underline text-center w-full block mt-2">Hapus Semua Galeri</button>
                     </div>
-                    <button onclick="uploadServicePhoto()" class="bg-orange-500 text-white px-8 py-3 rounded-xl font-bold shadow hover:bg-orange-600 w-full">Tambah ke Galeri Layanan</button>
-                    <button onclick="clearGallery()" class="text-xs text-red-500 underline text-center w-full block mt-2">Hapus Semua Galeri</button>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
             <a href="index.html" class="bg-white border text-gray-800 p-6 rounded-2xl shadow hover:shadow-lg transition text-center">
-                <i class="fas fa-globe text-3xl mb-2 text-gray-400"></i><h3 class="font-bold">Landing Page Utama</h3>
+                <i class="fas fa-globe text-3xl mb-2 text-gray-400"></i><h3 class="font-bold text-sm">Landing Page Utama</h3>
             </a>
             <a href="fgas/admin.html" class="bg-blue-600 text-white p-6 rounded-2xl shadow hover:shadow-lg transition text-center">
-                <i class="fas fa-mobile-alt text-3xl mb-2"></i><h3 class="font-bold">Scanner Panitia (App)</h3>
+                <i class="fas fa-mobile-alt text-3xl mb-2"></i><h3 class="font-bold text-sm">Scanner Panitia (App)</h3>
             </a>
             <a href="fgas/admin-internal.html" class="bg-purple-600 text-white p-6 rounded-2xl shadow hover:shadow-lg transition text-center">
-                <i class="fas fa-desktop text-3xl mb-2"></i><h3 class="font-bold">Admin Layar LED</h3>
+                <i class="fas fa-user-secret text-3xl mb-2"></i><h3 class="font-bold text-sm">Admin Internal FGAS</h3>
+            </a>
+            <a href="fgas/preview.html" target="_blank" class="bg-teal-600 text-white p-6 rounded-2xl shadow hover:shadow-lg transition text-center">
+                <i class="fas fa-chart-pie text-3xl mb-2"></i><h3 class="font-bold text-sm">Preview Dashboard</h3>
             </a>
         </div>
     </div>
     <script>
+        const defaultServices = {
+            event: { title: 'Event Organizer', desc: 'Tata panggung, konsep acara, hingga eksekusi eksekutif.' },
+            pengadaan: { title: 'Pengadaan Barang', desc: 'Distribusi dan vendor terpercaya sesuai standar kualitas.' },
+            tour: { title: 'Tour & Travel', desc: 'Itinerary profesional untuk liburan dan korporasi.' },
+            video: { title: 'Video & Fotografi', desc: 'Produksi sinematik dan dokumentasi kelas atas.' },
+            ads: { title: 'Advertising', desc: 'Iklan luar ruang dan digital untuk meroketkan brand.' }
+        };
+
         function login() {
             if(document.getElementById('pwd').value === 'amansekali') {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-content').classList.remove('hidden');
+                
+                // Load texts
+                const customTexts = JSON.parse(localStorage.getItem('anargya_services_custom')) || defaultServices;
+                ['event','pengadaan','tour','video','ads'].forEach(k => {
+                    document.getElementById(`t-${k}`).value = customTexts[k].title;
+                    document.getElementById(`d-${k}`).value = customTexts[k].desc;
+                });
+
                 document.getElementById('wa-input').value = localStorage.getItem('anargya_wa') || '';
                 document.getElementById('ig-input').value = localStorage.getItem('anargya_ig') || '';
             } else { alert('Gagal'); document.getElementById('pwd').value = ''; }
         }
+
+        function saveTexts() {
+            const data = {};
+            ['event','pengadaan','tour','video','ads'].forEach(k => {
+                data[k] = {
+                    title: document.getElementById(`t-${k}`).value,
+                    desc: document.getElementById(`d-${k}`).value
+                };
+            });
+            localStorage.setItem('anargya_services_custom', JSON.stringify(data));
+            alert('Teks Layanan Tersimpan!');
+        }
+
         function saveSocial() {
             localStorage.setItem('anargya_wa', document.getElementById('wa-input').value);
             localStorage.setItem('anargya_ig', document.getElementById('ig-input').value);
             alert('Tersimpan!');
         }
+
         function uploadServicePhoto() {
             const file = document.getElementById('gallery-upload').files[0];
             const category = document.getElementById('gallery-category').value;

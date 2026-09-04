@@ -15,8 +15,11 @@
 </head>
 <body class="flex flex-col items-center justify-center h-screen w-screen bg-cyber relative p-10">
     
-    <!-- Dynamic Admin Logo -->
-    <img id="raffle-logo" src="" class="absolute top-10 h-28 object-contain hidden z-20 drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]">
+    <!-- Top Right Logos (Pemkab & BKD) -->
+    <div id="top-right-logos" class="absolute top-6 right-10 flex gap-6 z-20"></div>
+
+    <!-- Dynamic Admin Logo (Center Top) -->
+    <img id="raffle-logo" src="" class="absolute top-10 h-32 object-contain hidden z-20 drop-shadow-[0_0_20px_rgba(255,255,255,0.6)]">
 
     <div class="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwb2x5Z29uIHBvaW50cz0iMCAwIDQwIDAgNDAgMSA0MCAxIDAgMSIgZmlsbD0iIzBiYmZlZSIvPjxwb2x5Z29uIHBvaW50cz0iMCAwIDEgMCAxIDQwIDEgNDAgMCA0MCIgZmlsbD0iIzBiYmZlZSIvPjwvc3ZnPg==')]"></div>
 
@@ -30,22 +33,33 @@
     </div>
 
     <!-- Alert Text -->
-    <div class="mt-8 bg-red-600/20 border border-red-500 p-4 rounded-xl z-10 text-center animate-pulse">
-        <p class="text-3xl text-red-400 tracking-widest font-bold">PANGGILAN 3X TIDAK HADIR = HADIAH HANGUS!</p>
+    <div class="mt-8 bg-red-600/20 border border-red-500 p-4 rounded-xl z-10 text-center animate-pulse shadow-[0_0_30px_rgba(220,38,38,0.4)]">
+        <p class="text-[2vw] text-red-400 tracking-widest font-black">PANGGILAN 3X TIDAK HADIR = HADIAH HANGUS!</p>
     </div>
 
-    <div class="absolute bottom-10 space-x-6 z-20">
-        <button onclick="startRaffleSequence()" id="btn-start" class="bg-blue-600 border-2 border-cyan-400 text-white px-10 py-4 rounded-full text-2xl font-bold hover:bg-blue-500 shadow-[0_0_30px_rgba(6,182,212,0.6)] cursor-pointer tracking-widest">MULAI (15 DETIK)</button>
+    <!-- Sponsor Logos (Bottom) -->
+    <div id="sponsor-logos" class="absolute bottom-6 w-full flex justify-center items-center gap-8 z-20 px-10 flex-wrap"></div>
+
+    <div class="absolute bottom-32 space-x-6 z-20">
+        <button onclick="startRaffleSequence()" id="btn-start" class="bg-blue-600 border-2 border-cyan-400 text-white px-12 py-5 rounded-full text-3xl font-black hover:bg-blue-500 shadow-[0_0_40px_rgba(6,182,212,0.8)] cursor-pointer tracking-widest transition-transform hover:scale-105">MULAI (15 DETIK)</button>
     </div>
 
     <script>
-        const savedLogo = localStorage.getItem('fgas_raffle_logo');
-        if(savedLogo) {
+        // Load Logos
+        const savedMainLogo = localStorage.getItem('fgas_raffle_logo');
+        if(savedMainLogo) {
             const logoEl = document.getElementById('raffle-logo');
-            logoEl.src = savedLogo;
+            logoEl.src = savedMainLogo;
             logoEl.classList.remove('hidden');
         }
 
+        const tops = JSON.parse(localStorage.getItem('fgas_top_logos')) || [];
+        document.getElementById('top-right-logos').innerHTML = tops.map(src => `<img src="${src}" class="h-24 bg-white p-2 rounded-xl object-contain shadow-[0_0_15px_rgba(255,255,255,0.3)]">`).join('');
+
+        const sponsors = JSON.parse(localStorage.getItem('fgas_sponsor_logos')) || [];
+        document.getElementById('sponsor-logos').innerHTML = sponsors.map(src => `<img src="${src}" class="h-20 object-contain bg-white/10 p-2 rounded-xl backdrop-blur-sm grayscale hover:grayscale-0 transition opacity-80 hover:opacity-100 border border-white/20">`).join('');
+
+        // Audio & Raffle Logic
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let oscillator = null;
 

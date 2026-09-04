@@ -2,14 +2,23 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Registrasi FGAS 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;600;700&display=swap');
-        body { background-color: #020617; font-family: 'Rajdhani', sans-serif; overflow-x: hidden; }
+        body { background-color: #020617; font-family: 'Rajdhani', sans-serif; overflow-x: hidden; width: 100vw; }
+        
+        /* iOS input fixes */
+        input, select, textarea {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            border-radius: 0.75rem !important; /* Force rounded instead of pill on iOS */
+        }
+        
         .sport-bg { position: fixed; inset: 0; z-index: -2; background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%); }
         .grid-overlay {
             position: fixed; inset: 0; z-index: -1; opacity: 0.15;
@@ -22,134 +31,196 @@
             0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); }
             100% { transform: perspective(500px) rotateX(60deg) translateY(50px) translateZ(-200px); }
         }
-        .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(59, 130, 246, 0.4); box-shadow: 0 0 40px rgba(59, 130, 246, 0.15); transform: skewX(-2deg); }
-        .glass-panel > div { transform: skewX(2deg); }
-        .input-dark { background: rgba(2, 6, 23, 0.8); border: 1px solid rgba(59, 130, 246, 0.5); color: white; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+        
+        .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(59, 130, 246, 0.4); box-shadow: 0 0 40px rgba(59, 130, 246, 0.15); }
+        .input-dark { background: rgba(2, 6, 23, 0.8); border: 1px solid rgba(59, 130, 246, 0.5); color: white; width: 100%; box-sizing: border-box; }
         .input-dark:focus { border-color: #06b6d4; outline: none; background: rgba(2, 6, 23, 0.95); box-shadow: 0 0 15px rgba(6, 182, 212, 0.4); }
         .title-sport { font-family: 'Orbitron', sans-serif; letter-spacing: 2px; line-height: 1.1; }
-        .btn-sport { clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px); transition: all 0.3s ease; }
+        .btn-sport { transition: all 0.3s ease; }
         .btn-sport:hover { transform: scale(1.02); filter: drop-shadow(0 0 20px rgba(6, 182, 212, 0.6)); }
         
-        /* Animated SVG Checkmark */
-        .checkmark__circle { stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 2; stroke-miterlimit: 10; stroke: #06b6d4; fill: none; animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards; }
-        .checkmark { width: 80px; height: 80px; border-radius: 50%; display: block; stroke-width: 2; stroke: #fff; stroke-miterlimit: 10; margin: 0 auto 20px auto; box-shadow: inset 0px 0px 0px #06b6d4; animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both; }
-        .checkmark__check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards; }
-        @keyframes stroke { 100% { stroke-dashoffset: 0; } }
-        @keyframes scale { 0%, 100% { transform: none; } 50% { transform: scale3d(1.1, 1.1, 1); } }
-        @keyframes fill { 100% { box-shadow: inset 0px 0px 0px 50px #06b6d4; } }
+        /* List Activity Scrollbar */
+        .activity-list::-webkit-scrollbar { width: 6px; }
+        .activity-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
+        .activity-list::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); border-radius: 4px; }
     </style>
 </head>
-<body class="text-white min-h-screen flex flex-col p-4 relative">
+<body class="text-white min-h-screen flex flex-col relative pb-20">
     <div class="sport-bg"></div>
     <div class="grid-overlay"></div>
 
-    <div class="w-full max-w-6xl mx-auto flex-grow grid grid-cols-1 lg:grid-cols-2 gap-12 relative z-10 py-10 items-center">
-        <!-- Info Section -->
-        <div class="flex flex-col justify-center">
-            <div class="inline-flex items-center space-x-2 mb-6">
-                <div class="w-12 h-1 bg-cyan-400 shadow-[0_0_10px_#22d3ee]"></div>
-                <span class="text-cyan-400 font-bold tracking-[0.2em] text-sm uppercase text-shadow">Official Registration</span>
-            </div>
-            <h1 class="title-sport text-6xl lg:text-7xl font-bold mb-4 uppercase text-transparent bg-clip-text bg-gradient-to-br from-white via-blue-100 to-blue-500 drop-shadow-2xl">
-                FGAS <span class="text-cyan-400">2026</span>
-            </h1>
-            <p class="text-2xl text-blue-200 mb-8 border-l-4 border-cyan-400 pl-4 font-semibold">Festival Goverment Auto Show & Undian Pajak PBB/P2 Boyolali.</p>
+    <!-- Top Logos (Absolute Top) -->
+    <div class="absolute top-0 left-0 w-full p-4 lg:p-8 flex justify-between items-start z-50 pointer-events-none">
+        <div class="flex items-center gap-4">
+            <img src="../logo_pemkab.jpg" class="h-10 md:h-16 rounded shadow-lg object-contain bg-white p-1" onerror="this.style.display='none'">
+            <img src="../logo_pengundian.png" class="h-10 md:h-16 object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" onerror="this.style.display='none'">
+        </div>
+    </div>
+
+    <div class="w-full max-w-7xl mx-auto flex-grow grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10 pt-24 lg:pt-32 px-4 lg:px-8 items-start">
+        
+        <!-- Info Section (Left/Top) -->
+        <div class="lg:col-span-7 flex flex-col justify-center">
             
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-blue-900/40 border border-blue-500/30 p-5 rounded-lg flex items-center gap-4"><svg class="w-8 h-8 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg><span class="font-bold text-lg">Auto Show</span></div>
-                <div class="bg-blue-900/40 border border-blue-500/30 p-5 rounded-lg flex items-center gap-4"><svg class="w-8 h-8 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg><span class="font-bold text-lg">Bazar UMKM</span></div>
+            <!-- Main Center Logo FGAS -->
+            <div class="w-full flex justify-center lg:justify-start mb-8">
+                <img src="../logo_fgas.png" class="w-full max-w-md drop-shadow-[0_0_30px_rgba(6,182,212,0.5)]" onerror="this.style.display='none'">
+            </div>
+
+            <div class="inline-flex items-center space-x-2 mb-4 bg-blue-900/40 border border-blue-500/30 p-2 rounded-lg w-max">
+                <i class="fas fa-calendar-alt text-cyan-400"></i>
+                <span class="text-cyan-100 font-bold text-sm tracking-widest uppercase">10 - 11 Oktober 2026</span>
+            </div>
+            <div class="inline-flex items-center space-x-2 mb-8 bg-blue-900/40 border border-blue-500/30 p-2 rounded-lg w-max">
+                <i class="fas fa-map-marker-alt text-red-400"></i>
+                <span class="text-red-100 font-bold text-sm tracking-widest uppercase">Alun-alun Kidul Boyolali</span>
+            </div>
+            
+            <!-- Countdown Timer -->
+            <div class="bg-slate-900/80 border border-cyan-500/40 p-4 rounded-2xl mb-8 max-w-lg backdrop-blur-md shadow-[0_0_20px_rgba(6,182,212,0.2)]">
+                <p class="text-xs text-cyan-400 font-bold uppercase tracking-widest mb-3 text-center">Hitung Mundur Event</p>
+                <div class="flex justify-between text-center gap-3">
+                    <div class="bg-black/50 rounded-xl p-3 flex-1 border border-cyan-500/30"><span id="days" class="block title-sport text-4xl text-white">00</span><span class="text-[10px] text-cyan-500 uppercase font-bold tracking-widest">Hari</span></div>
+                    <div class="bg-black/50 rounded-xl p-3 flex-1 border border-cyan-500/30"><span id="hours" class="block title-sport text-4xl text-white">00</span><span class="text-[10px] text-cyan-500 uppercase font-bold tracking-widest">Jam</span></div>
+                    <div class="bg-black/50 rounded-xl p-3 flex-1 border border-cyan-500/30"><span id="mins" class="block title-sport text-4xl text-white">00</span><span class="text-[10px] text-cyan-500 uppercase font-bold tracking-widest">Mnt</span></div>
+                    <div class="bg-black/50 rounded-xl p-3 flex-1 border border-cyan-500/30"><span id="secs" class="block title-sport text-4xl text-white">00</span><span class="text-[10px] text-cyan-500 uppercase font-bold tracking-widest">Dtk</span></div>
+                </div>
+            </div>
+
+            <!-- Activities List -->
+            <div class="glass-panel p-6 rounded-2xl mb-8 max-w-lg">
+                <h3 class="text-lg font-bold text-cyan-400 uppercase tracking-widest mb-4 border-b border-blue-500/30 pb-2"><i class="fas fa-list-ul mr-2"></i>Rangkaian Kegiatan</h3>
+                <div class="activity-list overflow-y-auto max-h-48 pr-2 space-y-2 text-sm font-medium text-blue-100">
+                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-cyan-500 text-xs"></i> Lomba Modifikasi Mobil & Motor</div>
+                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-cyan-500 text-xs"></i> Lomba Komunitas Mobil & Motor</div>
+                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-cyan-500 text-xs"></i> Festival UMKM Boyolali</div>
+                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-cyan-500 text-xs"></i> BMX Freestyle</div>
+                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-cyan-500 text-xs"></i> Lomba Mewarnai Anak</div>
+                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-cyan-500 text-xs"></i> Lomba Fashion Show Anak (Tema Budaya)</div>
+                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-cyan-500 text-xs"></i> Senam Sehat & Lomba Kostum Unik</div>
+                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-cyan-500 text-xs"></i> Hiburan Akustik & Dangdut</div>
+                    <div class="flex items-center gap-2 text-orange-400 font-bold"><i class="fas fa-gift text-xs"></i> Pengundian Hadiah Motor & Mobil</div>
+                    <div class="flex items-center gap-2 text-orange-400 font-bold"><i class="fas fa-ticket-alt text-xs"></i> Doorprize Untuk Semua Pengunjung</div>
+                </div>
             </div>
             
             <!-- Contact Panitia -->
-            <div class="mt-12 bg-slate-900/80 border border-slate-700 p-4 rounded-xl max-w-sm flex items-center gap-4">
-                <div class="w-12 h-12 bg-green-500/20 text-green-400 rounded-full flex justify-center items-center"><i class="fab fa-whatsapp text-2xl"></i></div>
-                <div>
-                    <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Bantuan Registrasi</p>
-                    <p class="text-lg font-bold text-white">0812-3456-7890</p>
+            <div class="bg-slate-900/80 border border-green-500/30 p-4 rounded-2xl max-w-lg flex items-center justify-between shadow-[0_0_15px_rgba(34,197,94,0.1)]">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-green-500/20 text-green-400 rounded-full flex justify-center items-center"><i class="fab fa-whatsapp text-2xl"></i></div>
+                    <div>
+                        <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Bantuan Registrasi</p>
+                        <p class="text-xl font-bold text-white tracking-widest">0812-3456-7890</p>
+                    </div>
                 </div>
+                <div class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse">PANITIA</div>
             </div>
         </div>
 
-        <!-- Form Section -->
-        <div class="glass-panel p-8 md:p-10">
-            <div id="form-section">
-                <h3 class="text-3xl title-sport mb-2 uppercase text-cyan-400 tracking-wider">Tiket Masuk</h3>
-                <p class="text-lg text-blue-200 mb-8 font-semibold">1 NIK / No. HP Berlaku untuk 1 Undian.</p>
-                
-                <div class="space-y-5">
-                    <div>
-                        <label class="block text-sm font-bold text-blue-300 uppercase tracking-wider mb-2">Kategori Pendaftaran</label>
-                        <select id="reg-type" onchange="handleCategoryChange()" class="w-full p-4 input-dark font-bold text-blue-100 text-lg">
-                            <option value="Pengunjung" class="bg-slate-900">Pengunjung (Doorprize Umum)</option>
-                            <option value="Lomba Fashion Show" class="bg-slate-900">Peserta Lomba Fashion Show</option>
-                            <option value="Lomba Mewarnai" class="bg-slate-900">Peserta Lomba Mewarnai</option>
-                            <option value="Modifikasi Mobil/Motor" class="bg-slate-900">Peserta Modifikasi Auto Show</option>
-                            <option value="Booth UMKM" class="bg-slate-900">Pendaftaran Booth UMKM</option>
-                        </select>
+        <!-- Form Section (Right/Bottom) -->
+        <div class="lg:col-span-5 w-full">
+            <div class="glass-panel p-6 md:p-8 rounded-3xl w-full">
+                <div id="form-section">
+                    <div class="flex justify-between items-center mb-6 border-b border-blue-500/30 pb-4">
+                        <div>
+                            <h3 class="text-2xl title-sport uppercase text-cyan-400 tracking-wider mb-1">Tiket Masuk</h3>
+                            <p class="text-sm text-blue-200 font-semibold">1 Identitas = 1 Nomor Undian.</p>
+                        </div>
+                        <div class="bg-orange-500 text-white font-black px-4 py-2 rounded-lg transform rotate-3 shadow-lg">GRATIS!</div>
                     </div>
                     
-                    <div id="dynamic-fields" class="space-y-4 bg-blue-900/30 p-4 border-l-2 border-cyan-400 hidden"></div>
-
-                    <div>
-                        <label class="block text-sm font-bold text-blue-300 uppercase tracking-wider mb-2">Nama Lengkap Sesuai KTP</label>
-                        <input type="text" id="nama" class="w-full p-4 input-dark text-lg" placeholder="Nama Pendaftar...">
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-bold text-blue-300 uppercase tracking-wider mb-2">NIK / No. Kartu Pelajar</label>
-                            <input type="text" id="nik" class="w-full p-4 input-dark text-lg" placeholder="Masukkan Identitas">
+                            <label class="block text-sm font-bold text-blue-300 uppercase tracking-wider mb-2">Kategori Pendaftaran</label>
+                            <select id="reg-type" onchange="handleCategoryChange()" class="w-full p-4 input-dark font-bold text-blue-100 text-base md:text-lg rounded-xl">
+                                <option value="Pengunjung" class="bg-slate-900">Pengunjung (Doorprize Umum)</option>
+                                <option value="Lomba Modifikasi Mobil" class="bg-slate-900">Lomba Modifikasi Mobil</option>
+                                <option value="Lomba Modifikasi Motor" class="bg-slate-900">Lomba Modifikasi Motor</option>
+                                <option value="Lomba Komunitas Mobil" class="bg-slate-900">Lomba Komunitas Mobil</option>
+                                <option value="Lomba Komunitas Motor" class="bg-slate-900">Lomba Komunitas Motor</option>
+                                <option value="Festival UMKM Boyolali" class="bg-slate-900">Festival UMKM Boyolali</option>
+                                <option value="BMX Freestyle" class="bg-slate-900">BMX Freestyle</option>
+                                <option value="Lomba Mewarnai Anak" class="bg-slate-900">Lomba Mewarnai Anak</option>
+                                <option value="Lomba Fashion Show Anak" class="bg-slate-900">Lomba Fashion Show Anak</option>
+                                <option value="Senam Sehat" class="bg-slate-900">Senam Sehat</option>
+                                <option value="Lomba Kostum Unik Senam" class="bg-slate-900">Lomba Kostum Unik Senam</option>
+                            </select>
+                        </div>
+                        
+                        <div id="dynamic-fields" class="space-y-3 bg-blue-900/30 p-4 border-l-4 border-cyan-400 rounded-r-xl hidden"></div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-blue-300 uppercase tracking-wider mb-2">Nama Lengkap</label>
+                            <input type="text" id="nama" class="w-full p-4 input-dark text-base md:text-lg rounded-xl" placeholder="Ketik nama lengkap...">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-blue-300 uppercase tracking-wider mb-2">NIK / Kartu Pelajar</label>
+                                <input type="text" id="nik" class="w-full p-4 input-dark text-base md:text-lg rounded-xl" placeholder="Masukkan Identitas">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-blue-300 uppercase tracking-wider mb-2">Umur (Tahun)</label>
+                                <input type="number" id="umur" class="w-full p-4 input-dark text-base md:text-lg rounded-xl" placeholder="Contoh: 25">
+                            </div>
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-blue-300 uppercase tracking-wider mb-2">No WhatsApp / HP</label>
-                            <input type="number" id="hp" class="w-full p-4 input-dark text-lg" placeholder="08...">
+                            <input type="number" id="hp" class="w-full p-4 input-dark text-base md:text-lg rounded-xl" placeholder="08...">
                         </div>
+                        <div>
+                            <label class="block text-sm font-bold text-blue-300 uppercase tracking-wider mb-2">Alamat Domisili</label>
+                            <textarea id="alamat" rows="2" class="w-full p-4 input-dark text-base md:text-lg rounded-xl" placeholder="Alamat lengkap..."></textarea>
+                        </div>
+                        
+                        <button id="submit-btn" onclick="register()" class="w-full btn-sport bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black py-4 uppercase tracking-widest mt-4 text-xl rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.4)] border border-cyan-300">
+                            <i class="fas fa-qrcode mr-2"></i> BUAT BARCODE TIKET
+                        </button>
                     </div>
-                    <div>
-                        <label class="block text-sm font-bold text-blue-300 uppercase tracking-wider mb-2">Alamat Domisili</label>
-                        <textarea id="alamat" rows="2" class="w-full p-4 input-dark text-lg" placeholder="Alamat lengkap..."></textarea>
+                </div>
+
+                <!-- Success Section -->
+                <div id="qrcode-container" class="hidden text-center py-6 h-full flex flex-col justify-center items-center">
+                    
+                    <div class="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mb-4 border-4 border-white shadow-[0_0_30px_rgba(34,197,94,0.8)] animate-bounce">
+                        <i class="fas fa-check text-5xl text-white"></i>
+                    </div>
+
+                    <h4 class="font-black text-3xl mb-1 title-sport tracking-wider uppercase text-cyan-400">Pendaftaran Berhasil</h4>
+                    
+                    <div class="bg-red-500/20 border-2 border-red-500/50 rounded-xl p-4 mb-6 w-full max-w-sm mt-4">
+                        <p class="text-red-300 text-lg font-black tracking-widest uppercase mb-1"><i class="fas fa-exclamation-triangle mr-1"></i> PENTING!</p>
+                        <p class="text-red-100 text-sm font-bold">Simpan barcode ini dengan baik. Wajib diperlihatkan ke Panitia/Crew saat di lokasi.</p>
                     </div>
                     
-                    <button id="submit-btn" onclick="register()" class="w-full btn-sport bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black py-5 uppercase tracking-widest mt-6 text-xl">
-                        <i class="fas fa-qrcode mr-2"></i> Buat Barcode
+                    <div class="bg-white p-6 inline-block mx-auto rounded-3xl shadow-[0_0_40px_rgba(255,255,255,0.2)]">
+                        <div id="qrcode" class="flex justify-center mb-4"></div>
+                        <p class="text-xs text-gray-500 uppercase tracking-widest font-black mb-1">TICKET ID</p>
+                        <p class="text-2xl font-black text-gray-900 tracking-wider font-mono bg-gray-100 py-1 rounded" id="ticket-id-display"></p>
+                    </div>
+                    
+                    <button onclick="downloadQR()" class="mt-8 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-black px-8 py-4 rounded-full transition shadow-[0_0_20px_rgba(6,182,212,0.8)] uppercase tracking-widest w-full">
+                        <i class="fas fa-download mr-2"></i> Simpan Barcode ke HP
                     </button>
-                </div>
-            </div>
 
-            <!-- Success Section -->
-            <div id="qrcode-container" class="hidden text-center py-6 h-full flex flex-col justify-center items-center">
-                
-                <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                  <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
-                  <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-                </svg>
-
-                <h4 class="font-black text-3xl mb-1 title-sport tracking-wider uppercase text-cyan-400">Barcode Siap</h4>
-                
-                <div class="bg-red-500/20 border border-red-500/50 rounded-lg p-3 mb-6 max-w-sm">
-                    <p class="text-red-200 text-sm font-bold"><i class="fas fa-exclamation-triangle mr-1"></i> PENTING!</p>
-                    <p class="text-red-100 text-xs mt-1">Simpan barcode ini dengan baik dan wajib diperlihatkan ke Panitia / Crew saat di lokasi untuk verifikasi.</p>
+                    <button onclick="window.location.reload()" class="mt-6 text-blue-300 font-bold hover:text-cyan-400 transition uppercase text-sm tracking-widest underline">Daftar Peserta Lain</button>
                 </div>
-                
-                <div class="bg-white p-6 inline-block mx-auto shadow-[0_0_40px_rgba(255,255,255,0.2)] relative" style="clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);">
-                    <div id="qrcode" class="flex justify-center mb-3"></div>
-                    <p class="text-xs text-gray-500 uppercase tracking-widest font-black mb-1">TICKET ID</p>
-                    <p class="text-2xl font-black text-gray-900 tracking-wider font-mono" id="ticket-id-display"></p>
-                </div>
-                
-                <button onclick="downloadQR()" class="mt-6 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold px-6 py-3 rounded-full transition shadow-[0_0_15px_rgba(6,182,212,0.5)]">
-                    <i class="fas fa-download mr-2"></i> Simpan Barcode ke HP
-                </button>
-
-                <button onclick="window.location.reload()" class="mt-6 text-blue-300 font-bold hover:text-cyan-400 transition uppercase text-sm tracking-widest underline">Daftar Peserta Lain</button>
             </div>
         </div>
     </div>
 
-    <!-- Hidden admin link -->
-    <a href="admin.html" class="fixed bottom-4 right-4 text-slate-800 hover:text-blue-500 transition duration-300 z-50"><i class="fas fa-cog"></i></a>
-
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzgcuZCaXL5lnXV8PpQYFrNiMZc2B4ZQcaMxR6mzSAw9c27AkVZT4GYzK1AwhdIagSc/exec'; 
+
+        const countDownDate = new Date("Oct 10, 2026 08:00:00").getTime();
+        const timerInterval = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = countDownDate - now;
+            if (distance < 0) { clearInterval(timerInterval); return; }
+            document.getElementById("days").innerText = Math.floor(distance / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
+            document.getElementById("hours").innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+            document.getElementById("mins").innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+            document.getElementById("secs").innerText = Math.floor((distance % (1000 * 60)) / 1000).toString().padStart(2, '0');
+        }, 1000);
 
         function handleCategoryChange() {
             const type = document.getElementById('reg-type').value;
@@ -157,35 +228,30 @@
             container.innerHTML = '';
             container.classList.remove('hidden');
 
-            if (type === 'Lomba Fashion Show') {
+            if (type === 'Lomba Fashion Show Anak') {
                 container.innerHTML = `
-                    <label class="block text-sm font-bold text-cyan-300 uppercase mb-2">Pilih Kategori Umur</label>
-                    <select id="sub-kategori" class="w-full p-3 input-dark mb-2 text-lg">
+                    <p class="text-sm font-bold text-cyan-300 mb-2"><i class="fas fa-palette mr-1"></i> TEMA: Budaya Boyolali</p>
+                    <label class="block text-sm font-bold text-cyan-300 uppercase mb-2">Kategori Umur</label>
+                    <select id="sub-kategori" class="w-full p-3 input-dark rounded-xl mb-2 text-base">
                         <option value="Umur 5-7 Tahun">Umur 5-7 Tahun</option>
                         <option value="Umur 7-9 Tahun">Umur 7-9 Tahun</option>
                     </select>
-                    <p class="text-sm text-orange-400 font-bold bg-orange-900/40 p-3 rounded border border-orange-500/30"><i class="fas fa-id-card mr-1"></i> WAJIB memperlihatkan Akta Kelahiran asli saat verifikasi ulang di lokasi.</p>
+                    <p class="text-sm text-orange-400 font-bold bg-orange-900/40 p-3 rounded-lg border border-orange-500/30"><i class="fas fa-id-card mr-1"></i> WAJIB memperlihatkan Akta Kelahiran asli untuk verifikasi umur.</p>
                 `;
-            } else if (type === 'Lomba Mewarnai') {
-                container.innerHTML = `<p class="text-sm font-bold text-cyan-300 bg-cyan-900/40 p-3 rounded border border-cyan-500/30"><i class="fas fa-info-circle mr-2"></i> Lomba ini khusus untuk anak rentang usia 5-6 Tahun.</p>`;
-            } else if (type === 'Modifikasi Mobil/Motor') {
+            } else if (type === 'Lomba Mewarnai Anak') {
                 container.innerHTML = `
-                    <label class="block text-sm font-bold text-cyan-300 uppercase mb-2">Kategori Kendaraan</label>
-                    <select id="sub-kategori" class="w-full p-3 input-dark text-lg">
-                        <option value="Mobil">Mobil</option>
-                        <option value="Motor">Motor</option>
-                    </select>
+                    <p class="text-sm text-orange-400 font-bold bg-orange-900/40 p-3 rounded-lg border border-orange-500/30"><i class="fas fa-info-circle mr-2"></i> Lomba ini khusus anak usia 5-6 Tahun. WAJIB memperlihatkan Akta Kelahiran asli saat di lokasi.</p>
                 `;
-            } else if (type === 'Booth UMKM') {
+            } else if (type === 'Festival UMKM Boyolali') {
                 container.innerHTML = `
-                    <label class="block text-sm font-bold text-cyan-300 uppercase mb-2">Pilih Jenis Stand</label>
-                    <select id="sub-kategori" class="w-full p-3 input-dark mb-3 text-lg">
+                    <label class="block text-sm font-bold text-cyan-300 uppercase mb-2">Jenis UMKM</label>
+                    <select id="sub-kategori" class="w-full p-3 input-dark rounded-xl mb-3 text-base">
                         <option value="Makanan">Makanan</option>
                         <option value="Minuman">Minuman</option>
-                        <option value="Lainnya">Lainnya (Baju, Souvenir, Jasa, dll)</option>
+                        <option value="Lainnya">Lainnya</option>
                     </select>
-                    <label class="block text-sm font-bold text-cyan-300 uppercase mb-2">Detail Jualan Spesifik</label>
-                    <input type="text" id="detail-produk" class="w-full p-3 input-dark text-lg" placeholder="Contoh: Es Teh Solo, Burger, Thrift Baju...">
+                    <label class="block text-sm font-bold text-cyan-300 uppercase mb-2">Keterangan Jualan</label>
+                    <input type="text" id="detail-produk" class="w-full p-3 input-dark rounded-xl text-base" placeholder="Cth: Baju Batik, Soto, dll...">
                 `;
             } else {
                 container.classList.add('hidden');
@@ -197,12 +263,13 @@
             let baseType = document.getElementById('reg-type').value;
             const nama = document.getElementById('nama').value;
             const nik = document.getElementById('nik').value;
+            const umur = document.getElementById('umur').value;
             const hp = document.getElementById('hp').value;
             const alamat = document.getElementById('alamat').value;
 
-            if(!nama || !hp || !nik) { alert("Data wajib belum lengkap (Nama, NIK/Kartu Pelajar, HP)!"); return; }
+            if(!nama || !hp || !nik || !umur) { alert("Data wajib belum lengkap (Nama, NIK/Kartu Pelajar, Umur, HP)!"); return; }
 
-            // 1 NIK/HP = 1 Undian Validation
+            // 1 NIK/HP validation
             let visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
             const isDuplicate = visitors.some(v => v.nik === nik || v.hp === hp);
             if(isDuplicate && baseType === 'Pengunjung') {
@@ -216,13 +283,14 @@
             
             if (subKategori) finalType += ` - ${subKategori.value}`;
             if (detailProduk && detailProduk.value) finalType += ` (${detailProduk.value})`;
-            if (baseType === 'Lomba Mewarnai') finalType += ` - Usia 5-6 Thn`;
+            if (baseType === 'Lomba Mewarnai Anak') finalType += ` - Usia 5-6 Thn`;
 
-            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> GENERATING...';
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> MEMPROSES...';
             btn.disabled = true;
 
             const ticketId = 'FGAS-' + Math.floor(Math.random() * 1000000);
-            const data = { type: finalType, nama, nik, hp, alamat, ticketId };
+            // Append Age (umur) so it saves to the backend payload correctly
+            const data = { type: finalType, nama, nik, hp, alamat, umur, ticketId };
 
             try {
                 visitors.push(data);
@@ -241,7 +309,7 @@
                 
                 document.getElementById('qrcode').innerHTML = '';
                 new QRCode(document.getElementById("qrcode"), {
-                    text: ticketId, width: 220, height: 220, colorDark : "#000000", colorLight : "#ffffff"
+                    text: ticketId, width: 250, height: 250, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
                 });
                 document.getElementById('ticket-id-display').innerText = ticketId;
 
@@ -258,8 +326,10 @@
             if(img && img.src) {
                 const a = document.createElement('a');
                 a.href = img.src;
-                a.download = 'Barcode_FGAS_2026.png';
+                a.download = 'TICKET_FGAS_2026.png';
+                document.body.appendChild(a);
                 a.click();
+                document.body.removeChild(a);
             } else {
                 alert('Menunggu barcode selesai di-render. Coba lagi dalam 1 detik.');
             }
