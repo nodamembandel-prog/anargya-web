@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Event FGAS 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold">Dashboard Admin FGAS 2026</h1>
+            <button onclick="fetchData()" id="refresh-btn" class="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700">Refresh Data Cloud</button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div class="bg-white p-6 rounded shadow">
+                <h2 class="text-xl font-bold mb-4">Statistik Pendaftar</h2>
+                <ul id="stats" class="space-y-2">
+                    <li class="text-gray-500">Memuat data...</li>
+                </ul>
+            </div>
+            
+            <div class="bg-white p-6 rounded shadow border-l-4 border-blue-500">
+                <h2 class="text-xl font-bold mb-4">Setting Doorprize (Raffle)</h2>
+                <div class="space-y-4">
+                    <input type="text" id="target-winner" placeholder="Nama Pemenang / Nomer Tiket Settingan" class="w-full p-2 border rounded">
+                    <input type="text" id="target-prize" placeholder="Hadiah (cth: Sepeda Motor)" class="w-full p-2 border rounded">
+                    <button onclick="setWinner()" class="bg-blue-600 text-white px-4 py-2 rounded">Set Pemenang untuk Layar LED</button>
+                    <a href="raffle.html" target="_blank" class="block text-center mt-4 bg-gray-800 text-white px-4 py-2 rounded">Buka Layar Pengundian LED</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded shadow">
+            <h2 class="text-xl font-bold mb-4">Daftar Kontak Peserta</h2>
+            <div class="overflow-x-auto max-h-96">
+                <table class="w-full text-left border-collapse">
+                    <thead class="sticky top-0 bg-white shadow-sm">
+                        <tr>
+                            <th class="border-b p-2">Waktu Daftar</th>
+                            <th class="border-b p-2">Tipe</th>
+                            <th class="border-b p-2">Nama</th>
+                            <th class="border-b p-2">No HP</th>
+                            <th class="border-b p-2">Ticket ID</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <tr><td colspan="5" class="text-center p-4 text-gray-500">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // GANTI URL DI BAWAH INI DENGAN URL GOOGLE APPS SCRIPT ANDA
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzgcuZCaXL5lnXV8PpQYFrNiMZc2B4ZQcaMxR6mzSAw9c27AkVZT4GYzK1AwhdIagSc/exec'; 
+
+        async function fetchData() {
+            const btn = document.getElementById('refresh-btn');
+            btn.innerText = "Memuat...";
+            
+            let visitors = [];
+
+            try {
+                if (SCRIPT_URL.startsWith('http')) {
+                    // Ambil dari Google Sheets (Cloud Backend)
+                    const response = await fetch(SCRIPT_URL);
+                    visitors = await response.json();
+                } else {
+                    // Fallback ambil dari LocalStorage
+                    visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
+                }
+                
+                renderData(visitors);
+            } catch (error) {
+                console.error("Gagal mengambil data dari server:", error);
+                alert("Gagal koneksi ke server, menampilkan data lokal.");
+                visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
+                renderData(visitors);
+            } finally {
+                btn.innerText = "Refresh Data Cloud";
+            }
+        }
+
+        function renderData(visitors) {
+            // Stats
+            const types = ['Pengunjung', 'Lomba Fashion Show', 'Lomba Mewarnai', 'Booth UMKM', 'Modifikasi Mobil/Motor'];
+            const statsEl = document.getElementById('stats');
+            statsEl.innerHTML = ''; // clear
+            let total = 0;
+            
+            types.forEach(t => {
+                const count = visitors.filter(v => v.type === t || v.Type === t).length;
+                total += count;
+                statsEl.innerHTML += `<li><span class="capitalize font-semibold">${t}</span>: ${count} orang</li>`;
+            });
+            statsEl.innerHTML += `<li class="border-t pt-2 mt-2 font-bold text-blue-600">Total Pendaftar: ${total}</li>`;
+
+            // Table
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            
+            // Reverse so newest is on top
+            visitors.reverse().forEach(v => {
+                // Handling key differences (Google Sheets keys vs LocalStorage keys)
+                const date = v.Timestamp ? new Date(v.Timestamp).toLocaleString('id-ID') : 'Local Data';
+                const type = v.Type || v.type || '-';
+                const nama = v.Nama || v.nama || '-';
+                const hp = v.HP || v.hp || '-';
+                const ticket = v.TicketID || v.ticketId || '-';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-2 border-b text-sm text-gray-500">${date}</td>
+                        <td class="p-2 border-b capitalize">${type}</td>
+                        <td class="p-2 border-b font-semibold">${nama}</td>
+                        <td class="p-2 border-b">${hp}</td>
+                        <td class="p-2 border-b text-blue-600">${ticket}</td>
+                    </tr>`;
+            });
+            
+            if(visitors.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-500">Belum ada pendaftar.</td></tr>`;
+            }
+        }
+
+        function setWinner() {
+            localStorage.setItem('fgas_target_winner', document.getElementById('target-winner').value);
+            localStorage.setItem('fgas_target_prize', document.getElementById('target-prize').value);
+            alert('Pemenang berhasil di setting. Silahkan mulai undian di Layar LED.');
+        }
+
+        // Auto load on page load
+        fetchData();
+    </script>
+</body>
+</html>

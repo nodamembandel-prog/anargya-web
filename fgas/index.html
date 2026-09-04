@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>FGAS 2026 - Boyolali</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { colors: { blue: { 600: '#2563EB', 800: '#1E40AF' } } }
+            }
+        }
+    </script>
+</head>
+<body class="bg-blue-50">
+    <header class="bg-blue-800 text-white py-16 text-center">
+        <h1 class="text-4xl font-bold mb-4">Festival Goverment Auto Show 2026</h1>
+        <h2 class="text-2xl">& Pengundian Pajak PBB/P2 Boyolali</h2>
+        <p class="mt-4 text-blue-200">Daftar sekarang untuk pengunjung, lomba, dan dapatkan doorprize menarik!</p>
+    </header>
+
+    <div class="max-w-4xl mx-auto py-10 px-4">
+        <div class="bg-white p-8 rounded-xl shadow-lg border-t-4 border-blue-600">
+            <h3 class="text-2xl font-bold mb-6 text-blue-800">Formulir Pendaftaran</h3>
+            
+            <select id="reg-type" class="w-full p-3 border rounded mb-6 text-lg">
+                <option value="Pengunjung">Pengunjung (Doorprize)</option>
+                <option value="Lomba Fashion Show">Lomba Fashion Show</option>
+                <option value="Lomba Mewarnai">Lomba Mewarnai</option>
+                <option value="Booth UMKM">Booth UMKM</option>
+                <option value="Modifikasi Mobil/Motor">Modifikasi Mobil/Motor</option>
+            </select>
+
+            <div class="space-y-4">
+                <input type="text" id="nama" placeholder="Nama Lengkap" class="w-full p-3 border rounded">
+                <input type="text" id="nik" placeholder="NIK" class="w-full p-3 border rounded">
+                <input type="text" id="hp" placeholder="Nomor HP" class="w-full p-3 border rounded">
+                <textarea id="alamat" placeholder="Alamat" class="w-full p-3 border rounded"></textarea>
+                
+                <button id="submit-btn" onclick="register()" class="w-full bg-blue-600 text-white font-bold py-3 rounded hover:bg-blue-700 transition">Daftar & Generate Barcode</button>
+            </div>
+
+            <div id="qrcode-container" class="mt-8 text-center hidden">
+                <h4 class="font-bold text-green-600 mb-2">Berhasil Terdaftar! Simpan Barcode/QR ini:</h4>
+                <div id="qrcode" class="flex justify-center mb-4"></div>
+                <p class="text-xl font-bold text-gray-800 mt-2" id="ticket-id-display"></p>
+                <p class="text-sm text-gray-500 mt-1">Tunjukkan barcode ini saat registrasi ulang di lokasi.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // GANTI URL DI BAWAH INI DENGAN URL GOOGLE APPS SCRIPT ANDA
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzgcuZCaXL5lnXV8PpQYFrNiMZc2B4ZQcaMxR6mzSAw9c27AkVZT4GYzK1AwhdIagSc/exec'; 
+
+        async function register() {
+            const btn = document.getElementById('submit-btn');
+            const type = document.getElementById('reg-type').value;
+            const nama = document.getElementById('nama').value;
+            const nik = document.getElementById('nik').value;
+            const hp = document.getElementById('hp').value;
+            const alamat = document.getElementById('alamat').value;
+
+            if(!nama || !hp) {
+                alert("Nama dan No HP wajib diisi!");
+                return;
+            }
+
+            btn.innerText = "Memproses...";
+            btn.disabled = true;
+
+            const ticketId = 'FGAS-' + Math.floor(Math.random() * 1000000);
+            
+            const data = { type, nama, nik, hp, alamat, ticketId };
+
+            try {
+                // Backup ke LocalStorage
+                let visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
+                visitors.push(data);
+                localStorage.setItem('fgas_visitors', JSON.stringify(visitors));
+
+                // Kirim ke Google Sheets Backend jika URL sudah diatur
+                if (SCRIPT_URL.startsWith('http')) {
+                    await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    console.warn("URL Backend belum diatur, data hanya disimpan di browser lokal.");
+                }
+
+                // Tampilkan QR Code
+                document.getElementById('qrcode-container').classList.remove('hidden');
+                document.getElementById('qrcode').innerHTML = '';
+                new QRCode(document.getElementById("qrcode"), ticketId);
+                document.getElementById('ticket-id-display').innerText = ticketId;
+                
+                alert('Pendaftaran Berhasil!');
+                
+                // Clear form
+                document.getElementById('nama').value = '';
+                document.getElementById('nik').value = '';
+                document.getElementById('hp').value = '';
+                document.getElementById('alamat').value = '';
+
+            } catch (error) {
+                console.error("Error saving data:", error);
+                alert("Terjadi kesalahan, namun data tersimpan di HP/PC ini.");
+            } finally {
+                btn.innerText = "Daftar & Generate Barcode";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

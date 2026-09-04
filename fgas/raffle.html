@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Live Undian Doorprize</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #000; color: #fff; overflow: hidden; }
+        .slot-machine { font-size: 5rem; font-weight: bold; letter-spacing: 5px; }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen">
+    
+    <h1 class="text-5xl font-bold mb-12 text-blue-400">PENGUNDIAN DOORPRIZE FGAS 2026</h1>
+    
+    <div class="bg-gray-900 border-4 border-blue-600 p-12 rounded-3xl text-center w-3/4 max-w-4xl shadow-[0_0_50px_rgba(37,99,235,0.5)]">
+        <div id="prize-name" class="text-3xl text-yellow-400 mb-8 font-bold">MENUNGGU PENGUNDIAN...</div>
+        <div id="winner-name" class="slot-machine text-white h-32 flex items-center justify-center">? ? ? ? ?</div>
+    </div>
+
+    <div class="mt-16 space-x-4">
+        <button onclick="startRaffle()" class="bg-green-600 text-white px-8 py-4 rounded-full text-2xl font-bold">START</button>
+        <button onclick="stopRaffle()" class="bg-red-600 text-white px-8 py-4 rounded-full text-2xl font-bold">STOP</button>
+    </div>
+
+    <script>
+        let interval;
+        const names = ["BUDI SANTOSO", "SITI AMINAH", "AGUS PRATAMA", "DEWI LESTARI", "HENDRA GUNAWAN", "RINA MELATI"];
+        
+        function startRaffle() {
+            document.getElementById('prize-name').innerText = "MENGUNDI...";
+            interval = setInterval(() => {
+                const randomName = names[Math.floor(Math.random() * names.length)];
+                document.getElementById('winner-name').innerText = randomName;
+            }, 50);
+        }
+
+        function stopRaffle() {
+            clearInterval(interval);
+            const targetWinner = localStorage.getItem('fgas_target_winner') || "NAMA PEMENANG";
+            const targetPrize = localStorage.getItem('fgas_target_prize') || "HADIAH UTAMA";
+            
+            document.getElementById('winner-name').innerText = targetWinner.toUpperCase();
+            document.getElementById('prize-name').innerText = "SELAMAT ANDA MENDAPATKAN: " + targetPrize.toUpperCase();
+            
+            // Add some flashing effect
+            document.getElementById('winner-name').classList.add('text-green-400');
+        }
+    </script>
+</body>
+</html>

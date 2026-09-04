@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anargya KREATIVINDO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        orange: { 500: '#F97316', 600: '#EA580C' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+    <nav class="bg-white shadow-md fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex-shrink-0 flex items-center">
+                    <img src="Logo Anargya Kreativindo.png" alt="Anargya Logo" class="h-12" onerror="this.src='https://via.placeholder.com/150x50?text=ANARGYA'">
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="#services" class="text-gray-600 hover:text-orange-500 font-semibold">Layanan</a>
+                    <a href="superadmin.html" class="text-gray-600 hover:text-orange-500 font-semibold">Login Admin</a>
+                    <a id="wa-link" href="#" class="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition"><i class="fab fa-whatsapp"></i> Hubungi Kami</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="pt-32 pb-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h1 class="text-5xl font-bold text-gray-900 mb-6">Solusi Kreatif Tanpa Batas</h1>
+            <p class="text-xl text-gray-600 mb-10">Mewujudkan visi Anda melalui layanan Event, Pengadaan, Travel, Fotografi, dan Advertising.</p>
+            <a href="#services" class="bg-orange-500 text-white px-8 py-3 rounded-full text-lg font-bold hover:bg-orange-600 transition shadow-lg">Jelajahi Layanan Kami</a>
+        </div>
+    </header>
+
+    <section id="services" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12 text-gray-900">Bidang Layanan Utama</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="services-container">
+                <!-- Services will be loaded here via JS -->
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-gray-900 text-white py-10">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p>&copy; 2026 Anargya KREATIVINDO. All rights reserved.</p>
+            <div class="mt-4 space-x-4">
+                <a id="ig-link" href="#" class="text-gray-400 hover:text-white text-2xl"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Load data from localStorage or default
+        const defaultServices = [
+            { title: 'Event Organizer', desc: 'Pengelolaan acara profesional dari konsep hingga pelaksanaan.', icon: 'fa-calendar-check' },
+            { title: 'Pengadaan Barang', desc: 'Solusi pengadaan barang terpercaya dan berkualitas.', icon: 'fa-box' },
+            { title: 'Tour & Travel', desc: 'Perjalanan aman dan nyaman untuk personal & korporasi.', icon: 'fa-plane' },
+            { title: 'Video & Fotografi', desc: 'Dokumentasi momen terbaik dengan kualitas visual tinggi.', icon: 'fa-camera' },
+            { title: 'Advertising', desc: 'Strategi periklanan modern untuk meningkatkan brand awareness.', icon: 'fa-bullhorn' }
+        ];
+
+        let services = JSON.parse(localStorage.getItem('anargya_services')) || defaultServices;
+        let waLink = localStorage.getItem('anargya_wa') || 'https://wa.me/6281234567890';
+        let igLink = localStorage.getItem('anargya_ig') || 'https://instagram.com/anargya';
+
+        document.getElementById('wa-link').href = waLink;
+        document.getElementById('ig-link').href = igLink;
+
+        const container = document.getElementById('services-container');
+        services.forEach(srv => {
+            container.innerHTML += `
+                <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 text-center">
+                    <div class="w-16 h-16 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                        <i class="fas ${srv.icon}"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">${srv.title}</h3>
+                    <p class="text-gray-600">${srv.desc}</p>
+                    ${srv.title.includes('Event') ? '<a href="fgas/index.html" class="inline-block mt-4 text-orange-500 font-semibold hover:underline">Lihat Event FGAS 2026 &rarr;</a>' : ''}
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html>

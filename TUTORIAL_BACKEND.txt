@@ -1,0 +1,90 @@
+=== TUTORIAL CARA MEMBUAT DATABASE GRATIS DENGAN GOOGLE SHEETS ===
+
+Pilihan Database Gratis Terbaik untuk Event adalah Google Sheets API.
+Kenapa? 
+1. 100% Gratis.
+2. Panitia (non-programmer) bisa langsung melihat data pendaftar dalam bentuk file Excel/Tabel (sangat familiar).
+3. Sangat ringan tanpa perlu instalasi database kompleks.
+
+LANGKAH 1: BUAT GOOGLE SHEET BARU
+1. Buka browser, masuk ke akun Google Anda, lalu buka https://sheets.google.com
+2. Buat Spreadsheet baru, beri nama "Database Event FGAS 2026".
+3. Di tab/sheet yang aktif (biasanya bernama "Sheet1" di bawah), ganti namanya menjadi "Registrasi" (Penting! Huruf depan Kapital R).
+4. Di baris pertama (Baris 1), tuliskan judul kolom berikut berurutan dari A ke G:
+   A1: Timestamp
+   B1: TicketID
+   C1: Type
+   D1: Nama
+   E1: NIK
+   F1: HP
+   G1: Alamat
+
+LANGKAH 2: MASUKKAN KODE BACKEND (APPS SCRIPT)
+1. Di Google Sheet tersebut, klik menu "Ekstensi" > "Apps Script".
+2. Hapus kode yang ada di layar, lalu COPY & PASTE kode di bawah ini:
+
+// --- COPY MULAI DARI SINI ---
+const SHEET_NAME = 'Registrasi';
+
+function doPost(e) {
+  try {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+    const data = JSON.parse(e.postData.contents);
+    
+    sheet.appendRow([
+      new Date(), 
+      data.ticketId,
+      data.type,
+      data.nama,
+      data.nik,
+      data.hp,
+      data.alamat
+    ]);
+    
+    return ContentService.createTextOutput(JSON.stringify({"status": "success"}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch(error) {
+    return ContentService.createTextOutput(JSON.stringify({"status": "error"}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doGet(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+  const data = sheet.getDataRange().getValues();
+  
+  const headers = data[0]; 
+  const result = [];
+  for (let i = 1; i < data.length; i++) {
+    let row = data[i];
+    let obj = {};
+    for (let j = 0; j < headers.length; j++) {
+      obj[headers[j]] = row[j];
+    }
+    result.push(obj);
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+// --- AKHIR COPY ---
+
+3. Klik Logo DISKET (Save/Simpan).
+
+LANGKAH 3: DEPLOY & DAPATKAN URL API
+1. Klik tombol "Terapkan" (Deploy) warna biru di pojok kanan atas > Pilih "Deployment Baru" (New deployment).
+2. Di icon "Pilih jenis", klik ikon roda gigi ⚙️, lalu centang "Aplikasi Web" (Web app).
+3. Kolom Deskripsi: Ketik "API V1"
+4. Jalankan sebagai (Execute as): Pilih "Saya" (Me / email Anda).
+5. Yang memiliki akses (Who has access): WAJIB PILIH "Siapa saja" (Anyone).
+6. Klik tombol "Terapkan" (Deploy).
+7. Jika diminta "Otorisasi Akses", klik izinkan akun Google Anda (klik Advanced/Lanjutan -> Go to Untitled project).
+8. Selesai! Anda akan mendapatkan "URL Aplikasi Web" (URL panjang berakhiran /exec). COPY URL TERSEBUT.
+
+LANGKAH 4: HUBUNGKAN KE WEBSITE (HTML)
+1. Buka file `website/fgas/index.html` dan `website/fgas/admin.html` menggunakan Notepad atau VS Code.
+2. Cari tulisan:
+   const SCRIPT_URL = 'URL_WEB_APP_GOOGLE_SCRIPT_ANDA_DISINI';
+3. Ganti 'URL_WEB_APP_GOOGLE_SCRIPT_ANDA_DISINI' dengan URL Google Script yang Anda copy di Langkah 3.
+4. Save file HTML tersebut.
+5. Selesai! Semua data yang diisi dari form pendaftaran pengunjung akan otomatis masuk ke Google Sheet Anda secara realtime, dan bisa dilihat di Dashboard Admin maupun Google Sheet langsung!
