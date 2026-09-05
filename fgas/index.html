@@ -8,17 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        html, body { max-width: 100%; overflow-x: hidden; overscroll-behavior-y: none; }
-        /* FIX iOS SAFARI BUG: Mencegah gambar hilang & patah-patah saat scroll */
-        img, .glass-panel, .glass-card, .bento-card, header, nav, .logos-container, .sport-bg { 
-            -webkit-transform: translate3d(0,0,0); 
-            transform: translate3d(0,0,0); 
-            will-change: transform;
-        }
-
-
-        
-
+        html, body { max-width: 100%; overflow-x: hidden; }
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;600;700&display=swap');
         body { background-color: #020617; font-family: 'Rajdhani', sans-serif; overflow-x: hidden; width: 100%; max-width: 100%; margin: 0; padding: 0; }
         
@@ -72,13 +62,16 @@
     <div id="dynamic-bg" class="sport-bg no-print"></div>
     <div class="grid-overlay no-print"></div>
 
-    <div class="logos-container no-print">
-        <div class="logo-box left"><img src="../logo_pengundian.png" class="h-10 md:h-14 object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]" onerror="this.style.display='none'"></div>
-        <div class="logo-box center"><img src="../logo_fgas.png" class="h-12 md:h-20 object-contain drop-shadow-[0_0_20px_rgba(6,182,212,0.6)]" onerror="this.style.display='none'"></div>
-        <div class="logo-box right"><img src="../logo_pemkab.png" class="h-10 md:h-14 object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]" onerror="this.src='../logo_pemkab.jpg'"></div>
+    <!-- LOGOS CONTAINER FIXED -->
+    <div class="flex justify-between items-center w-full p-4 lg:p-6 relative z-50 no-print border-b border-slate-800/50 mb-4 bg-slate-900/30 backdrop-blur-sm">
+        <img src="../logo_pengundian.png" class="h-10 md:h-14 object-contain drop-shadow-md" onerror="this.onerror=null; this.src='logo_pengundian.png';">
+        <div class="flex flex-col items-center flex-1 mx-4">
+            <img src="../logo_fgas.png" class="h-14 md:h-20 object-contain drop-shadow-[0_0_15px_rgba(6,182,212,0.6)]" onerror="this.onerror=null; this.src='logo_fgas.png';">
+        </div>
+        <img src="../logo_pemkab.png" class="h-10 md:h-14 object-contain drop-shadow-md" onerror="this.onerror=null; this.src='../logo_pemkab.jpg';">
     </div>
 
-    <div class="w-full max-w-7xl mx-auto flex-grow grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10 pt-4 px-4 lg:px-8 items-start no-print">
+    <div class="w-full max-w-7xl mx-auto flex-grow grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10 px-4 lg:px-8 items-start no-print">
         
         <div class="lg:col-span-7 flex flex-col">
             <h1 class="title-sport text-5xl lg:text-7xl font-bold mb-4 uppercase text-transparent bg-clip-text bg-gradient-to-br from-white via-blue-100 to-blue-500 drop-shadow-2xl">
@@ -107,10 +100,9 @@
                 <div class="activity-list overflow-y-auto max-h-40 pr-2 space-y-2 text-sm font-medium text-blue-100">
                     <div class="flex items-center gap-2"><i class="fas fa-check-circle text-cyan-500 text-xs"></i> Lomba Modifikasi Mobil & Motor</div>
                     <div class="flex items-center gap-2"><i class="fas fa-check-circle text-cyan-500 text-xs"></i> Lomba Komunitas Mobil & Motor</div>
-                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-cyan-500 text-xs"></i> Festival UMKM Boyolali</div>
                     <div class="flex items-center gap-2"><i class="fas fa-check-circle text-cyan-500 text-xs"></i> BMX Freestyle</div>
                     <div class="flex items-center gap-2"><i class="fas fa-check-circle text-cyan-500 text-xs"></i> Lomba Mewarnai Anak</div>
-                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-cyan-500 text-xs"></i> Lomba Fashion Show Anak (Tema Budaya)</div>
+                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-cyan-500 text-xs"></i> Lomba Fashion Show Anak (Batik/Adat)</div>
                     <div class="flex items-center gap-2"><i class="fas fa-check-circle text-cyan-500 text-xs"></i> Senam Sehat & Lomba Kostum Unik</div>
                     <div class="flex items-center gap-2"><i class="fas fa-check-circle text-cyan-500 text-xs"></i> Hiburan Akustik & Dangdut</div>
                     <div class="flex items-center gap-2 text-orange-400 font-bold"><i class="fas fa-gift text-xs"></i> Pengundian Hadiah Motor & Mobil</div>
@@ -122,22 +114,23 @@
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 bg-green-500/20 text-green-400 rounded-full flex justify-center items-center"><i class="fab fa-whatsapp text-2xl"></i></div>
                     <div>
-                        <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Bantuan Registrasi</p>
-                        <p class="text-xl font-bold text-white tracking-widest">0812-3456-7890</p>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Info & Pendaftaran UMKM</p>
+                        <p class="text-xl font-bold text-white tracking-widest leading-none mt-1">0812-3456-7890</p>
                     </div>
                 </div>
-                <div class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse">PANITIA</div>
+                <a href="https://wa.me/6281234567890" target="_blank" class="bg-green-500 hover:bg-green-600 text-white text-[10px] font-bold px-4 py-2 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]"><i class="fas fa-paper-plane mr-1"></i> CHAT PANITIA</a>
             </div>
         </div>
 
         <!-- Form Section -->
-        <div class="lg:col-span-5 w-full">
+        <div class="lg:col-span-5 w-full pointer-events-auto">
             <div class="glass-panel p-6 md:p-8 rounded-3xl w-full">
                 <div id="form-section">
                     <div class="flex justify-between items-center mb-6 border-b border-blue-500/30 pb-4">
                         <div>
                             <h3 class="text-2xl title-sport uppercase text-cyan-400 tracking-wider mb-1">Tiket Masuk</h3>
                             <p class="text-xs md:text-sm text-blue-200 font-semibold">1 NIK / No. HP Berlaku untuk 1 Undian.</p>
+                            <p class="text-[10px] text-orange-400 mt-1 uppercase font-bold tracking-widest">*Kuota Semua Lomba Terbatas</p>
                         </div>
                         <div class="bg-orange-500 text-white font-black px-4 py-2 rounded-lg text-sm shadow-lg transform rotate-3">GRATIS!</div>
                     </div>
@@ -145,13 +138,13 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-xs md:text-sm font-bold text-blue-300 uppercase tracking-wider mb-1">Kategori Pendaftaran</label>
+                            <!-- UMKM REMOVED FROM PUBLIC -->
                             <select id="reg-type" onchange="handleCategoryChange()" class="w-full p-3.5 input-dark font-bold text-blue-100 text-base rounded-xl">
                                 <option value="Pengunjung" class="bg-slate-900">Pengunjung (Doorprize Umum)</option>
                                 <option value="Lomba Modifikasi Mobil" class="bg-slate-900">Lomba Modifikasi Mobil</option>
                                 <option value="Lomba Modifikasi Motor" class="bg-slate-900">Lomba Modifikasi Motor</option>
                                 <option value="Lomba Komunitas Mobil" class="bg-slate-900">Lomba Komunitas Mobil</option>
                                 <option value="Lomba Komunitas Motor" class="bg-slate-900">Lomba Komunitas Motor</option>
-                                <option value="Festival UMKM Boyolali" class="bg-slate-900">Festival UMKM Boyolali</option>
                                 <option value="BMX Freestyle" class="bg-slate-900">BMX Freestyle</option>
                                 <option value="Lomba Mewarnai Anak" class="bg-slate-900">Lomba Mewarnai Anak</option>
                                 <option value="Lomba Fashion Show Anak" class="bg-slate-900">Lomba Fashion Show Anak</option>
@@ -240,11 +233,9 @@
     </div>
 
     <script>
-        
         const _0xUrl = 'aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J3ejNlYlpPc0Y2cURqRmxyY2FwaXYtRWxjVVQxQ0t0Rm5oRGtBTXNMbmRRSEdEOEczZmxkVXJWQmtCQWZSTWU3eDEvZXhlYw==';
         const SCRIPT_URL = atob(_0xUrl);
         const APP_TOKEN = 'FGAS_SECRET_2026';
-
 
         const customBg = localStorage.getItem('fgas_bg_image');
         if(customBg) { document.getElementById('dynamic-bg').style.backgroundImage = `url(${customBg})`; }
@@ -295,29 +286,18 @@
 
             if (type === 'Lomba Fashion Show Anak') {
                 container.innerHTML = `
-                    <p class="text-sm font-bold text-cyan-300 mb-2"><i class="fas fa-palette mr-1"></i> TEMA: Budaya Boyolali</p>
+                    <p class="text-sm font-bold text-cyan-300 mb-2"><i class="fas fa-palette mr-1"></i> TEMA: Batik / Pakaian Adat</p>
                     <label class="block text-xs font-bold text-cyan-300 uppercase mb-1">Kategori Umur</label>
                     <select id="sub-kategori" class="w-full p-3 input-dark rounded-xl mb-2 text-base">
                         <option value="Umur 5-7 Tahun">Umur 5-7 Tahun</option>
                         <option value="Umur 7-9 Tahun">Umur 7-9 Tahun</option>
                     </select>
-                    <p class="text-xs text-orange-400 font-bold bg-orange-900/40 p-2 rounded-lg border border-orange-500/30"><i class="fas fa-id-card mr-1"></i> WAJIB bawa Akta Kelahiran asli saat di lokasi.</p>
+                    <p class="text-xs text-orange-400 font-bold bg-orange-900/40 p-2 rounded-lg border border-orange-500/30"><i class="fas fa-id-card mr-1"></i> WAJIB bawa Akta Kelahiran asli saat di lokasi. Kuota terbatas!</p>
                 `;
             } else if (type === 'Lomba Mewarnai Anak') {
-                container.innerHTML = `<p class="text-xs text-orange-400 font-bold bg-orange-900/40 p-2 rounded-lg border border-orange-500/30"><i class="fas fa-info-circle mr-1"></i> Khusus anak usia 5-6 Tahun. WAJIB bawa Akta Kelahiran asli.</p>`;
+                container.innerHTML = `<p class="text-xs text-orange-400 font-bold bg-orange-900/40 p-2 rounded-lg border border-orange-500/30"><i class="fas fa-info-circle mr-1"></i> Khusus anak usia 5-6 Tahun. <b>Peserta wajib membawa meja lipat sendiri</b>, panitia hanya menyediakan kertas mewarnai.</p>`;
             } else if (type === 'Modifikasi Mobil/Motor' || type === 'Lomba Modifikasi Mobil' || type === 'Lomba Modifikasi Motor') {
                 container.classList.add('hidden');
-            } else if (type === 'Festival UMKM Boyolali') {
-                container.innerHTML = `
-                    <label class="block text-xs font-bold text-cyan-300 uppercase mb-1">Jenis UMKM</label>
-                    <select id="sub-kategori" class="w-full p-3 input-dark rounded-xl mb-3 text-base">
-                        <option value="Makanan">Makanan</option>
-                        <option value="Minuman">Minuman</option>
-                        <option value="Lainnya">Lainnya</option>
-                    </select>
-                    <label class="block text-xs font-bold text-cyan-300 uppercase mb-1">Keterangan Jualan</label>
-                    <input type="text" id="detail-produk" class="w-full p-3 input-dark rounded-xl text-base" placeholder="Cth: Baju Batik, Soto, dll...">
-                `;
             } else {
                 container.classList.add('hidden');
             }
