@@ -1,113 +1,19 @@
-=== TUTORIAL UPDATE DATABASE GOOGLE SHEETS (WAJIB DIBACA) ===
+=== CARA MENG-INSTALL APLIKASI PANITIA & PEDAGANG (TANPA FILE .APK) ===
 
-Sistem telah di-upgrade tingkat keamanannya (Token Authentication & Anti-Spam).
-Anda WAJIB memperbarui kode Apps Script Anda sekali lagi agar sistem sinkronisasi aman dari hacker/scraper.
+Karena sistem ini telah menggunakan teknologi PWA (Progressive Web App), Anda tidak perlu repot mengirimkan file .APK yang rawan diblokir oleh Google Play Protect. 
 
-LANGKAH 1: BUKA GOOGLE SHEETS ANDA
-1. Buka file Google Sheets "Database Event FGAS 2026" Anda.
-2. Klik menu "Ekstensi" > "Apps Script".
+Cukup ikuti langkah mudah ini:
 
-LANGKAH 2: GANTI KODE LAMA DENGAN KODE BARU INI (Hapus semua kode lama)
+UNTUK PENGGUNA ANDROID (Google Chrome):
+1. Buka link web Panitia (misal: namawebanda.com/fgas/panitia.html) atau Pedagang di Google Chrome.
+2. Di halaman login, Anda akan melihat tombol baru berwarna biru/oranye bertuliskan "Install App Panitia/UMKM".
+3. Klik tombol tersebut, lalu pilih "Install" pada popup yang muncul.
+4. Aplikasi akan otomatis ter-install di daftar aplikasi HP Anda dengan ikon khusus!
+*Catatan: Jika tombol tidak muncul, klik tanda titik tiga di pojok kanan atas Chrome, lalu pilih "Tambahkan ke Layar Utama" (Add to Home screen).*
 
-// --- COPY MULAI DARI SINI ---
-const SECRET_TOKEN = 'FGAS_SECRET_2026';
-
-function setupSheets() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  if(!ss.getSheetByName('Registrasi')) {
-    const s1 = ss.insertSheet('Registrasi');
-    s1.appendRow(['Timestamp', 'TicketID', 'Type', 'Nama', 'NIK', 'HP', 'Alamat', 'Umur', 'Gender', 'Status']);
-  }
-  if(!ss.getSheetByName('Voucher')) {
-    const s2 = ss.insertSheet('Voucher');
-    s2.appendRow(['Timestamp', 'VoucherID', 'Nominal', 'Status']);
-  }
-}
-
-function doPost(e) {
-  try {
-    const data = JSON.parse(e.postData.contents);
-    if (data.token !== SECRET_TOKEN) {
-      return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": "Access Denied"})).setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    
-    if(data.action === 'register') {
-      const sheet = ss.getSheetByName('Registrasi');
-      sheet.appendRow([new Date(), data.ticketId, data.type, data.nama, data.nik, data.hp, data.alamat, data.umur, data.gender, "Hadir"]);
-      return ContentService.createTextOutput(JSON.stringify({"status": "success"})).setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    if(data.action === 'generate_voucher') {
-      const sheet = ss.getSheetByName('Voucher');
-      data.vouchers.forEach(v => {
-        sheet.appendRow([new Date(), v, "10000", "Aktif"]);
-      });
-      return ContentService.createTextOutput(JSON.stringify({"status": "success"})).setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    if(data.action === 'redeem_voucher') {
-      const sheet = ss.getSheetByName('Voucher');
-      const vs = sheet.getDataRange().getValues();
-      for(let i=1; i<vs.length; i++) {
-        if(vs[i][1] === data.voucherId) {
-          if(vs[i][3] === "Digunakan") {
-             return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": "Voucher sudah dipakai!"})).setMimeType(ContentService.MimeType.JSON);
-          }
-          sheet.getRange(i+1, 4).setValue("Digunakan");
-          return ContentService.createTextOutput(JSON.stringify({"status": "success", "message": "Voucher berhasil ditukar Rp 10.000"})).setMimeType(ContentService.MimeType.JSON);
-        }
-      }
-      return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": "Voucher tidak valid"})).setMimeType(ContentService.MimeType.JSON);
-    }
-  } catch(error) {
-    return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": error.toString()})).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-function doGet(e) {
-  if (!e || !e.parameter || e.parameter.token !== SECRET_TOKEN) {
-    return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": "Access Denied"})).setMimeType(ContentService.MimeType.JSON);
-  }
-
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  
-  const sheetReg = ss.getSheetByName('Registrasi');
-  const regData = sheetReg ? sheetReg.getDataRange().getValues() : [];
-  const visitors = [];
-  if(regData.length > 1) {
-    const headers = regData[0];
-    for (let i = 1; i < regData.length; i++) {
-      let obj = {};
-      for (let j = 0; j < headers.length; j++) { obj[headers[j]] = regData[i][j]; }
-      visitors.push(obj);
-    }
-  }
-
-  const sheetVouch = ss.getSheetByName('Voucher');
-  const vouchData = sheetVouch ? sheetVouch.getDataRange().getValues() : [];
-  const vouchers = [];
-  if(vouchData.length > 1) {
-    const vHeaders = vouchData[0];
-    for (let i = 1; i < vouchData.length; i++) {
-      let obj = {};
-      for (let j = 0; j < vHeaders.length; j++) { obj[vHeaders[j]] = vouchData[i][j]; }
-      vouchers.push(obj);
-    }
-  }
-  
-  return ContentService.createTextOutput(JSON.stringify({ visitors: visitors, vouchers: vouchers })).setMimeType(ContentService.MimeType.JSON);
-}
-// --- AKHIR COPY ---
-
-LANGKAH 3: JALANKAN FUNGSI SETUP (PENTING!)
-1. Di layar Apps Script, pada menu dropdown pilih fungsi `setupSheets`.
-2. Klik tombol "Jalankan" (Run).
-3. Jika minta izin akses, izinkan.
-
-LANGKAH 4: DEPLOY ULANG (SANGAT PENTING!)
-1. Klik tombol "Terapkan" (Deploy) > "Kelola Deployment" (Manage deployments).
-2. Klik icon pensil (Edit) di deployment Anda.
-3. Pada bagian "Versi", pilih "Versi Baru" (New version).
-4. Klik "Terapkan". Selesai! Sistem Anda sekarang terenkripsi dengan API Token.
+UNTUK PENGGUNA iPHONE/iOS (Safari):
+1. Buka link web Panitia atau Pedagang di Safari.
+2. Ketuk ikon "Share/Bagikan" (kotak dengan panah ke atas) di bagian bawah layar.
+3. Gulir ke bawah dan ketuk "Tambahkan ke Layar Utama" (Add to Home Screen).
+4. Ketuk "Tambah" di pojok kanan atas.
+5. Selesai! Aplikasi FGAS sudah muncul di layar depan iPhone Anda dan akan berjalan full-screen tanpa menu browser.
