@@ -73,7 +73,7 @@
             });
         });
 
-        window.onload = function() {
+        window.addEventListener('DOMContentLoaded', () => {
             const savedUser = localStorage.getItem('pedagang_auth');
             if(savedUser) {
                 document.getElementById('header-name').innerHTML = `<i class="fas fa-store mr-2"></i> ${savedUser}`;
@@ -81,7 +81,7 @@
                 document.getElementById('main-content').classList.remove('hidden');
                 localStorage.setItem('online_pedagang_' + savedUser, Date.now());
             }
-        }
+        });
 
         function login() {
             const pwd = document.getElementById('pwd').value;

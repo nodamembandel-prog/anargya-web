@@ -63,7 +63,27 @@
         const sponsors = JSON.parse(localStorage.getItem('fgas_sponsor_logos')) || [];
         document.getElementById('sponsor-logos').innerHTML = sponsors.map(src => `<img src="${src}" class="h-16 md:h-20 object-contain opacity-90 hover:opacity-100 transition drop-shadow-lg">`).join('');
 
+        
+        const _0xUrl = 'aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J3ejNlYlpPc0Y2cURqRmxyY2FwaXYtRWxjVVQxQ0t0Rm5oRGtBTXNMbmRRSEdEOEczZmxkVXJWQmtCQWZSTWU3eDEvZXhlYw==';
+        const SCRIPT_URL = atob(_0xUrl);
+        const APP_TOKEN = 'FGAS_SECRET_2026';
+
+        async function fetchLiveVisitors() {
+            try {
+                const res = await fetch(SCRIPT_URL + "?token=" + APP_TOKEN);
+                const data = await res.json();
+                if(data.visitors) {
+                    localStorage.setItem('fgas_visitors', JSON.stringify(data.visitors));
+                }
+            } catch(e) {}
+        }
+        
+        // Auto sync every 10 seconds silently
+        fetchLiveVisitors();
+        setInterval(fetchLiveVisitors, 10000);
+        
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
         let oscillator = null;
 
         function playDrumroll() {

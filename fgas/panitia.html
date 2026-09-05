@@ -99,7 +99,7 @@
             });
         });
 
-        window.onload = function() {
+        window.addEventListener('DOMContentLoaded', () => {
             const savedPanitia = localStorage.getItem('panitia_auth');
             if(savedPanitia) {
                 document.getElementById('header-name').innerHTML = `<i class="fas fa-user mr-2"></i> Panitia: ${savedPanitia}`;
@@ -107,11 +107,12 @@
                 document.getElementById('main-content').classList.remove('hidden');
                 fetchData();
                 localStorage.setItem('online_panitia_' + savedPanitia, Date.now());
-                setInterval(fetchData, 30000);
+                setInterval(fetchData, 15000);
             }
-            // Auto select first mode
-            setMode('doorprize', document.querySelector('.mode-btn'));
-        }
+            
+            const btnDoorprize = document.querySelector('.mode-btn');
+            if(btnDoorprize) setMode('doorprize', btnDoorprize);
+        });
 
         function login() {
             const pwd = document.getElementById('pwd').value;

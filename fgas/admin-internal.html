@@ -143,17 +143,30 @@
             "Lomba Mewarnai Anak", "Lomba Fashion Show Anak", "Senam Sehat", "Lomba Kostum Unik Senam"
         ];
 
+        function triggerLoginSuccess() {
+            localStorage.setItem('admin_internal_auth', 'true');
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            document.getElementById('doorprize-stock').value = localStorage.getItem('fgas_doorprize_stock') || "";
+            document.getElementById('wa-1').value = localStorage.getItem('fgas_wa_1') || "";
+            document.getElementById('wa-2').value = localStorage.getItem('fgas_wa_2') || "";
+            renderData();
+            renderQuotaInputs();
+            checkOnlineStatus();
+            setInterval(checkOnlineStatus, 30000);
+            fetchData();
+            setInterval(fetchData, 15000);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if(localStorage.getItem('admin_internal_auth') === 'true') {
+                triggerLoginSuccess();
+            }
+        });
+
         function login() {
             if(btoa(document.getElementById('pwd').value) === 'YW1hbnNla2FsaQ==') {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('main-content').classList.remove('hidden');
-                document.getElementById('doorprize-stock').value = localStorage.getItem('fgas_doorprize_stock') || "";
-                document.getElementById('wa-1').value = localStorage.getItem('fgas_wa_1') || "";
-                document.getElementById('wa-2').value = localStorage.getItem('fgas_wa_2') || "";
-                renderData();
-                renderQuotaInputs();
-                checkOnlineStatus();
-                setInterval(checkOnlineStatus, 30000);
+                triggerLoginSuccess();
             } else { alert('Akses Ditolak!'); document.getElementById('pwd').value = ''; }
         }
 
@@ -300,7 +313,7 @@
         }
         
         // Auto fetch on load
-        if(!document.getElementById('main-content').classList.contains('hidden')) fetchData();
+        
     </script>
 </body>
 </html>
