@@ -6,11 +6,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         html, body { max-width: 100%; overflow-x: hidden; }
-        
-
-
-        
- @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap'); body { background: #0f172a; color: white; font-family: sans-serif; } .vj-panel { background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); transition: bottom 0.3s ease; } .vj-panel:hover { bottom: 0 !important; } input {font-size:16px;} </style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap'); body { background: #0f172a; color: white; font-family: sans-serif; } .vj-panel { background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); transition: bottom 0.3s ease; } .vj-panel:hover { bottom: 0 !important; } input {font-size:16px; box-sizing: border-box;} 
+    </style>
 </head>
 <body class="h-screen w-full overflow-hidden">
     <iframe id="display-frame" src="raffle.html" class="w-full h-full border-none"></iframe>
@@ -18,13 +15,19 @@
     <div class="vj-panel fixed left-0 w-full p-6 border-t border-blue-500/50 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] z-50 flex flex-col gap-4" style="bottom: -85vh; height: 90vh;">
         <div class="flex justify-between items-center border-b border-white/10 pb-2">
             <h2 class="font-bold text-xl text-cyan-400"><i class="fas fa-sliders-h mr-2"></i> VJ CONTROL PANEL (Arahkan mouse ke bawah untuk membuka)</h2>
-            <div class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-bold animate-pulse">VJ MODE ACTIVE</div>
+            <div class="flex items-center gap-3">
+                <span id="sync-badge" class="bg-slate-800 border border-slate-600 text-slate-300 px-3 py-1 rounded-full text-xs font-bold transition-colors">Connecting...</span>
+                <div class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-bold animate-pulse">VJ MODE ACTIVE</div>
+            </div>
         </div>
         
         <div class="grid grid-cols-2 gap-8 h-full overflow-y-auto pb-10">
             <div class="bg-white/5 p-6 rounded-xl border border-white/10 space-y-4">
-                <h3 class="font-bold text-orange-400 text-lg border-b border-white/10 pb-2">1. PENGUNDIAN DOORPRIZE</h3>
-                <input type="text" id="target-winner" class="w-full p-3 bg-black/50 border border-white/20 rounded text-white" placeholder="Nama / ID Pemenang">
+                <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                    <h3 class="font-bold text-orange-400 text-lg">1. PENGUNDIAN DOORPRIZE</h3>
+                    <button onclick="resetDrawnTickets()" class="text-xs text-red-400 hover:text-red-300 underline"><i class="fas fa-trash mr-1"></i>Reset Kupon Terpilih</button>
+                </div>
+                <input type="text" id="target-winner" class="w-full p-3 bg-black/50 border border-white/20 rounded text-white" placeholder="Nama / ID Pemenang (Kosongkan = Acak Otomatis)">
                 <input type="text" id="target-prize" class="w-full p-3 bg-black/50 border border-white/20 rounded text-white" placeholder="Hadiah (Motor, Kulkas, dll)">
                 <input type="text" id="target-sponsor" class="w-full p-3 bg-black/50 border border-white/20 rounded text-white" placeholder="Sponsor (opsional, cth: Bank Jateng)">
                 <button onclick="setRaffle()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded font-bold transition">SET DATA KE LAYAR LED</button>
@@ -47,6 +50,37 @@
     </div>
 
     <script>
+        const _0xUrl = 'aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J3ejNlYlpPc0Y2cURqRmxyY2FwaXYtRWxjVVQxQ0t0Rm5oRGtBTXNMbmRRSEdEOEczZmxkVXJWQmtCQWZSTWU3eDEvZXhlYw==';
+        const SCRIPT_URL = atob(_0xUrl);
+        const APP_TOKEN = 'FGAS_SECRET_2026';
+
+        async function fetchData() {
+            try {
+                const res = await fetch(SCRIPT_URL + "?token=" + APP_TOKEN);
+                const data = await res.json();
+                if(data.visitors) {
+                    localStorage.setItem('fgas_visitors', JSON.stringify(data.visitors));
+                }
+                const badge = document.getElementById('sync-badge');
+                badge.className = "bg-green-900 border border-green-500 text-green-400 px-3 py-1 rounded-full text-xs font-bold transition-colors";
+                badge.innerHTML = '<span class="w-2 h-2 inline-block rounded-full bg-green-400 animate-pulse mr-1"></span> Live Data Synced';
+                setTimeout(() => {
+                    badge.className = "bg-slate-800 border border-slate-600 text-slate-300 px-3 py-1 rounded-full text-xs font-bold transition-colors";
+                    badge.innerHTML = 'Standby';
+                }, 3000);
+            } catch(e) {}
+        }
+        
+        fetchData();
+        setInterval(fetchData, 10000);
+
+        function resetDrawnTickets() {
+            if(confirm("Yakin ingin mereset riwayat pemenang undian? Kupon yang sudah menang akan bisa terpilih menang lagi.")) {
+                localStorage.removeItem('fgas_drawn_tickets');
+                alert("Berhasil direset!");
+            }
+        }
+
         function setRaffle() {
             localStorage.setItem('fgas_target_winner', document.getElementById('target-winner').value);
             localStorage.setItem('fgas_target_prize', document.getElementById('target-prize').value);
@@ -62,7 +96,7 @@
 
             // SAVE WINNERS TO LOCALSTORAGE SO PREVIEW DASHBOARD CAN READ IT
             const winners = JSON.parse(localStorage.getItem('fgas_winners') || "[]");
-            winners.push(lomba.toUpperCase() + "<br><span class='text-white mt-1 block font-normal text-[10px]'>1st: " + j1 + " &bull; 2nd: " + j2 + " &bull; 3rd: " + j3 + "</span>");
+            winners.push(`${lomba.toUpperCase()}<br><span class='text-white mt-1 block font-normal text-[10px]'>1st: ${j1} &bull; 2nd: ${j2} &bull; 3rd: ${j3}</span>`);
             localStorage.setItem('fgas_winners', JSON.stringify(winners));
 
             const podiumHTML = `<!DOCTYPE html>
@@ -72,12 +106,7 @@
                 <script src="https://cdn.tailwindcss.com"></`+`script>
                 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></`+`script>
                 <style>
-        html, body { max-width: 100%; overflow-x: hidden; }
-        
-
-
-        
-
+                    html, body { max-width: 100%; overflow-x: hidden; }
                     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
                     body { background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #000 100%); color: #fff; overflow: hidden; font-family: 'Orbitron', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
                     .podium { display: flex; align-items: flex-end; justify-content: center; gap: 2vw; margin-top: 5vh; height: 40vh; }

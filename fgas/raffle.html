@@ -7,13 +7,8 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         html, body { max-width: 100%; overflow-x: hidden; }
-        
-
-
-        
-
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
-        body { background: #000; color: #fff; overflow-x: hidden; font-family: 'Orbitron', sans-serif; }
+        body { background: #000; color: #fff; font-family: 'Orbitron', sans-serif; }
         .slot-machine { font-size: 7vw; line-height: 1.1; font-weight: 900; letter-spacing: 5px; text-shadow: 0 0 30px rgba(6,182,212,0.8); }
         .bg-cyber { background: radial-gradient(circle at 50% 50%, #0f172a 0%, #000 100%); }
         .glass-box { background: rgba(15,23,42,0.8); border: 2px solid #06b6d4; box-shadow: 0 0 50px rgba(6,182,212,0.4); border-radius: 40px; }
@@ -105,7 +100,8 @@
         }
 
         let interval;
-        let participantNames = ["BUDI SANTOSO", "SITI AMINAH", "AGUS PRATAMA", "DEWI LESTARI", "HENDRA GUNAWAN", "RINA MELATI", "DWI CAHYO", "FITRI HANDAYANI"];
+        let participantNames = ["MENGAMBIL DATA..."];
+        let eligibleVisitorsGlobal = [];
         
         function startRaffleSequence() {
             window.addEventListener('storage', () => {}); // refresh listener
@@ -113,9 +109,19 @@
             let stock = parseInt(localStorage.getItem('fgas_doorprize_stock') || "999");
             if(stock <= 0) { alert("STOK HADIAH HABIS!"); return; }
             
+            // NEW LOGIC: Filter out already drawn tickets!
             const visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
-            if(visitors.length > 0) {
-                participantNames = visitors.map(v => (v.nama || v.Nama || "PESERTA").toUpperCase());
+            const drawnTickets = JSON.parse(localStorage.getItem('fgas_drawn_tickets')) || [];
+            
+            eligibleVisitorsGlobal = visitors.filter(v => {
+                const tid = v.ticketId || v.TicketID;
+                return !drawnTickets.includes(tid);
+            });
+
+            if(eligibleVisitorsGlobal.length > 0) {
+                participantNames = eligibleVisitorsGlobal.map(v => (v.nama || v.Nama || "PESERTA").toUpperCase());
+            } else {
+                participantNames = ["TIDAK ADA PESERTA / KUPON HABIS"];
             }
 
             audioCtx.resume();
@@ -131,10 +137,10 @@
                 document.getElementById('winner-name').innerText = participantNames[Math.floor(Math.random() * participantNames.length)];
             }, 60);
 
-            setTimeout(() => { stopRaffle(stock, visitors); }, 15000);
+            setTimeout(() => { stopRaffle(stock); }, 15000);
         }
 
-        function stopRaffle(stock, visitors) {
+        function stopRaffle(stock) {
             clearInterval(interval);
             if(oscillator) { oscillator.stop(); oscillator = null; }
             playWinSound();
@@ -149,15 +155,22 @@
 
             let targetWinner = localStorage.getItem('fgas_target_winner') || "";
             
-            // AUTO RANDOM LOGIC
+            // AUTO RANDOM LOGIC WITH 1-TICKET = 1-WIN LIMIT
             if (targetWinner.trim() === "") {
-                if (visitors && visitors.length > 0) {
-                    const randVisitor = visitors[Math.floor(Math.random() * visitors.length)];
+                if (eligibleVisitorsGlobal && eligibleVisitorsGlobal.length > 0) {
+                    const randVisitor = eligibleVisitorsGlobal[Math.floor(Math.random() * eligibleVisitorsGlobal.length)];
                     const wName = (randVisitor.nama || randVisitor.Nama || "PESERTA").toUpperCase();
                     const wId = randVisitor.ticketId || randVisitor.TicketID || "";
                     targetWinner = wName + (wId ? " (" + wId + ")" : "");
+                    
+                    // SAVE TO DRAWN (BLACKLIST FOR NEXT ROUND)
+                    if(wId) {
+                        const drawn = JSON.parse(localStorage.getItem('fgas_drawn_tickets')) || [];
+                        drawn.push(wId);
+                        localStorage.setItem('fgas_drawn_tickets', JSON.stringify(drawn));
+                    }
                 } else {
-                    targetWinner = "BELUM ADA PESERTA";
+                    targetWinner = "TIDAK ADA KUPON TERSISA";
                 }
             }
 
