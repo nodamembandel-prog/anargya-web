@@ -10,8 +10,16 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
+        html, body { max-width: 100%; overflow-x: hidden; overscroll-behavior-y: none; }
+        /* FIX iOS SAFARI BUG: Mencegah gambar hilang & patah-patah saat scroll */
+        img, .glass-panel, .glass-card, .bento-card, header, nav, .logos-container, .sport-bg { 
+            -webkit-transform: translate3d(0,0,0); 
+            transform: translate3d(0,0,0); 
+            will-change: transform;
+        }
 
-        html, body { max-width: 100%; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+
+        
  input { font-size: 16px !important; box-sizing: border-box;} body {overflow-x: hidden;} </style>
 </head>
 <body class="bg-orange-50 text-slate-800 font-sans w-full">

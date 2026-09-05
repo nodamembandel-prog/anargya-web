@@ -8,8 +8,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        html, body { max-width: 100%; overflow-x: hidden; overscroll-behavior-y: none; }
+        /* FIX iOS SAFARI BUG: Mencegah gambar hilang & patah-patah saat scroll */
+        img, .glass-panel, .glass-card, .bento-card, header, nav, .logos-container, .sport-bg { 
+            -webkit-transform: translate3d(0,0,0); 
+            transform: translate3d(0,0,0); 
+            will-change: transform;
+        }
 
-        html, body { max-width: 100%; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+
+        
 
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;600;700&display=swap');
         body { background-color: #020617; font-family: 'Rajdhani', sans-serif; overflow-x: hidden; width: 100%; max-width: 100%; margin: 0; padding: 0; }
