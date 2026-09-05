@@ -5,44 +5,59 @@
     <title>Live Preview Pengunjung - FGAS 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style> body { background: #020617; font-family: 'Inter', sans-serif; overflow-x: hidden; } .glass-card { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); } </style>
+    <style> 
+        body { background: #020617; font-family: 'Inter', sans-serif; overflow-x: hidden; width: 100%; box-sizing: border-box;} 
+        .glass-card { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); } 
+    </style>
 </head>
-<body class="text-white p-4 md:p-8 min-h-screen relative w-full">
+<body class="text-white p-4 md:p-8 min-h-[100dvh] relative w-full">
+    
     <div class="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwb2x5Z29uIHBvaW50cz0iMCAwIDQwIDAgNDAgMSA0MCAxIDAgMSIgZmlsbD0iIzBiYmZlZSIvPjxwb2x5Z29uIHBvaW50cz0iMCAwIDEgMCAxIDQwIDEgNDAgMCA0MCIgZmlsbD0iIzBiYmZlZSIvPjwvc3ZnPg==')] pointer-events-none"></div>
 
-    <div class="max-w-7xl mx-auto relative z-10">
+    <div class="max-w-7xl mx-auto relative z-10 w-full">
         <!-- NO BORDER LOGOS -->
-        <div class="flex justify-between items-center mb-8 border-b border-slate-700/50 pb-6">
+        <div class="flex justify-between items-center mb-8 border-b border-slate-700/50 pb-6 w-full">
             <img src="../logo_pengundian.png" class="h-10 md:h-12 object-contain drop-shadow-md" onerror="this.style.display='none'">
-            <div class="flex flex-col items-center">
+            <div class="flex flex-col items-center flex-1 mx-4">
                 <img src="../logo_fgas.png" class="h-12 md:h-16 object-contain drop-shadow-[0_0_15px_rgba(6,182,212,0.5)]" onerror="this.style.display='none'">
-                <p class="text-xs text-slate-400 mt-2 tracking-widest uppercase">Live Traffic Dashboard</p>
+                <p class="text-xs text-slate-400 mt-2 tracking-widest uppercase text-center">Live Traffic Dashboard</p>
             </div>
             <img src="../logo_pemkab.png" class="h-10 md:h-12 object-contain drop-shadow-md" onerror="this.src='../logo_pemkab.jpg'">
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="glass-card p-6 rounded-3xl border-t-4 border-t-blue-500 shadow-xl">
-                <h3 class="text-slate-400 font-bold uppercase text-[10px] tracking-widest mb-2">Total Registrasi</h3><p id="total-count" class="text-5xl font-black text-white">0</p>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mb-8 w-full">
+            <div class="glass-card p-4 md:p-6 rounded-3xl border-t-4 border-t-blue-500 shadow-xl w-full">
+                <h3 class="text-slate-400 font-bold uppercase text-[10px] tracking-widest mb-2">Total Registrasi</h3><p id="total-count" class="text-4xl md:text-5xl font-black text-white">0</p>
             </div>
-            <div class="glass-card p-6 rounded-3xl border-t-4 border-t-cyan-400 shadow-xl">
-                <h3 class="text-slate-400 font-bold uppercase text-[10px] tracking-widest mb-2">Pengunjung Doorprize</h3><p id="visitor-count" class="text-5xl font-black text-cyan-400">0</p>
+            <div class="glass-card p-4 md:p-6 rounded-3xl border-t-4 border-t-cyan-400 shadow-xl w-full">
+                <h3 class="text-slate-400 font-bold uppercase text-[10px] tracking-widest mb-2">Pengunjung Doorprize</h3><p id="visitor-count" class="text-4xl md:text-5xl font-black text-cyan-400">0</p>
             </div>
-            <div class="glass-card p-6 rounded-3xl border-t-4 border-t-orange-500 shadow-xl">
-                <h3 class="text-slate-400 font-bold uppercase text-[10px] tracking-widest mb-2">Peserta Lomba & UMKM</h3><p id="participant-count" class="text-5xl font-black text-orange-400">0</p>
+            <div class="glass-card p-4 md:p-6 rounded-3xl border-t-4 border-t-orange-500 shadow-xl w-full">
+                <h3 class="text-slate-400 font-bold uppercase text-[10px] tracking-widest mb-2">Peserta Lomba & UMKM</h3><p id="participant-count" class="text-4xl md:text-5xl font-black text-orange-400">0</p>
             </div>
-            <div class="glass-card p-6 rounded-3xl border-t-4 border-t-pink-500 shadow-xl">
+            <div class="glass-card p-4 md:p-6 rounded-3xl border-t-4 border-t-pink-500 shadow-xl w-full">
                 <h3 class="text-slate-400 font-bold uppercase text-[10px] tracking-widest mb-2">Gender Overview</h3>
                 <div class="flex justify-between items-end mt-2">
-                    <div><span class="text-xs text-slate-400">Laki-laki</span><br><span id="count-l" class="text-2xl font-bold text-blue-300">0</span></div>
-                    <div><span class="text-xs text-slate-400">Perempuan</span><br><span id="count-p" class="text-2xl font-bold text-pink-300">0</span></div>
+                    <div><span class="text-xs text-slate-400">Laki-laki</span><br><span id="count-l" class="text-xl md:text-2xl font-bold text-blue-300">0</span></div>
+                    <div><span class="text-xs text-slate-400">Perempuan</span><br><span id="count-p" class="text-xl md:text-2xl font-bold text-pink-300">0</span></div>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="glass-card p-8 rounded-3xl shadow-xl"><h3 class="font-bold text-lg mb-6 text-center text-slate-200 tracking-wider">Kategori Pendaftar</h3><div class="h-72"><canvas id="typeChart"></canvas></div></div>
-            <div class="glass-card p-8 rounded-3xl shadow-xl"><h3 class="font-bold text-lg mb-6 text-center text-slate-200 tracking-wider">Distribusi Umur</h3><div class="h-72 flex justify-center"><canvas id="ageChart"></canvas></div></div>
+        <!-- JITTER FIX: Fixed relative height wrapper for canvas -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
+            <div class="glass-card p-6 md:p-8 rounded-3xl shadow-xl w-full">
+                <h3 class="font-bold text-base md:text-lg mb-4 text-center text-slate-200 tracking-wider">Kategori Pendaftar</h3>
+                <div class="relative w-full h-[250px] md:h-[300px]">
+                    <canvas id="typeChart"></canvas>
+                </div>
+            </div>
+            <div class="glass-card p-6 md:p-8 rounded-3xl shadow-xl w-full">
+                <h3 class="font-bold text-base md:text-lg mb-4 text-center text-slate-200 tracking-wider">Distribusi Umur</h3>
+                <div class="relative w-full h-[250px] md:h-[300px] flex justify-center">
+                    <canvas id="ageChart"></canvas>
+                </div>
+            </div>
         </div>
 
         <div class="text-center mt-6">
@@ -53,9 +68,11 @@
     </div>
 
     <script>
+        
         const _0xUrl = 'aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J3ejNlYlpPc0Y2cURqRmxyY2FwaXYtRWxjVVQxQ0t0Rm5oRGtBTXNMbmRRSEdEOEczZmxkVXJWQmtCQWZSTWU3eDEvZXhlYw==';
         const SCRIPT_URL = atob(_0xUrl);
         const APP_TOKEN = 'FGAS_SECRET_2026';
+
         
         let typeChartInstance, ageChartInstance;
 
@@ -66,7 +83,6 @@
                 if(data.visitors) renderDashboard(data.visitors);
                 
                 const s = document.getElementById('sync-status');
-                s.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online: Sync Active';
                 s.classList.remove('opacity-0');
                 setTimeout(() => s.classList.add('opacity-0'), 3000);
             } catch(e) {}
@@ -104,13 +120,13 @@
             if(typeChartInstance) typeChartInstance.destroy();
             typeChartInstance = new Chart(document.getElementById('typeChart'), {
                 type: 'bar', data: { labels: Object.keys(typeCounts), datasets: [{ data: Object.values(typeCounts), backgroundColor: '#06b6d4', borderRadius: 6 }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } }
             });
 
             if(ageChartInstance) ageChartInstance.destroy();
             ageChartInstance = new Chart(document.getElementById('ageChart'), {
                 type: 'polarArea', data: { labels: Object.keys(ageCounts), datasets: [{ data: Object.values(ageCounts), backgroundColor: ['#f472b6', '#3b82f6', '#34d399', '#fbbf24'], borderWidth: 0 }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { padding: 20 } } }, cutout: '65%' }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { padding: 10 } } }, cutout: '65%' }
             });
         }
 
