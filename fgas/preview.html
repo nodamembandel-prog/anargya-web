@@ -8,21 +8,17 @@
     <style> body { background: #020617; font-family: 'Inter', sans-serif; overflow-x: hidden; } .glass-card { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); } </style>
 </head>
 <body class="text-white p-4 md:p-8 min-h-screen relative w-full">
-    
     <div class="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwb2x5Z29uIHBvaW50cz0iMCAwIDQwIDAgNDAgMSA0MCAxIDAgMSIgZmlsbD0iIzBiYmZlZSIvPjxwb2x5Z29uIHBvaW50cz0iMCAwIDEgMCAxIDQwIDEgNDAgMCA0MCIgZmlsbD0iIzBiYmZlZSIvPjwvc3ZnPg==')] pointer-events-none"></div>
 
     <div class="max-w-7xl mx-auto relative z-10">
+        <!-- NO BORDER LOGOS -->
         <div class="flex justify-between items-center mb-8 border-b border-slate-700/50 pb-6">
-            <div class="flex items-center gap-4">
-                <img src="../logo_pengundian.png" class="h-10 md:h-12 object-contain" onerror="this.style.display='none'">
-            </div>
+            <img src="../logo_pengundian.png" class="h-10 md:h-12 object-contain drop-shadow-md" onerror="this.style.display='none'">
             <div class="flex flex-col items-center">
                 <img src="../logo_fgas.png" class="h-12 md:h-16 object-contain drop-shadow-[0_0_15px_rgba(6,182,212,0.5)]" onerror="this.style.display='none'">
                 <p class="text-xs text-slate-400 mt-2 tracking-widest uppercase">Live Traffic Dashboard</p>
             </div>
-            <div class="flex items-center gap-4">
-                <img src="../logo_pemkab.png" class="h-10 md:h-12 object-contain rounded bg-white p-1" onerror="this.src='../logo_pemkab.jpg'">
-            </div>
+            <img src="../logo_pemkab.png" class="h-10 md:h-12 object-contain drop-shadow-md" onerror="this.src='../logo_pemkab.jpg'">
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -57,11 +53,9 @@
     </div>
 
     <script>
-        
         const _0xUrl = 'aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J3ejNlYlpPc0Y2cURqRmxyY2FwaXYtRWxjVVQxQ0t0Rm5oRGtBTXNMbmRRSEdEOEczZmxkVXJWQmtCQWZSTWU3eDEvZXhlYw==';
         const SCRIPT_URL = atob(_0xUrl);
         const APP_TOKEN = 'FGAS_SECRET_2026';
-
         
         let typeChartInstance, ageChartInstance;
 
