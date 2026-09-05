@@ -11,7 +11,6 @@
         .slot-machine { font-size: 7vw; line-height: 1.1; font-weight: 900; letter-spacing: 5px; text-shadow: 0 0 30px rgba(6,182,212,0.8); }
         .bg-cyber { background: radial-gradient(circle at 50% 50%, #0f172a 0%, #000 100%); }
         .glass-box { background: rgba(15,23,42,0.8); border: 2px solid #06b6d4; box-shadow: 0 0 50px rgba(6,182,212,0.4); border-radius: 40px; }
-        
         .top-logos-container { display: flex; justify-content: space-between; align-items: flex-start; padding: 2rem; width: 100%; position: relative; z-index: 20;}
     </style>
 </head>
@@ -58,10 +57,10 @@
         }
 
         const tops = JSON.parse(localStorage.getItem('fgas_top_logos')) || [];
-        document.getElementById('top-right-logos').innerHTML = tops.map(src => `<img src="${src}" class="h-24 bg-white p-2 rounded-xl object-contain shadow-[0_0_15px_rgba(255,255,255,0.3)]">`).join('');
+        document.getElementById('top-right-logos').innerHTML = tops.map(src => `<img src="${src}" class="h-20 md:h-24 object-contain drop-shadow-md">`).join('');
 
         const sponsors = JSON.parse(localStorage.getItem('fgas_sponsor_logos')) || [];
-        document.getElementById('sponsor-logos').innerHTML = sponsors.map(src => `<img src="${src}" class="h-20 object-contain bg-white/10 p-2 rounded-xl backdrop-blur-sm grayscale hover:grayscale-0 transition opacity-80 hover:opacity-100 border border-white/20">`).join('');
+        document.getElementById('sponsor-logos').innerHTML = sponsors.map(src => `<img src="${src}" class="h-16 md:h-20 object-contain opacity-90 hover:opacity-100 transition drop-shadow-lg">`).join('');
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let oscillator = null;
@@ -100,7 +99,7 @@
         }
 
         let interval;
-        const names = ["BUDI SANTOSO", "SITI AMINAH", "AGUS PRATAMA", "DEWI LESTARI", "HENDRA GUNAWAN", "RINA MELATI", "DWI CAHYO", "FITRI HANDAYANI"];
+        let participantNames = ["BUDI SANTOSO", "SITI AMINAH", "AGUS PRATAMA", "DEWI LESTARI", "HENDRA GUNAWAN", "RINA MELATI", "DWI CAHYO", "FITRI HANDAYANI"];
         
         function startRaffleSequence() {
             window.addEventListener('storage', () => {}); // refresh listener
@@ -108,6 +107,11 @@
             let stock = parseInt(localStorage.getItem('fgas_doorprize_stock') || "999");
             if(stock <= 0) { alert("STOK HADIAH HABIS!"); return; }
             
+            const visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
+            if(visitors.length > 0) {
+                participantNames = visitors.map(v => (v.nama || v.Nama || "PESERTA").toUpperCase());
+            }
+
             audioCtx.resume();
             document.getElementById('btn-start').style.display = 'none';
             document.getElementById('prize-name').innerText = "MENGACAK DATABASE PESERTA...";
@@ -118,13 +122,13 @@
             playDrumroll();
             
             interval = setInterval(() => {
-                document.getElementById('winner-name').innerText = names[Math.floor(Math.random() * names.length)];
+                document.getElementById('winner-name').innerText = participantNames[Math.floor(Math.random() * participantNames.length)];
             }, 60);
 
-            setTimeout(() => { stopRaffle(stock); }, 15000);
+            setTimeout(() => { stopRaffle(stock, visitors); }, 15000);
         }
 
-        function stopRaffle(stock) {
+        function stopRaffle(stock, visitors) {
             clearInterval(interval);
             if(oscillator) { oscillator.stop(); oscillator = null; }
             playWinSound();
@@ -137,8 +141,23 @@
                 if (Date.now() < end) requestAnimationFrame(frame);
             }());
 
-            const targetWinner = localStorage.getItem('fgas_target_winner') || "PEMENANG TERPILIH";
-            const targetPrize = localStorage.getItem('fgas_target_prize') || "HADIAH UTAMA";
+            let targetWinner = localStorage.getItem('fgas_target_winner') || "";
+            
+            // AUTO RANDOM LOGIC
+            if (targetWinner.trim() === "") {
+                if (visitors && visitors.length > 0) {
+                    const randVisitor = visitors[Math.floor(Math.random() * visitors.length)];
+                    const wName = (randVisitor.nama || randVisitor.Nama || "PESERTA").toUpperCase();
+                    const wId = randVisitor.ticketId || randVisitor.TicketID || "";
+                    targetWinner = wName + (wId ? " (" + wId + ")" : "");
+                } else {
+                    targetWinner = "BELUM ADA PESERTA";
+                }
+            }
+
+            let targetPrize = localStorage.getItem('fgas_target_prize') || "";
+            if (targetPrize.trim() === "") targetPrize = "DOORPRIZE";
+
             const targetSponsor = localStorage.getItem('fgas_target_sponsor') || "";
             
             document.getElementById('winner-name').innerText = targetWinner;
