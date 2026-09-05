@@ -5,7 +5,10 @@
     <title>Live Preview Pengunjung - FGAS 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style> 
+    <style>
+
+        html, body { max-width: 100%; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+ 
         body { background: #020617; font-family: 'Inter', sans-serif; overflow-x: hidden; width: 100%; box-sizing: border-box;} 
         .glass-card { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); } 
     </style>
@@ -49,13 +52,13 @@
             <div class="glass-card p-6 md:p-8 rounded-3xl shadow-xl w-full">
                 <h3 class="font-bold text-base md:text-lg mb-4 text-center text-slate-200 tracking-wider">Kategori Pendaftar</h3>
                 <div class="relative w-full h-[250px] md:h-[300px]">
-                    <canvas id="typeChart"></canvas>
+                    <canvas id="typeChart" style="display: block; width: 100%; height: 100%;"></canvas>
                 </div>
             </div>
             <div class="glass-card p-6 md:p-8 rounded-3xl shadow-xl w-full">
                 <h3 class="font-bold text-base md:text-lg mb-4 text-center text-slate-200 tracking-wider">Distribusi Umur</h3>
                 <div class="relative w-full h-[250px] md:h-[300px] flex justify-center">
-                    <canvas id="ageChart"></canvas>
+                    <canvas id="ageChart" style="display: block; width: 100%; height: 100%;"></canvas>
                 </div>
             </div>
         </div>

@@ -6,6 +6,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
+
+        html, body { max-width: 100%; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
         body { background: #000; color: #fff; overflow-x: hidden; font-family: 'Orbitron', sans-serif; }
         .slot-machine { font-size: 7vw; line-height: 1.1; font-weight: 900; letter-spacing: 5px; text-shadow: 0 0 30px rgba(6,182,212,0.8); }
@@ -99,7 +102,7 @@
         }
 
         let interval;
-        const names = ["BUDI SANTOSO", "SITI AMINAH", "AGUS PRATAMA", "DEWI LESTARI", "HENDRA GUNAWAN", "RINA MELATI", "DWI CAHYO", "FITRI HANDAYANI"];
+        let participantNames = ["BUDI SANTOSO", "SITI AMINAH", "AGUS PRATAMA", "DEWI LESTARI", "HENDRA GUNAWAN", "RINA MELATI", "DWI CAHYO", "FITRI HANDAYANI"];
         
         function startRaffleSequence() {
             window.addEventListener('storage', () => {}); // refresh listener
@@ -107,6 +110,11 @@
             let stock = parseInt(localStorage.getItem('fgas_doorprize_stock') || "999");
             if(stock <= 0) { alert("STOK HADIAH HABIS!"); return; }
             
+            const visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
+            if(visitors.length > 0) {
+                participantNames = visitors.map(v => (v.nama || v.Nama || "PESERTA").toUpperCase());
+            }
+
             audioCtx.resume();
             document.getElementById('btn-start').style.display = 'none';
             document.getElementById('prize-name').innerText = "MENGACAK DATABASE PESERTA...";
@@ -117,13 +125,13 @@
             playDrumroll();
             
             interval = setInterval(() => {
-                document.getElementById('winner-name').innerText = names[Math.floor(Math.random() * names.length)];
+                document.getElementById('winner-name').innerText = participantNames[Math.floor(Math.random() * participantNames.length)];
             }, 60);
 
-            setTimeout(() => { stopRaffle(stock); }, 15000);
+            setTimeout(() => { stopRaffle(stock, visitors); }, 15000);
         }
 
-        function stopRaffle(stock) {
+        function stopRaffle(stock, visitors) {
             clearInterval(interval);
             if(oscillator) { oscillator.stop(); oscillator = null; }
             playWinSound();
@@ -136,8 +144,23 @@
                 if (Date.now() < end) requestAnimationFrame(frame);
             }());
 
-            const targetWinner = localStorage.getItem('fgas_target_winner') || "PEMENANG TERPILIH";
-            const targetPrize = localStorage.getItem('fgas_target_prize') || "HADIAH UTAMA";
+            let targetWinner = localStorage.getItem('fgas_target_winner') || "";
+            
+            // AUTO RANDOM LOGIC
+            if (targetWinner.trim() === "") {
+                if (visitors && visitors.length > 0) {
+                    const randVisitor = visitors[Math.floor(Math.random() * visitors.length)];
+                    const wName = (randVisitor.nama || randVisitor.Nama || "PESERTA").toUpperCase();
+                    const wId = randVisitor.ticketId || randVisitor.TicketID || "";
+                    targetWinner = wName + (wId ? " (" + wId + ")" : "");
+                } else {
+                    targetWinner = "BELUM ADA PESERTA";
+                }
+            }
+
+            let targetPrize = localStorage.getItem('fgas_target_prize') || "";
+            if (targetPrize.trim() === "") targetPrize = "DOORPRIZE";
+
             const targetSponsor = localStorage.getItem('fgas_target_sponsor') || "";
             
             document.getElementById('winner-name').innerText = targetWinner;
