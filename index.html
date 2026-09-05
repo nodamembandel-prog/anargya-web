@@ -44,8 +44,8 @@
         <div class="max-w-7xl mx-auto px-4 lg:px-8">
             <div class="flex justify-between h-20 md:h-24 items-center">
                 <div class="flex-shrink-0">
-                    <img src="logo.png" alt="" class="h-8 md:h-10 hover:scale-105 transition duration-300" style="background: transparent; border: none; outline: none; color: transparent; text-indent: -9999px;" onerror="document.getElementById('fallback-logo').style.display='block'; this.style.display='none';">
-                    <span class="text-xl md:text-2xl font-display font-black tracking-widest brand-gradient-text" style="display: none;" id="fallback-logo">ANARGYA.</span>
+                    <img src="logo.png" alt="" class="h-8 md:h-10 hover:scale-105 transition duration-300 hidden" onload="this.classList.remove('hidden'); document.getElementById('fallback-logo').classList.add('hidden');">
+                    <span id="fallback-logo" class="text-xl md:text-2xl font-display font-black tracking-widest brand-gradient-text block mt-1">ANARGYA.</span>
                 </div>
                 <div class="flex items-center space-x-4 md:space-x-8">
                     <a href="#services" class="hidden md:block text-sm font-semibold text-gray-300 hover:text-brand-500 uppercase tracking-widest transition">Layanan</a>
@@ -108,8 +108,8 @@
         <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-500 to-transparent opacity-50"></div>
         <div class="relative z-10 w-full max-w-4xl mx-auto px-4 flex flex-col items-center text-center">
             <div class="mb-8 md:mb-10">
-                <img src="logo.png" alt="" class="h-12 md:h-16 object-contain" style="background: transparent; border: none; outline: none; color: transparent; text-indent: -9999px;" onerror="document.getElementById('footer-fallback').style.display='block'; this.style.display='none';">
-                <span class="text-2xl md:text-3xl font-display font-black tracking-widest brand-gradient-text" style="display: none;" id="footer-fallback">ANARGYA.</span>
+                <img src="logo.png" alt="" class="h-12 md:h-16 object-contain hidden" onload="this.classList.remove('hidden'); document.getElementById('footer-fallback').classList.add('hidden');">
+                <span id="footer-fallback" class="text-2xl md:text-3xl font-display font-black tracking-widest brand-gradient-text block">ANARGYA.</span>
             </div>
             <p class="text-gray-400 text-base md:text-lg mb-10 md:mb-12 max-w-xl leading-relaxed font-light">Mitra strategis Anda dalam mewujudkan event berskala besar, pengadaan efisien, dan eksekusi visual tak terlupakan.</p>
             <div class="flex justify-center gap-6 mb-12 md:mb-16">
