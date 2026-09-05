@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiU2Nhbm5lciBGZ2FzIiwic2hvcnRfbmFtZSI6IkZHQVMiLCJzdGFydF91cmwiOiIuIiwibWFya2V0aW5nX2NvbG9yIjoiIzI1NjNlYiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIn0=">
+    <title>Scanner Panitia FGAS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style> .glass-card { background: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; } </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans">
+    
+    <div id="login-screen" class="min-h-screen flex items-center justify-center bg-slate-900 absolute inset-0 z-50 px-4">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center">
+            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl"><i class="fas fa-shield-alt"></i></div>
+            <h2 class="text-2xl font-bold text-slate-900 mb-2">Panel Panitia</h2>
+            <input type="password" id="pwd" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl mb-4 focus:ring-2 focus:ring-blue-500 outline-none text-center tracking-widest text-2xl" placeholder="***">
+            <button onclick="login()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg text-lg">Login</button>
+        </div>
+    </div>
+
+    <div id="main-content" class="hidden min-h-screen flex flex-col">
+        <div class="bg-blue-600 text-white px-6 py-4 flex justify-between items-center shadow-md sticky top-0 z-40">
+            <h1 class="font-bold text-lg"><i class="fas fa-qrcode mr-2"></i>Scanner App FGAS</h1>
+            <button onclick="location.reload()" class="bg-red-500 px-3 py-1.5 rounded text-sm font-bold"><i class="fas fa-power-off"></i></button>
+        </div>
+
+        <div class="flex-grow p-4 md:p-8 max-w-lg mx-auto w-full space-y-6">
+            
+            <div class="glass-card p-6 text-center border-t-4 border-t-green-500">
+                <h2 class="font-bold text-slate-800 mb-1 text-xl">Verifikasi Hadiah / Tiket</h2>
+                <p class="text-xs text-slate-500 mb-4 bg-yellow-50 text-yellow-700 p-2 rounded font-bold">Panitia dapat memverifikasi Pemenang Undian atau Kehadiran Peserta di sini.</p>
+                
+                <div id="reader" class="w-full rounded-xl overflow-hidden shadow-inner border-2 border-slate-200 mb-4 bg-black"></div>
+                
+                <button onclick="startScanner()" id="startScanBtn" class="bg-green-600 text-white w-full py-4 rounded-xl font-bold hover:bg-green-700 shadow-md mb-2 text-lg"><i class="fas fa-camera mr-2"></i> BUKA KAMERA SCANNER</button>
+                <button onclick="stopScanner()" id="stopScanBtn" class="bg-red-500 text-white w-full py-4 rounded-xl font-bold hidden text-lg"><i class="fas fa-stop mr-2"></i> TUTUP KAMERA</button>
+                
+                <div id="scan-result" class="mt-4 hidden p-4 rounded-xl text-center font-bold text-lg border-2"></div>
+            </div>
+            
+            <div class="text-center pt-4"><button onclick="fetchData()" class="text-blue-500 font-bold underline bg-white px-6 py-3 rounded-full shadow-sm"><i class="fas fa-sync-alt mr-1"></i> Tarik Data DB Terbaru</button></div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzgcuZCaXL5lnXV8PpQYFrNiMZc2B4ZQcaMxR6mzSAw9c27AkVZT4GYzK1AwhdIagSc/exec'; 
+        let html5QrCode;
+
+        function login() {
+            if(document.getElementById('pwd').value === 'adminfgas123') {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+            } else { alert('Akses Ditolak!'); document.getElementById('pwd').value = ''; }
+        }
+
+        function checkBarcode(scannedId) {
+            const currentWinnerId = localStorage.getItem('fgas_target_winner') || "NOT_SET";
+            const resDiv = document.getElementById('scan-result');
+            resDiv.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'border-green-500', 'bg-blue-100', 'text-blue-700', 'border-blue-500');
+            
+            if(scannedId !== "" && (scannedId === currentWinnerId || currentWinnerId.includes(scannedId))) {
+                resDiv.classList.add('bg-green-100', 'text-green-700', 'border-green-500');
+                resDiv.innerHTML = '<i class="fas fa-check-circle text-5xl mb-3 block animate-bounce"></i> <span class="text-2xl font-black">PEMENANG TERVERIFIKASI!</span><br><span class="text-sm font-bold text-green-900 mt-2 block">Sah! Sesuai dengan data Layar LED.</span>';
+            } else {
+                resDiv.classList.add('bg-blue-100', 'text-blue-700', 'border-blue-500');
+                resDiv.innerHTML = '<i class="fas fa-user-check text-5xl mb-3 block"></i> <span class="text-2xl font-black">TIKET VALID.</span><br><span class="text-sm font-bold text-blue-900 mt-2 block">Kehadiran tercatat. ID: ' + scannedId + '</span>';
+            }
+        }
+
+        function startScanner() {
+            document.getElementById('startScanBtn').classList.add('hidden');
+            document.getElementById('stopScanBtn').classList.remove('hidden');
+            document.getElementById('scan-result').classList.add('hidden');
+            
+            html5QrCode = new Html5Qrcode("reader");
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            
+            html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
+                checkBarcode(decodedText);
+                stopScanner(); 
+            }).catch(err => {
+                alert("Gagal membuka kamera. Pastikan memberikan izin akses kamera: " + err);
+                stopScanner();
+            });
+        }
+
+        function stopScanner() {
+            if(html5QrCode) { html5QrCode.stop().catch(e=>console.log(e)); }
+            document.getElementById('startScanBtn').classList.remove('hidden');
+            document.getElementById('stopScanBtn').classList.add('hidden');
+        }
+
+        async function fetchData() {
+            try {
+                if (SCRIPT_URL.startsWith('http')) {
+                    const response = await fetch(SCRIPT_URL);
+                    const data = await response.json();
+                    alert("Sinkronisasi Sukses. Total Data: " + data.length);
+                }
+            } catch (error) { console.log(error); }
+        }
+    </script>
+</body>
+</html>

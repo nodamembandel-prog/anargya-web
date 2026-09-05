@@ -2,62 +2,159 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doorprize Raffle | FGAS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <title>Live Undian Doorprize</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        body { font-family: 'Poppins', sans-serif; background: #f0f2f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        .raffle-container { text-align: center; background: #fff; padding: 50px; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.1); width: 90%; max-width: 700px; }
-        h1 { color: #2c3e50; font-size: 2.5em; margin-bottom: 10px; }
-        #eventLogo { max-height: 120px; display: none; margin: 0 auto 20px; }
-        #raffleResult { font-size: 6em; font-weight: bold; color: #e67e22; margin: 30px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
-        .warning-box { background: #ffefef; border-left: 6px solid #e74c3c; padding: 20px; text-align: left; border-radius: 4px; margin-top: 20px; }
-        .warning-box p { margin: 5px 0; color: #c0392b; font-size: 1.1em; }
-        .warning-title { font-weight: bold; font-size: 1.3em !important; }
-        button { background: #3498db; color: #fff; border: none; padding: 15px 30px; font-size: 1.2em; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #2980b9; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
+        body { background: #000; color: #fff; overflow-x: hidden; font-family: 'Orbitron', sans-serif; }
+        .slot-machine { font-size: 7vw; line-height: 1.1; font-weight: 900; letter-spacing: 5px; text-shadow: 0 0 30px rgba(6,182,212,0.8); }
+        .bg-cyber { background: radial-gradient(circle at 50% 50%, #0f172a 0%, #000 100%); }
+        .glass-box { background: rgba(15,23,42,0.8); border: 2px solid #06b6d4; box-shadow: 0 0 50px rgba(6,182,212,0.4); border-radius: 40px; }
+        
+        .top-logos-container { display: flex; justify-content: space-between; align-items: flex-start; padding: 2rem; width: 100%; position: relative; z-index: 20;}
     </style>
 </head>
-<body>
-
-<div class="raffle-container">
-    <img id="eventLogo" src="" alt="Event Logo">
+<body class="flex flex-col min-h-screen w-full bg-cyber relative">
     
-    <h1>PENGUNDIAN DOORPRIZE</h1>
-    
-    <div id="raffleResult">0000</div>
-    <button onclick="startRaffle()">Acak Pemenang</button>
+    <div class="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwb2x5Z29uIHBvaW50cz0iMCAwIDQwIDAgNDAgMSA0MCAxIDAgMSIgZmlsbD0iIzBiYmZlZSIvPjxwb2x5Z29uIHBvaW50cz0iMCAwIDEgMCAxIDQwIDEgNDAgMCA0MCIgZmlsbD0iIzBiYmZlZSIvPjwvc3ZnPg==')] pointer-events-none"></div>
 
-    <div class="warning-box">
-        <p class="warning-title">⚠️ ATURAN DOORPRIZE:</p>
-        <p>Pemenang yang dipanggil <strong>3x berturut-turut TIDAK HADIR</strong>, maka hadiah dinyatakan <strong>HANGUS</strong> dan diundi kembali.</p>
+    <div class="top-logos-container">
+        <div></div>
+        <div class="flex flex-col items-center">
+            <img id="raffle-logo" src="" class="h-28 object-contain hidden drop-shadow-[0_0_20px_rgba(255,255,255,0.6)]">
+        </div>
+        <div id="top-right-logos" class="flex gap-4"></div>
     </div>
-</div>
 
-<script>
-    // Ambil logo dari LocalStorage yang disetting admin
-    window.onload = () => {
-        const savedLogo = localStorage.getItem('adminRaffleLogo');
-        if (savedLogo) {
-            const logoImg = document.getElementById('eventLogo');
-            logoImg.src = savedLogo;
-            logoImg.style.display = 'block';
+    <div class="flex-grow flex flex-col items-center justify-center relative z-10 px-10 pb-20">
+        <h1 class="text-[4vw] font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 tracking-widest uppercase text-center leading-tight drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]">
+            PENGUNDIAN DOORPRIZE<br><span class="text-[2vw] text-white tracking-[0.5em]">FGAS BOYOLALI 2026</span>
+        </h1>
+        
+        <div class="glass-box p-10 w-full max-w-[80vw] text-center flex flex-col items-center justify-center min-h-[30vh]">
+            <div id="prize-name" class="text-[2vw] text-cyan-400 mb-2 font-bold tracking-widest uppercase">BERSEDIA...</div>
+            <div id="sponsor-name" class="text-[1.5vw] text-orange-400 mb-6 font-bold tracking-widest uppercase hidden"></div>
+            <div id="winner-name" class="slot-machine text-white uppercase w-full">?????</div>
+        </div>
+
+        <div class="mt-8 bg-red-600/20 border border-red-500 p-4 rounded-xl text-center animate-pulse shadow-[0_0_30px_rgba(220,38,38,0.4)]">
+            <p class="text-[2vw] text-red-400 tracking-widest font-black uppercase">PANGGILAN 3X TIDAK HADIR = HADIAH HANGUS!</p>
+        </div>
+
+        <button onclick="startRaffleSequence()" id="btn-start" class="mt-10 bg-blue-600 border-2 border-cyan-400 text-white px-12 py-5 rounded-full text-2xl font-black hover:bg-blue-500 shadow-[0_0_40px_rgba(6,182,212,0.8)] cursor-pointer tracking-widest transition-transform hover:scale-105">
+            MULAI (15 DETIK)
+        </button>
+    </div>
+
+    <div id="sponsor-logos" class="absolute bottom-6 w-full flex justify-center items-center gap-8 z-20 px-10 flex-wrap"></div>
+
+    <script>
+        const savedMainLogo = localStorage.getItem('fgas_raffle_logo');
+        if(savedMainLogo) {
+            const logoEl = document.getElementById('raffle-logo');
+            logoEl.src = savedMainLogo;
+            logoEl.classList.remove('hidden');
         }
-    };
 
-    function startRaffle() {
-        const result = document.getElementById('raffleResult');
-        let counter = 0;
-        const interval = setInterval(() => {
-            result.innerText = Math.floor(1000 + Math.random() * 9000);
-            counter++;
-            if(counter > 20) {
-                clearInterval(interval);
-                result.innerText = "FGAS-" + Math.floor(1000 + Math.random() * 9000); // Hasil akhir simulasi
+        const tops = JSON.parse(localStorage.getItem('fgas_top_logos')) || [];
+        document.getElementById('top-right-logos').innerHTML = tops.map(src => `<img src="${src}" class="h-24 bg-white p-2 rounded-xl object-contain shadow-[0_0_15px_rgba(255,255,255,0.3)]">`).join('');
+
+        const sponsors = JSON.parse(localStorage.getItem('fgas_sponsor_logos')) || [];
+        document.getElementById('sponsor-logos').innerHTML = sponsors.map(src => `<img src="${src}" class="h-20 object-contain bg-white/10 p-2 rounded-xl backdrop-blur-sm grayscale hover:grayscale-0 transition opacity-80 hover:opacity-100 border border-white/20">`).join('');
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let oscillator = null;
+
+        function playDrumroll() {
+            if(oscillator) return;
+            oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(50, audioCtx.currentTime);
+            oscillator.frequency.linearRampToValueAtTime(250, audioCtx.currentTime + 15);
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            for(let i = 0; i < 150; i++) {
+                gainNode.gain.setValueAtTime(0.4, audioCtx.currentTime + (i * 0.1));
+                gainNode.gain.setValueAtTime(0.01, audioCtx.currentTime + (i * 0.1) + 0.05);
             }
-        }, 100);
-    }
-</script>
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+        }
 
+        function playWinSound() {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.3);
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime + 0.3);
+            osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.8);
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 2);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 2);
+        }
+
+        let interval;
+        const names = ["BUDI SANTOSO", "SITI AMINAH", "AGUS PRATAMA", "DEWI LESTARI", "HENDRA GUNAWAN", "RINA MELATI", "DWI CAHYO", "FITRI HANDAYANI"];
+        
+        function startRaffleSequence() {
+            window.addEventListener('storage', () => {}); // refresh listener
+            
+            let stock = parseInt(localStorage.getItem('fgas_doorprize_stock') || "999");
+            if(stock <= 0) { alert("STOK HADIAH HABIS!"); return; }
+            
+            audioCtx.resume();
+            document.getElementById('btn-start').style.display = 'none';
+            document.getElementById('prize-name').innerText = "MENGACAK DATABASE PESERTA...";
+            document.getElementById('sponsor-name').classList.add('hidden');
+            document.getElementById('winner-name').classList.remove('text-green-400');
+            document.getElementById('winner-name').style.textShadow = '0 0 30px rgba(6,182,212,0.8)';
+            
+            playDrumroll();
+            
+            interval = setInterval(() => {
+                document.getElementById('winner-name').innerText = names[Math.floor(Math.random() * names.length)];
+            }, 60);
+
+            setTimeout(() => { stopRaffle(stock); }, 15000);
+        }
+
+        function stopRaffle(stock) {
+            clearInterval(interval);
+            if(oscillator) { oscillator.stop(); oscillator = null; }
+            playWinSound();
+            
+            var duration = 5 * 1000;
+            var end = Date.now() + duration;
+            (function frame() {
+                confetti({ particleCount: 15, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#06b6d4', '#ffffff', '#3b82f6'] });
+                confetti({ particleCount: 15, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#06b6d4', '#ffffff', '#3b82f6'] });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+
+            const targetWinner = localStorage.getItem('fgas_target_winner') || "PEMENANG TERPILIH";
+            const targetPrize = localStorage.getItem('fgas_target_prize') || "HADIAH UTAMA";
+            const targetSponsor = localStorage.getItem('fgas_target_sponsor') || "";
+            
+            document.getElementById('winner-name').innerText = targetWinner;
+            document.getElementById('prize-name').innerText = "SELAMAT! ANDA MENDAPATKAN: " + targetPrize;
+            
+            if(targetSponsor !== "") {
+                document.getElementById('sponsor-name').innerText = "Dipersembahkan oleh: " + targetSponsor;
+                document.getElementById('sponsor-name').classList.remove('hidden');
+            }
+            
+            document.getElementById('winner-name').style.color = '#4ade80';
+            document.getElementById('winner-name').style.textShadow = '0 0 50px rgba(74,222,128,1)';
+            
+            if(stock !== 999) { localStorage.setItem('fgas_doorprize_stock', stock - 1); }
+            setTimeout(() => { document.getElementById('btn-start').style.display = 'block'; }, 5000);
+        }
+    </script>
 </body>
 </html>
