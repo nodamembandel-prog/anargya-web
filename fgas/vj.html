@@ -55,10 +55,15 @@
         }
 
         function triggerPodium() {
-            const lomba = document.getElementById('kategori-lomba').value;
-            const j1 = document.getElementById('juara-1').value;
-            const j2 = document.getElementById('juara-2').value;
-            const j3 = document.getElementById('juara-3').value;
+            const lomba = document.getElementById('kategori-lomba').value || "PENGUMUMAN LOMBA";
+            const j1 = document.getElementById('juara-1').value || "-";
+            const j2 = document.getElementById('juara-2').value || "-";
+            const j3 = document.getElementById('juara-3').value || "-";
+
+            // SAVE WINNERS TO LOCALSTORAGE SO PREVIEW DASHBOARD CAN READ IT
+            const winners = JSON.parse(localStorage.getItem('fgas_winners') || "[]");
+            winners.push(lomba.toUpperCase() + "<br><span class='text-white mt-1 block font-normal text-[10px]'>1st: " + j1 + " &bull; 2nd: " + j2 + " &bull; 3rd: " + j3 + "</span>");
+            localStorage.setItem('fgas_winners', JSON.stringify(winners));
 
             const podiumHTML = `<!DOCTYPE html>
             <html lang="id">
