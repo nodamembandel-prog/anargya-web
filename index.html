@@ -22,7 +22,7 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Poppins:wght@300;400;600;700&display=swap');
-        body { background-color: #050505; color: #ffffff; overflow-x: hidden; }
+        body { background-color: #050505; color: #ffffff; overflow-x: hidden; width: 100%; }
         .glass-nav { background: rgba(5, 5, 5, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); }
         .hero-bg { background-image: radial-gradient(circle at 15% 50%, rgba(255, 94, 0, 0.15), transparent 25%), radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.15), transparent 25%); }
         .bento-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; transition: all 0.4s ease; backdrop-filter: blur(10px); cursor: pointer; }
@@ -34,7 +34,6 @@
     </style>
 </head>
 <body class="font-sans selection:bg-brand-500 selection:text-white">
-    
     <nav class="glass-nav fixed w-full z-50 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 lg:px-8">
             <div class="flex justify-between h-20 md:h-24 items-center">
@@ -52,7 +51,6 @@
 
     <header class="pt-32 pb-16 md:pt-40 md:pb-20 hero-bg min-h-[100dvh] flex items-center relative overflow-hidden">
         <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px); background-size: 50px 50px;"></div>
-        
         <div class="max-w-7xl mx-auto px-4 lg:px-8 relative z-10 w-full flex flex-col items-center text-center">
             <div data-aos="fade-down" class="inline-flex items-center justify-center px-4 md:px-5 py-2 rounded-full border border-brand-500/30 bg-brand-500/10 text-brand-500 text-[10px] md:text-xs font-bold tracking-[0.2em] mb-6 md:mb-8">
                 <span class="w-2 h-2 rounded-full bg-brand-500 mr-3 animate-pulse"></span> PREMIER CREATIVE AGENCY
@@ -82,7 +80,6 @@
                 </div>
                 <p class="text-gray-400 max-w-md text-sm leading-relaxed text-center md:text-left">Kami menghadirkan layanan terintegrasi yang dirancang khusus untuk memenuhi standar industri tertinggi dalam setiap proyek Anda.</p>
             </div>
-            
             <div class="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6" id="services-container"></div>
         </div>
     </section>
@@ -95,10 +92,7 @@
             </div>
             <div class="p-6 md:p-8 overflow-y-auto no-scrollbar flex-grow">
                 <p id="modal-desc" class="text-base md:text-lg text-gray-400 mb-8 md:mb-10 leading-relaxed"></p>
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="w-8 h-1 bg-brand-500 rounded-full"></div>
-                    <h4 class="font-display font-bold text-lg md:text-xl text-white">Galeri Portofolio</h4>
-                </div>
+                <div class="flex items-center gap-3 mb-6"><div class="w-8 h-1 bg-brand-500 rounded-full"></div><h4 class="font-display font-bold text-lg md:text-xl text-white">Galeri Portofolio</h4></div>
                 <div id="modal-gallery" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"></div>
             </div>
         </div>
@@ -106,20 +100,16 @@
 
     <footer class="bg-black text-white py-16 md:py-24 relative overflow-hidden border-t border-white/5">
         <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-500 to-transparent opacity-50"></div>
-        
         <div class="relative z-10 w-full max-w-4xl mx-auto px-4 flex flex-col items-center text-center">
             <div class="mb-8 md:mb-10">
                 <img src="logo.png" alt="Anargya Logo" class="h-12 md:h-16 object-contain" onerror="document.getElementById('footer-fallback').style.display='block'; this.style.display='none';">
                 <span class="text-2xl md:text-3xl font-display font-black tracking-widest brand-gradient-text" style="display: none;" id="footer-fallback">ANARGYA.</span>
             </div>
-            
             <p class="text-gray-400 text-base md:text-lg mb-10 md:mb-12 max-w-xl leading-relaxed font-light">Mitra strategis Anda dalam mewujudkan event berskala besar, pengadaan efisien, dan eksekusi visual tak terlupakan.</p>
-            
             <div class="flex justify-center gap-6 mb-12 md:mb-16">
                 <a id="ig-link" href="#" class="w-12 h-12 md:w-14 md:h-14 bg-white/5 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:-translate-y-2 transition-all duration-300 border border-white/10"><i class="fab fa-instagram text-lg md:text-xl"></i></a>
                 <a id="wa-link" href="#" class="w-12 h-12 md:w-14 md:h-14 bg-white/5 rounded-full flex items-center justify-center text-white hover:bg-green-500 hover:-translate-y-2 transition-all duration-300 border border-white/10"><i class="fab fa-whatsapp text-lg md:text-xl"></i></a>
             </div>
-            
             <div class="w-full pt-8 text-gray-600 font-semibold tracking-widest text-[10px] md:text-xs uppercase">
                 &copy; 2026 Anargya Kreativindo. Hak Cipta Dilindungi.
             </div>
@@ -129,7 +119,6 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
         AOS.init({ duration: 800, once: true, offset: 50 });
-
         const defaultServices = [
             { id: 'event', title: 'Event Organizer', desc: 'Manajemen acara end-to-end, tata panggung presisi, dan eksekusi acara berskala nasional.', icon: 'fa-layer-group', span: 'md:col-span-8' },
             { id: 'pengadaan', title: 'Pengadaan Barang', desc: 'Sistem pengadaan vendor terintegrasi.', icon: 'fa-dolly-flatbed', span: 'md:col-span-4' },
@@ -137,7 +126,6 @@
             { id: 'video', title: 'Video & Foto', desc: 'Produksi visual sinematik & dokumentasi.', icon: 'fa-video', span: 'md:col-span-4' },
             { id: 'ads', title: 'Advertising', desc: 'Solusi periklanan OOH & digital marketing.', icon: 'fa-ad', span: 'md:col-span-4' }
         ];
-
         const customTexts = JSON.parse(localStorage.getItem('anargya_services_custom')) || {};
         const activeServices = defaultServices.map(srv => {
             if(customTexts[srv.id]) return { ...srv, title: customTexts[srv.id].title, desc: customTexts[srv.id].desc };
@@ -151,7 +139,6 @@
         activeServices.forEach((srv, idx) => {
             const isEvent = srv.id === 'event';
             const extraBtn = isEvent ? `<div class="mt-6"><a href="fgas/index.html" class="inline-flex items-center text-[10px] md:text-xs font-bold text-black uppercase tracking-widest bg-white px-4 md:px-5 py-2 md:py-2.5 rounded-full hover:bg-brand-500 hover:text-white transition-colors">Event Terdekat <i class="fas fa-chevron-right ml-2 text-[8px] md:text-[10px]"></i></a></div>` : '';
-            
             container.innerHTML += `
                 <div data-aos="fade-up" data-aos-delay="${idx * 100}" onclick="openModal('${srv.id}')" class="bento-card p-6 md:p-8 flex flex-col justify-between ${srv.span} group relative overflow-hidden h-full min-h-[220px] md:min-h-[250px]">
                     <div class="absolute -right-10 -bottom-10 opacity-5 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none">
@@ -175,39 +162,25 @@
             const srv = activeServices.find(s => s.id === id);
             document.getElementById('modal-title').innerText = srv.title;
             document.getElementById('modal-desc').innerText = srv.desc;
-            
             const galContainer = document.getElementById('modal-gallery');
             galContainer.innerHTML = '';
             
             if(galleries[id] && galleries[id].length > 0) {
                 galleries[id].forEach(imgUrl => {
-                    galContainer.innerHTML += `
-                        <div class="relative group overflow-hidden rounded-2xl border border-white/10 aspect-[4/3]">
-                            <img src="${imgUrl}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
-                        </div>`;
+                    galContainer.innerHTML += `<div class="relative group overflow-hidden rounded-2xl border border-white/10 aspect-[4/3]"><img src="${imgUrl}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"></div>`;
                 });
             } else {
-                galContainer.innerHTML = `
-                    <div class="col-span-full flex flex-col items-center justify-center py-10 md:py-12 px-4 bg-white/5 rounded-2xl border border-dashed border-white/20">
-                        <i class="fas fa-image text-3xl text-gray-500 mb-3"></i>
-                        <p class="text-gray-400 text-xs md:text-sm text-center">Belum ada foto portofolio.</p>
-                    </div>`;
+                galContainer.innerHTML = `<div class="col-span-full flex flex-col items-center justify-center py-10 md:py-12 px-4 bg-white/5 rounded-2xl border border-dashed border-white/20"><i class="fas fa-image text-3xl text-gray-500 mb-3"></i><p class="text-gray-400 text-xs md:text-sm text-center">Belum ada foto portofolio.</p></div>`;
             }
-
             const modal = document.getElementById('service-modal');
             const content = document.getElementById('modal-content');
             modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                content.classList.remove('scale-95');
-            }, 10);
+            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
         }
-
         function closeModal() {
             const modal = document.getElementById('service-modal');
             const content = document.getElementById('modal-content');
-            modal.classList.add('opacity-0');
-            content.classList.add('scale-95');
+            modal.classList.add('opacity-0'); content.classList.add('scale-95');
             setTimeout(() => { modal.classList.add('hidden'); }, 300);
         }
     </script>

@@ -7,34 +7,27 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
-        body { background: #000; color: #fff; overflow: hidden; font-family: 'Orbitron', sans-serif; }
+        body { background: #000; color: #fff; overflow-x: hidden; font-family: 'Orbitron', sans-serif; }
         .slot-machine { font-size: 7vw; line-height: 1.1; font-weight: 900; letter-spacing: 5px; text-shadow: 0 0 30px rgba(6,182,212,0.8); }
         .bg-cyber { background: radial-gradient(circle at 50% 50%, #0f172a 0%, #000 100%); }
         .glass-box { background: rgba(15,23,42,0.8); border: 2px solid #06b6d4; box-shadow: 0 0 50px rgba(6,182,212,0.4); border-radius: 40px; }
         
-        /* Flex container for top logos so they don't overlap with center */
         .top-logos-container { display: flex; justify-content: space-between; align-items: flex-start; padding: 2rem; width: 100%; position: relative; z-index: 20;}
     </style>
 </head>
-<body class="flex flex-col h-screen w-screen bg-cyber relative">
+<body class="flex flex-col min-h-screen w-full bg-cyber relative">
     
     <div class="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwb2x5Z29uIHBvaW50cz0iMCAwIDQwIDAgNDAgMSA0MCAxIDAgMSIgZmlsbD0iIzBiYmZlZSIvPjxwb2x5Z29uIHBvaW50cz0iMCAwIDEgMCAxIDQwIDEgNDAgMCA0MCIgZmlsbD0iIzBiYmZlZSIvPjwvc3ZnPg==')] pointer-events-none"></div>
 
-    <!-- Top Logos structured in Flexbox -->
     <div class="top-logos-container">
-        <!-- Left: empty or specific if needed -->
         <div></div>
-        <!-- Center: Dynamic Admin Logo -->
         <div class="flex flex-col items-center">
             <img id="raffle-logo" src="" class="h-28 object-contain hidden drop-shadow-[0_0_20px_rgba(255,255,255,0.6)]">
         </div>
-        <!-- Right: Top Right Logos (Pemkab & BKD) -->
         <div id="top-right-logos" class="flex gap-4"></div>
     </div>
 
-    <!-- Main Content Centered -->
     <div class="flex-grow flex flex-col items-center justify-center relative z-10 px-10 pb-20">
-        
         <h1 class="text-[4vw] font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 tracking-widest uppercase text-center leading-tight drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]">
             PENGUNDIAN DOORPRIZE<br><span class="text-[2vw] text-white tracking-[0.5em]">FGAS BOYOLALI 2026</span>
         </h1>
@@ -45,7 +38,6 @@
             <div id="winner-name" class="slot-machine text-white uppercase w-full">?????</div>
         </div>
 
-        <!-- Alert Text -->
         <div class="mt-8 bg-red-600/20 border border-red-500 p-4 rounded-xl text-center animate-pulse shadow-[0_0_30px_rgba(220,38,38,0.4)]">
             <p class="text-[2vw] text-red-400 tracking-widest font-black uppercase">PANGGILAN 3X TIDAK HADIR = HADIAH HANGUS!</p>
         </div>
@@ -53,14 +45,11 @@
         <button onclick="startRaffleSequence()" id="btn-start" class="mt-10 bg-blue-600 border-2 border-cyan-400 text-white px-12 py-5 rounded-full text-2xl font-black hover:bg-blue-500 shadow-[0_0_40px_rgba(6,182,212,0.8)] cursor-pointer tracking-widest transition-transform hover:scale-105">
             MULAI (15 DETIK)
         </button>
-
     </div>
 
-    <!-- Sponsor Logos (Bottom Fixed) -->
     <div id="sponsor-logos" class="absolute bottom-6 w-full flex justify-center items-center gap-8 z-20 px-10 flex-wrap"></div>
 
     <script>
-        // Load Logos
         const savedMainLogo = localStorage.getItem('fgas_raffle_logo');
         if(savedMainLogo) {
             const logoEl = document.getElementById('raffle-logo');
@@ -116,12 +105,8 @@
         function startRaffleSequence() {
             window.addEventListener('storage', () => {}); // refresh listener
             
-            // Check Doorprize stock if configured in admin
             let stock = parseInt(localStorage.getItem('fgas_doorprize_stock') || "999");
-            if(stock <= 0) {
-                alert("STOK HADIAH HABIS!");
-                return;
-            }
+            if(stock <= 0) { alert("STOK HADIAH HABIS!"); return; }
             
             audioCtx.resume();
             document.getElementById('btn-start').style.display = 'none';
@@ -167,11 +152,7 @@
             document.getElementById('winner-name').style.color = '#4ade80';
             document.getElementById('winner-name').style.textShadow = '0 0 50px rgba(74,222,128,1)';
             
-            // Decrement Stock
-            if(stock !== 999) {
-                localStorage.setItem('fgas_doorprize_stock', stock - 1);
-            }
-            
+            if(stock !== 999) { localStorage.setItem('fgas_doorprize_stock', stock - 1); }
             setTimeout(() => { document.getElementById('btn-start').style.display = 'block'; }, 5000);
         }
     </script>

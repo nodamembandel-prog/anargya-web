@@ -5,9 +5,9 @@
     <title>Live Preview Pengunjung - FGAS 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style> body { background: #020617; font-family: 'Inter', sans-serif; } .glass-card { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); } </style>
+    <style> body { background: #020617; font-family: 'Inter', sans-serif; overflow-x: hidden; } .glass-card { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); } </style>
 </head>
-<body class="text-white p-4 md:p-8 min-h-screen relative">
+<body class="text-white p-4 md:p-8 min-h-screen relative w-full">
     
     <div class="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwb2x5Z29uIHBvaW50cz0iMCAwIDQwIDAgNDAgMSA0MCAxIDAgMSIgZmlsbD0iIzBiYmZlZSIvPjxwb2x5Z29uIHBvaW50cz0iMCAwIDEgMCAxIDQwIDEgNDAgMCA0MCIgZmlsbD0iIzBiYmZlZSIvPjwvc3ZnPg==')] pointer-events-none"></div>
 
@@ -21,7 +21,7 @@
                 <p class="text-xs text-slate-400 mt-2 tracking-widest uppercase">Live Traffic Dashboard</p>
             </div>
             <div class="flex items-center gap-4">
-                <img src="../logo_pemkab.png" class="h-10 md:h-12 object-contain drop-shadow-lg" onerror="this.src='../logo_pemkab.jpg'">
+                <img src="../logo_pemkab.png" class="h-10 md:h-12 object-contain rounded bg-white p-1" onerror="this.src='../logo_pemkab.jpg'">
             </div>
         </div>
 
@@ -57,12 +57,17 @@
     </div>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwz3ebZOsF6qDjFlrcapiv-ElcUT1CKtFnhDkAMsLndQHGD8G3fldUrVBkBAfRMe7x1/exec'; 
+        
+        const _0xUrl = 'aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J3ejNlYlpPc0Y2cURqRmxyY2FwaXYtRWxjVVQxQ0t0Rm5oRGtBTXNMbmRRSEdEOEczZmxkVXJWQmtCQWZSTWU3eDEvZXhlYw==';
+        const SCRIPT_URL = atob(_0xUrl);
+        const APP_TOKEN = 'FGAS_SECRET_2026';
+
+        
         let typeChartInstance, ageChartInstance;
 
         async function fetchLive() {
             try {
-                const res = await fetch(SCRIPT_URL);
+                const res = await fetch(SCRIPT_URL + "?token=" + APP_TOKEN);
                 const data = await res.json();
                 if(data.visitors) renderDashboard(data.visitors);
                 
@@ -70,9 +75,7 @@
                 s.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online: Sync Active';
                 s.classList.remove('opacity-0');
                 setTimeout(() => s.classList.add('opacity-0'), 3000);
-            } catch(e) {
-                // silent fail, don't interrupt UI
-            }
+            } catch(e) {}
         }
 
         function renderDashboard(visitors) {

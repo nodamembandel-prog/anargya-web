@@ -4,13 +4,11 @@
     <meta charset="UTF-8">
     <title>VJ Control Panel - FGAS 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style> @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap'); body { background: #0f172a; color: white; font-family: sans-serif; } .vj-panel { background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); transition: bottom 0.3s ease; } .vj-panel:hover { bottom: 0 !important; } </style>
+    <style> @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap'); body { background: #0f172a; color: white; font-family: sans-serif; } .vj-panel { background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); transition: bottom 0.3s ease; } .vj-panel:hover { bottom: 0 !important; } input {font-size:16px;} </style>
 </head>
 <body class="h-screen w-screen overflow-hidden">
-    <!-- The iframe serving the actual visual -->
     <iframe id="display-frame" src="raffle.html" class="w-full h-full border-none"></iframe>
 
-    <!-- VJ Controller (Hidden at bottom) -->
     <div class="vj-panel fixed left-0 w-full p-6 border-t border-blue-500/50 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] z-50 flex flex-col gap-4" style="bottom: -85vh; height: 90vh;">
         <div class="flex justify-between items-center border-b border-white/10 pb-2">
             <h2 class="font-bold text-xl text-cyan-400"><i class="fas fa-sliders-h mr-2"></i> VJ CONTROL PANEL (Arahkan mouse ke bawah untuk membuka)</h2>
@@ -18,7 +16,6 @@
         </div>
         
         <div class="grid grid-cols-2 gap-8 h-full overflow-y-auto pb-10">
-            <!-- Doorprize Control -->
             <div class="bg-white/5 p-6 rounded-xl border border-white/10 space-y-4">
                 <h3 class="font-bold text-orange-400 text-lg border-b border-white/10 pb-2">1. PENGUNDIAN DOORPRIZE</h3>
                 <input type="text" id="target-winner" class="w-full p-3 bg-black/50 border border-white/20 rounded text-white" placeholder="Nama / ID Pemenang">
@@ -28,7 +25,6 @@
                 <button onclick="document.getElementById('display-frame').src='raffle.html'" class="w-full bg-slate-700 hover:bg-slate-600 py-3 rounded font-bold transition text-xs">RESET TAMPILAN UNDIAN</button>
             </div>
 
-            <!-- Lomba Control -->
             <div class="bg-white/5 p-6 rounded-xl border border-white/10 space-y-4">
                 <h3 class="font-bold text-pink-400 text-lg border-b border-white/10 pb-2">2. PENGUMUMAN JUARA LOMBA</h3>
                 <p class="text-xs text-gray-400">Atur pemenang dan tampilkan podium dramatis di Layar LED.</p>
@@ -52,7 +48,6 @@
             document.getElementById('display-frame').src = 'raffle.html';
         }
 
-        // We simulate a podium view inside the iframe using data uris or rewriting doc
         function triggerPodium() {
             const lomba = document.getElementById('kategori-lomba').value;
             const j1 = document.getElementById('juara-1').value;
