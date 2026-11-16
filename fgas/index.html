@@ -172,26 +172,20 @@
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs md:text-sm font-bold text-blue-300 uppercase tracking-wider mb-1">NIK / Kartu Pelajar</label>
-                                <input type="text" id="nik" class="w-full p-3.5 input-dark text-base rounded-xl" placeholder="Nomor Identitas">
-                            </div>
-                            <div>
                                 <label class="block text-xs md:text-sm font-bold text-blue-300 uppercase tracking-wider mb-1">No WhatsApp / HP</label>
                                 <input type="number" id="hp" class="w-full p-3.5 input-dark text-base rounded-xl" placeholder="08...">
                             </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs md:text-sm font-bold text-blue-300 uppercase tracking-wider mb-1">Umur (Tahun)</label>
                                 <input type="number" id="umur" class="w-full p-3.5 input-dark text-base rounded-xl" placeholder="Contoh: 25">
                             </div>
-                            <div>
-                                <label class="block text-xs md:text-sm font-bold text-blue-300 uppercase tracking-wider mb-1">Jenis Kelamin</label>
-                                <select id="gender" class="w-full p-3.5 input-dark font-bold text-blue-100 text-base rounded-xl">
-                                    <option value="Laki-laki" class="bg-slate-900">Laki-laki</option>
-                                    <option value="Perempuan" class="bg-slate-900">Perempuan</option>
-                                </select>
-                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs md:text-sm font-bold text-blue-300 uppercase tracking-wider mb-1">Jenis Kelamin</label>
+                            <select id="gender" class="w-full p-3.5 input-dark font-bold text-blue-100 text-base rounded-xl">
+                                <option value="Laki-laki" class="bg-slate-900">Laki-laki</option>
+                                <option value="Perempuan" class="bg-slate-900">Perempuan</option>
+                            </select>
                         </div>
                         <div>
                             <label class="block text-xs md:text-sm font-bold text-blue-300 uppercase tracking-wider mb-1">Alamat Domisili</label>
@@ -293,7 +287,9 @@
         function checkQuotas() {
             const quotas = JSON.parse(localStorage.getItem('fgas_quotas')) || {};
             const visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
+            const inactiveLombas = JSON.parse(localStorage.getItem('fgas_inactive_lombas')) || [];
             const counts = {};
+            
             visitors.forEach(v => {
                 const baseType = v.type.split(' - ')[0].split(' (')[0];
                 counts[baseType] = (counts[baseType] || 0) + 1;
@@ -302,15 +298,28 @@
             const select = document.getElementById('reg-type');
             Array.from(select.options).forEach(opt => {
                 const type = opt.value;
-                if (type !== 'Pengunjung' && quotas[type]) {
+                if (inactiveLombas.includes(type)) {
+                    opt.style.display = 'none';
+                    opt.disabled = true;
+                } else if (type !== 'Pengunjung' && quotas[type]) {
                     const max = parseInt(quotas[type]);
                     if ((counts[type] || 0) >= max) {
                         opt.disabled = true;
                         opt.text = type + ' (KUOTA HABIS)';
                         opt.classList.add('text-red-400');
                     }
+                } else {
+                    opt.style.display = '';
+                    opt.disabled = false;
+                    opt.text = type === 'Pengunjung' ? 'Pengunjung (Doorprize Umum)' : type;
+                    opt.classList.remove('text-red-400');
                 }
             });
+            
+            if(select.options[select.selectedIndex] && select.options[select.selectedIndex].disabled) {
+                select.value = 'Pengunjung';
+                handleCategoryChange();
+            }
         }
         window.addEventListener('DOMContentLoaded', () => {
             checkQuotas();
@@ -358,17 +367,17 @@
             const btn = document.getElementById('submit-btn');
             let baseType = document.getElementById('reg-type').value;
             const nama = document.getElementById('nama').value.trim();
-            const nik = document.getElementById('nik').value.trim();
+            const nik = '-';
             const umur = document.getElementById('umur').value.trim();
             const gender = document.getElementById('gender').value;
             const hp = document.getElementById('hp').value.trim();
             const alamat = document.getElementById('alamat').value.trim();
 
-            if(!nama || !hp || !nik || !umur) { showCustomAlert("Semua data wajib di isi dengan benar !"); return; }
+            if(!nama || !hp || !umur) { showCustomAlert("Semua data wajib di isi dengan benar !"); return; }
 
             let visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
-            if(visitors.some(v => v.nik === nik || v.hp === hp) && baseType === 'Pengunjung') {
-                showCustomAlert("MAAF! NIK atau Nomor HP ini sudah terdaftar. 1 Identitas = 1 Undian."); return;
+            if(visitors.some(v => v.hp === hp) && baseType === 'Pengunjung') {
+                showCustomAlert("MAAF! Nomor HP ini sudah terdaftar. 1 Identitas = 1 Undian."); return;
             }
 
             const quotas = JSON.parse(localStorage.getItem('fgas_quotas')) || {};
