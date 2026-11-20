@@ -89,20 +89,6 @@
                 <div class="bg-orange-500/20 border border-orange-500/50 px-4 py-2 rounded-lg flex items-center gap-2 animate-pulse"><i class="fas fa-tag text-orange-400"></i><span class="text-sm font-bold text-orange-400 tracking-widest uppercase">SEMUA LOMBA GRATIS!</span></div>
             </div>
             
-            <!-- TOMBOL KHUSUS PENGUNJUNG / DOORPRIZE -->
-            <div class="mb-6 max-w-lg">
-                <a href="pengunjung.html" class="w-full flex items-center justify-between bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-slate-950 font-black px-6 py-4 rounded-2xl shadow-[0_0_25px_rgba(249,115,22,0.5)] transition transform hover:scale-[1.02]">
-                    <div class="flex items-center gap-3">
-                        <i class="fas fa-ticket-alt text-2xl"></i>
-                        <div class="text-left">
-                            <span class="block text-sm md:text-base uppercase tracking-wider leading-tight">DAFTAR PENGUNJUNG (DOORPRIZE)</span>
-                            <span class="block text-[11px] font-bold opacity-90">Klik di sini untuk ambil Barcode Undian Gratis!</span>
-                        </div>
-                    </div>
-                    <i class="fas fa-chevron-right text-xl"></i>
-                </a>
-            </div>
-
             <!-- VIDEO AUTOPLAY LANDSCAPE (16:9) -->
             <div id="video-section" class="hidden mb-8 max-w-lg w-full">
                 <div class="glass-panel p-2 rounded-2xl border border-cyan-500/40 shadow-[0_0_25px_rgba(6,182,212,0.2)]">
@@ -424,9 +410,7 @@
             if(!nama || !hp || !umur) { showCustomAlert("Semua data wajib di isi dengan benar !"); return; }
 
             let visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
-            if(visitors.some(v => v.hp === hp) && baseType === 'Pengunjung') {
-                showCustomAlert("MAAF! Nomor HP ini sudah terdaftar. 1 Identitas = 1 Undian."); return;
-            }
+            // Lomba registration allows participants to register for competitions
 
             const quotas = JSON.parse(localStorage.getItem('fgas_quotas')) || {};
             const counts = {};
