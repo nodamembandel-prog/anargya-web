@@ -332,6 +332,7 @@
             const quotas = JSON.parse(localStorage.getItem('fgas_quotas')) || {};
             const visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
             const inactiveLombas = JSON.parse(localStorage.getItem('fgas_inactive_lombas')) || [];
+            const closedLombas = JSON.parse(localStorage.getItem('fgas_closed_lombas')) || [];
             const counts = {};
 
             visitors.forEach(v => {
@@ -344,27 +345,30 @@
             const prevVal = select.value;
             select.innerHTML = '';
 
-            let activeCount = 0;
+            let openCount = 0;
             ALL_LOMBA_LIST.forEach(type => {
-                // Actually omit unchecked lomba from DOM (fixes iOS/Safari & Chrome)
                 if (inactiveLombas.includes(type)) return;
 
-                activeCount++;
                 const opt = document.createElement('option');
                 opt.value = type;
                 opt.className = 'bg-slate-900';
 
-                if (quotas[type] && (counts[type] || 0) >= parseInt(quotas[type])) {
+                if (closedLombas.includes(type)) {
+                    opt.disabled = true;
+                    opt.text = type + ' (CLOSED / DITUTUP)';
+                    opt.classList.add('text-red-400');
+                } else if (quotas[type] && (counts[type] || 0) >= parseInt(quotas[type])) {
                     opt.disabled = true;
                     opt.text = type + ' (KUOTA HABIS)';
                     opt.classList.add('text-red-400');
                 } else {
+                    openCount++;
                     opt.text = type;
                 }
                 select.appendChild(opt);
             });
 
-            if (activeCount === 0) {
+            if (openCount === 0) {
                 const opt = document.createElement('option');
                 opt.value = '';
                 opt.text = 'Semua kategori lomba sedang ditutup';
@@ -394,6 +398,7 @@
                 if (data.settings) {
                     if (data.settings.fgas_quotas) localStorage.setItem('fgas_quotas', data.settings.fgas_quotas);
                     if (data.settings.fgas_inactive_lombas) localStorage.setItem('fgas_inactive_lombas', data.settings.fgas_inactive_lombas);
+                    if (data.settings.fgas_closed_lombas) localStorage.setItem('fgas_closed_lombas', data.settings.fgas_closed_lombas);
                     if (data.settings.fgas_close_lomba !== undefined) localStorage.setItem('fgas_close_lomba', String(data.settings.fgas_close_lomba));
                 }
                 checkQuotas();
