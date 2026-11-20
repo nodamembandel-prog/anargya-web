@@ -232,7 +232,7 @@
             btn.disabled = true;
 
             const ticketId = 'FGAS-' + Math.floor(Math.random() * 1000000);
-            const data = { action: 'register', token: APP_TOKEN, type: 'Pengunjung', nama, nik: '-', hp, alamat, umur, gender, ticketId };
+            const data = { action: 'register', token: APP_TOKEN, type: 'Pengunjung', nama, nik: '-', hp, alamat, umur, gender, ticketId, Timestamp: new Date().toISOString() };
 
             try {
                 visitors.push(data);

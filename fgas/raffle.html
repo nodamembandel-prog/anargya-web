@@ -249,9 +249,21 @@
             const visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
             const drawnTickets = JSON.parse(localStorage.getItem('fgas_drawn_tickets')) || [];
 
+            const hours = (payload && payload.hoursFilter !== undefined)
+                ? parseFloat(payload.hoursFilter)
+                : parseFloat(localStorage.getItem('fgas_raffle_hours') || "0");
+            const cutoff = hours > 0 ? (Date.now() - hours * 3600 * 1000) : 0;
+
             eligibleVisitorsGlobal = visitors.filter(v => {
                 const tid = v.ticketId || v.TicketID;
-                return !drawnTickets.includes(tid);
+                if (drawnTickets.includes(tid)) return false;
+                if (hours > 0) {
+                    const tsRaw = v.Timestamp || v.timestamp;
+                    if (!tsRaw) return false;
+                    const t = new Date(tsRaw).getTime();
+                    if (isNaN(t) || t < cutoff) return false;
+                }
+                return true;
             });
 
             if(eligibleVisitorsGlobal.length > 0) {
