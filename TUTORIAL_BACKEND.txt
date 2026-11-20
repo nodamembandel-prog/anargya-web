@@ -1,7 +1,7 @@
-=== TUTORIAL UPDATE DATABASE GOOGLE SHEETS (WAJIB DIBACA) ===
+=== TUTORIAL UPDATE DATABASE GOOGLE SHEETS (V40 - SYNC PENGATURAN & TUTUP PENDAFTARAN) ===
 
-Sistem telah di-upgrade untuk melacak NAMA BOOTH (TENANT) yang mencairkan voucher.
-Anda WAJIB memperbarui kode Apps Script Anda sekali lagi.
+Agar pengaturan "Aktifasi Lomba (Centang)", "Kuota Lomba", dan "Tutup Pendaftaran" di Admin Internal
+langsung berlaku di SEMUA HP pengunjung (tidak hanya di laptop Admin), Anda WAJIB update kode Apps Script ini.
 
 LANGKAH 1: BUKA GOOGLE SHEETS ANDA
 1. Buka file Google Sheets "Database Event FGAS 2026".
@@ -26,11 +26,16 @@ function setupSheets() {
     s2 = ss.insertSheet('Voucher');
     s2.appendRow(['Timestamp', 'VoucherID', 'Nominal', 'Status', 'Tenant']);
   } else {
-    // Ensure Tenant column exists
     const headers = s2.getRange(1, 1, 1, s2.getLastColumn()).getValues()[0];
     if(headers.indexOf('Tenant') === -1) {
       s2.getRange(1, 5).setValue('Tenant');
     }
+  }
+
+  let s3 = ss.getSheetByName('Settings');
+  if(!s3) {
+    s3 = ss.insertSheet('Settings');
+    s3.appendRow(['Key', 'Value']);
   }
 }
 
@@ -72,6 +77,31 @@ function doPost(e) {
       }
       return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": "Voucher tidak valid"})).setMimeType(ContentService.MimeType.JSON);
     }
+
+    if(data.action === 'save_settings') {
+      let sheet = ss.getSheetByName('Settings');
+      if(!sheet) {
+        sheet = ss.insertSheet('Settings');
+        sheet.appendRow(['Key', 'Value']);
+      }
+      const settingsObj = data.settings || {};
+      const rows = sheet.getDataRange().getValues();
+      Object.keys(settingsObj).forEach(k => {
+        const valStr = typeof settingsObj[k] === 'string' ? settingsObj[k] : JSON.stringify(settingsObj[k]);
+        let found = false;
+        for(let i=1; i<rows.length; i++) {
+          if(rows[i][0] === k) {
+            sheet.getRange(i+1, 2).setValue(valStr);
+            found = true;
+            break;
+          }
+        }
+        if(!found) {
+          sheet.appendRow([k, valStr]);
+        }
+      });
+      return ContentService.createTextOutput(JSON.stringify({"status": "success"})).setMimeType(ContentService.MimeType.JSON);
+    }
   } catch(error) {
     return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": error.toString()})).setMimeType(ContentService.MimeType.JSON);
   }
@@ -107,8 +137,17 @@ function doGet(e) {
       vouchers.push(obj);
     }
   }
+
+  const sheetSet = ss.getSheetByName('Settings');
+  const setData = sheetSet ? sheetSet.getDataRange().getValues() : [];
+  const settings = {};
+  if(setData.length > 1) {
+    for (let i = 1; i < setData.length; i++) {
+      if(setData[i][0]) settings[setData[i][0]] = setData[i][1];
+    }
+  }
   
-  return ContentService.createTextOutput(JSON.stringify({ visitors: visitors, vouchers: vouchers })).setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify({ visitors: visitors, vouchers: vouchers, settings: settings })).setMimeType(ContentService.MimeType.JSON);
 }
 // --- AKHIR COPY ---
 

@@ -150,6 +150,12 @@
         <!-- Form Section -->
         <div class="lg:col-span-5 w-full pointer-events-auto">
             <div class="glass-panel p-6 md:p-8 rounded-3xl w-full">
+                <div id="closed-section" class="hidden text-center py-10">
+                    <div class="w-20 h-20 mx-auto mb-4 bg-red-500/20 text-red-400 rounded-full flex items-center justify-center text-4xl border border-red-500/40"><i class="fas fa-lock"></i></div>
+                    <h3 class="text-2xl title-sport uppercase text-red-400 tracking-wider mb-2">Pendaftaran Ditutup</h3>
+                    <p class="text-sm text-blue-200 font-semibold leading-relaxed">Mohon maaf, pendaftaran lomba FGAS 2026 saat ini telah ditutup oleh panitia.</p>
+                </div>
+
                 <div id="form-section">
                     <div class="flex justify-between items-center mb-6 border-b border-blue-500/30 pb-4">
                         <div>
@@ -297,46 +303,105 @@
         updateTimer();
         setInterval(updateTimer, 1000);
 
+        const ALL_LOMBA_LIST = [
+            "Lomba Modifikasi Mobil",
+            "Lomba Modifikasi Motor",
+            "Lomba Komunitas Mobil",
+            "Lomba Komunitas Motor",
+            "Lomba Mewarnai Anak",
+            "Lomba Fashion Show Anak",
+            "Senam Sehat",
+            "Lomba Kostum Unik Senam"
+        ];
+
         function checkQuotas() {
+            const isClosed = localStorage.getItem('fgas_close_lomba') === 'true';
+            const formSec = document.getElementById('form-section');
+            const closedSec = document.getElementById('closed-section');
+            const qrSec = document.getElementById('qrcode-container');
+
+            if (isClosed && qrSec.classList.contains('hidden')) {
+                formSec.classList.add('hidden');
+                closedSec.classList.remove('hidden');
+                return;
+            } else if (!isClosed && qrSec.classList.contains('hidden')) {
+                closedSec.classList.add('hidden');
+                formSec.classList.remove('hidden');
+            }
+
             const quotas = JSON.parse(localStorage.getItem('fgas_quotas')) || {};
             const visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
             const inactiveLombas = JSON.parse(localStorage.getItem('fgas_inactive_lombas')) || [];
             const counts = {};
-            
+
             visitors.forEach(v => {
-                const baseType = v.type.split(' - ')[0].split(' (')[0];
-                counts[baseType] = (counts[baseType] || 0) + 1;
+                const rawType = String(v.Type || v.type || '');
+                const baseType = rawType.split(' - ')[0].split(' (')[0].trim();
+                if(baseType) counts[baseType] = (counts[baseType] || 0) + 1;
             });
 
             const select = document.getElementById('reg-type');
-            Array.from(select.options).forEach(opt => {
-                const type = opt.value;
-                if (inactiveLombas.includes(type)) {
-                    opt.style.display = 'none';
+            const prevVal = select.value;
+            select.innerHTML = '';
+
+            let activeCount = 0;
+            ALL_LOMBA_LIST.forEach(type => {
+                // Actually omit unchecked lomba from DOM (fixes iOS/Safari & Chrome)
+                if (inactiveLombas.includes(type)) return;
+
+                activeCount++;
+                const opt = document.createElement('option');
+                opt.value = type;
+                opt.className = 'bg-slate-900';
+
+                if (quotas[type] && (counts[type] || 0) >= parseInt(quotas[type])) {
                     opt.disabled = true;
-                } else if (type !== 'Pengunjung' && quotas[type]) {
-                    const max = parseInt(quotas[type]);
-                    if ((counts[type] || 0) >= max) {
-                        opt.disabled = true;
-                        opt.text = type + ' (KUOTA HABIS)';
-                        opt.classList.add('text-red-400');
-                    }
+                    opt.text = type + ' (KUOTA HABIS)';
+                    opt.classList.add('text-red-400');
                 } else {
-                    opt.style.display = '';
-                    opt.disabled = false;
-                    opt.text = type === 'Pengunjung' ? 'Pengunjung (Doorprize Umum)' : type;
-                    opt.classList.remove('text-red-400');
+                    opt.text = type;
                 }
+                select.appendChild(opt);
             });
-            
-            if(select.options[select.selectedIndex] && select.options[select.selectedIndex].disabled) {
-                const firstEnabled = Array.from(select.options).find(o => !o.disabled); if(firstEnabled) select.value = firstEnabled.value;
-                handleCategoryChange();
+
+            if (activeCount === 0) {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.text = 'Semua kategori lomba sedang ditutup';
+                opt.disabled = true;
+                opt.selected = true;
+                select.appendChild(opt);
+                document.getElementById('submit-btn').disabled = true;
+            } else {
+                document.getElementById('submit-btn').disabled = false;
+                if (Array.from(select.options).some(o => o.value === prevVal && !o.disabled)) {
+                    select.value = prevVal;
+                } else {
+                    const firstEnabled = Array.from(select.options).find(o => !o.disabled);
+                    if (firstEnabled) select.value = firstEnabled.value;
+                }
             }
+            handleCategoryChange();
+        }
+
+        async function syncLiveFromSheet() {
+            try {
+                const res = await fetch(SCRIPT_URL + '?token=' + APP_TOKEN);
+                const data = await res.json();
+                if (data.visitors) {
+                    localStorage.setItem('fgas_visitors', JSON.stringify(data.visitors));
+                }
+                if (data.settings) {
+                    if (data.settings.fgas_quotas) localStorage.setItem('fgas_quotas', data.settings.fgas_quotas);
+                    if (data.settings.fgas_inactive_lombas) localStorage.setItem('fgas_inactive_lombas', data.settings.fgas_inactive_lombas);
+                    if (data.settings.fgas_close_lomba !== undefined) localStorage.setItem('fgas_close_lomba', String(data.settings.fgas_close_lomba));
+                }
+                checkQuotas();
+            } catch(e) { console.log("Sheet sync fallback:", e); }
         }
         window.addEventListener('DOMContentLoaded', () => {
             checkQuotas();
-            handleCategoryChange();
+            syncLiveFromSheet();
 
             // Load Rundown PNG Portrait (default: rundown.png, overrideable via Admin)
             const customRundown = localStorage.getItem('fgas_rundown_image');
@@ -412,7 +477,7 @@
 
             const quotas = JSON.parse(localStorage.getItem('fgas_quotas')) || {};
             const counts = {};
-            visitors.forEach(v => { counts[v.type.split(' - ')[0].split(' (')[0]] = (counts[v.type.split(' - ')[0].split(' (')[0]] || 0) + 1; });
+            visitors.forEach(v => { const bt = String(v.Type || v.type || '').split(' - ')[0].split(' (')[0].trim(); if(bt) counts[bt] = (counts[bt] || 0) + 1; });
             if (baseType !== 'Pengunjung' && quotas[baseType] && counts[baseType] >= parseInt(quotas[baseType])) {
                 showCustomAlert(`MAAF! Kuota pendaftaran untuk ${baseType} sudah penuh.`); return;
             }

@@ -66,6 +66,12 @@
         </div>
 
         <div class="glass-panel p-6 md:p-8 rounded-3xl w-full">
+            <div id="closed-section" class="hidden text-center py-10">
+                <div class="w-20 h-20 mx-auto mb-4 bg-red-500/20 text-red-400 rounded-full flex items-center justify-center text-4xl border border-red-500/40"><i class="fas fa-lock"></i></div>
+                <h3 class="text-2xl title-sport uppercase text-red-400 tracking-wider mb-2">Pendaftaran Ditutup</h3>
+                <p class="text-sm text-blue-200 font-semibold leading-relaxed">Mohon maaf, pendaftaran pengunjung FGAS 2026 saat ini telah ditutup oleh panitia.</p>
+            </div>
+
             <div id="form-section">
                 <div class="text-center mb-6 border-b border-blue-500/30 pb-4">
                     <h1 class="text-2xl md:text-3xl title-sport uppercase text-cyan-400 tracking-wider mb-1">Tiket Pengunjung</h1>
@@ -177,6 +183,35 @@
             modal.classList.add('opacity-0'); box.classList.add('scale-95');
             setTimeout(() => { modal.classList.add('hidden'); }, 300);
         }
+
+                function applyClosedState() {
+            const isClosed = localStorage.getItem('fgas_close_pengunjung') === 'true';
+            const qrHidden = document.getElementById('qrcode-container').classList.contains('hidden');
+            if (isClosed && qrHidden) {
+                document.getElementById('form-section').classList.add('hidden');
+                document.getElementById('closed-section').classList.remove('hidden');
+            } else if (!isClosed && qrHidden) {
+                document.getElementById('closed-section').classList.add('hidden');
+                document.getElementById('form-section').classList.remove('hidden');
+            }
+        }
+
+        async function syncPengunjungSheet() {
+            try {
+                const res = await fetch(SCRIPT_URL + '?token=' + APP_TOKEN);
+                const data = await res.json();
+                if (data.visitors) localStorage.setItem('fgas_visitors', JSON.stringify(data.visitors));
+                if (data.settings && data.settings.fgas_close_pengunjung !== undefined) {
+                    localStorage.setItem('fgas_close_pengunjung', String(data.settings.fgas_close_pengunjung));
+                }
+                applyClosedState();
+            } catch(e) {}
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            applyClosedState();
+            syncPengunjungSheet();
+        });
 
         async function registerPengunjung() {
             const btn = document.getElementById('submit-btn');
