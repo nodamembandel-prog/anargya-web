@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pendaftaran Pengunjung & Doorprize - FGAS 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;600;700&display=swap');
+        html, body { max-width: 100%; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+        body { background-color: #020617; font-family: 'Rajdhani', sans-serif; width: 100%; margin: 0; padding: 0; }
+        input, select, textarea { font-size: 16px !important; border-radius: 0.75rem !important; -webkit-appearance: none; -moz-appearance: none; appearance: none; box-sizing: border-box; }
+
+        /* ULTRA-SMOOTH iOS CSS */
+        .sport-bg { position: fixed; inset: 0; z-index: -2; background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%); background-size: cover; background-position: center; }
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: -1; opacity: 0.15;
+            background-size: 50px 50px;
+            background-image: linear-gradient(to right, #3b82f6 1px, transparent 1px), linear-gradient(to bottom, #3b82f6 1px, transparent 1px);
+            animation: gridPan 20s linear infinite;
+        }
+        @keyframes gridPan { 0% { background-position: 0 0; } 100% { background-position: 50px 50px; } }
+
+        .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(59, 130, 246, 0.4); box-shadow: 0 0 40px rgba(59, 130, 246, 0.15); }
+        .input-dark { background: rgba(2, 6, 23, 0.8); border: 1px solid rgba(59, 130, 246, 0.5); color: white; width: 100%; }
+        .input-dark:focus { border-color: #06b6d4; outline: none; background: rgba(2, 6, 23, 0.95); box-shadow: 0 0 15px rgba(6, 182, 212, 0.4); }
+        .title-sport { font-family: 'Orbitron', sans-serif; letter-spacing: 2px; line-height: 1.1; }
+
+        .checkmark__circle { stroke-dasharray: 166; stroke-dashoffset: 166; stroke-width: 2; stroke-miterlimit: 10; stroke: #06b6d4; fill: none; animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards; }
+        .checkmark { width: 80px; height: 80px; border-radius: 50%; display: block; stroke-width: 2; stroke: #fff; stroke-miterlimit: 10; margin: 0 auto 20px auto; box-shadow: inset 0px 0px 0px #06b6d4; animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both; }
+        .checkmark__check { transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48; animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards; }
+        @keyframes stroke { 100% { stroke-dashoffset: 0; } }
+        @keyframes scale { 0%, 100% { transform: none; } 50% { transform: scale3d(1.1, 1.1, 1); } }
+        @keyframes fill { 100% { box-shadow: inset 0px 0px 0px 50px #06b6d4; } }
+
+        @media print {
+            body * { visibility: hidden; }
+            #print-ticket-area, #print-ticket-area * { visibility: visible; }
+            #print-ticket-area { position: absolute; left: 50%; top: 50px; transform: translateX(-50%); width: 100%; text-align: center; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="text-white min-h-screen flex flex-col relative pb-10 w-full overflow-x-hidden">
+
+    <div id="dynamic-bg" class="sport-bg no-print"></div>
+    <div class="grid-overlay no-print"></div>
+
+    <!-- HEADER LOGOS -->
+    <div class="flex justify-between items-center w-full p-4 lg:p-6 relative z-50 no-print border-b border-slate-800/50 mb-4 bg-slate-900/30 backdrop-blur-sm">
+        <img src="../logo_pengundian.png" class="h-10 md:h-14 object-contain drop-shadow-md" onerror="this.onerror=null; this.src='logo_pengundian.png';">
+        <div class="flex flex-col items-center flex-1 mx-4">
+            <img src="../logo_fgas.png" class="h-14 md:h-20 object-contain drop-shadow-[0_0_15px_rgba(6,182,212,0.6)]" onerror="this.onerror=null; this.src='logo_fgas.png';">
+        </div>
+        <img src="../logo_pemkab.png" class="h-10 md:h-14 object-contain drop-shadow-md" onerror="this.onerror=null; this.src='../logo_pemkab.jpg';">
+    </div>
+
+    <div class="w-full max-w-xl mx-auto flex-grow relative z-10 px-4 pt-2 no-print">
+        <div class="mb-4 flex justify-between items-center">
+            <a href="index.html" class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-cyan-400 hover:text-white transition bg-slate-900/70 px-4 py-2 rounded-full border border-cyan-500/30">
+                <i class="fas fa-arrow-left"></i> Kembali ke Beranda FGAS
+            </a>
+            <span class="bg-orange-500/20 border border-orange-500/50 text-orange-400 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">TIKET GRATIS</span>
+        </div>
+
+        <div class="glass-panel p-6 md:p-8 rounded-3xl w-full">
+            <div id="form-section">
+                <div class="text-center mb-6 border-b border-blue-500/30 pb-4">
+                    <h1 class="text-2xl md:text-3xl title-sport uppercase text-cyan-400 tracking-wider mb-1">Tiket Pengunjung</h1>
+                    <p class="text-sm text-blue-200 font-semibold">Festival Goverment Auto Show & Undian PBB-P2 & OPSEN PKB Boyolali 2026</p>
+                    <div class="mt-3 bg-cyan-900/30 border border-cyan-500/30 rounded-xl p-3 text-xs text-cyan-200">
+                        <i class="fas fa-gift text-orange-400 mr-1"></i> <b>1 No. HP = 1 Kupon Undian.</b> Diundi setiap 2 jam oleh operator panitia!
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs md:text-sm font-bold text-blue-300 uppercase tracking-wider mb-1">Nama Lengkap</label>
+                        <input type="text" id="nama" class="w-full p-3.5 input-dark text-base rounded-xl" placeholder="Ketik nama sesuai KTP...">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs md:text-sm font-bold text-blue-300 uppercase tracking-wider mb-1">No WhatsApp / HP</label>
+                            <input type="number" id="hp" class="w-full p-3.5 input-dark text-base rounded-xl" placeholder="08...">
+                        </div>
+                        <div>
+                            <label class="block text-xs md:text-sm font-bold text-blue-300 uppercase tracking-wider mb-1">Umur (Tahun)</label>
+                            <input type="number" id="umur" class="w-full p-3.5 input-dark text-base rounded-xl" placeholder="Contoh: 25">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs md:text-sm font-bold text-blue-300 uppercase tracking-wider mb-1">Jenis Kelamin</label>
+                        <select id="gender" class="w-full p-3.5 input-dark font-bold text-blue-100 text-base rounded-xl">
+                            <option value="Laki-laki" class="bg-slate-900">Laki-laki</option>
+                            <option value="Perempuan" class="bg-slate-900">Perempuan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs md:text-sm font-bold text-blue-300 uppercase tracking-wider mb-1">Alamat Domisili</label>
+                        <textarea id="alamat" rows="2" class="w-full p-3.5 input-dark text-base rounded-xl" placeholder="Alamat lengkap..."></textarea>
+                    </div>
+
+                    <button id="submit-btn" onclick="registerPengunjung()" class="w-full transition hover:scale-105 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black py-4 uppercase tracking-widest mt-2 text-lg rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.4)] border border-cyan-300">
+                        <i class="fas fa-qrcode mr-2"></i> BUAT BARCODE PENGUNJUNG
+                    </button>
+                </div>
+            </div>
+
+            <!-- Success Section -->
+            <div id="qrcode-container" class="hidden text-center py-6 flex flex-col justify-center items-center">
+                <svg class="checkmark no-print" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                  <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                  <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                </svg>
+
+                <h4 class="font-black text-3xl mb-1 title-sport tracking-wider uppercase text-cyan-400 no-print">Tiket Berhasil Dibuat</h4>
+
+                <div class="bg-slate-800 border-2 border-cyan-500/50 rounded-xl p-4 mb-6 w-full max-w-sm mt-4 no-print text-left">
+                    <p class="text-cyan-300 text-sm font-black tracking-widest uppercase mb-2"><i class="fas fa-gift mr-1"></i> SIMPAN BARCODE INI!</p>
+                    <p class="text-blue-100 text-sm leading-relaxed mb-3">Tunjukkan/Scan barcode ini di lokasi. Anda berhak mengikuti Undian <b>DOORPRIZE</b> yang akan diundi setiap 2 jam selama event berlangsung.</p>
+                    <p class="text-[10px] text-yellow-400 italic">*Bagi Pedagang/Tenant wajib mendaftar di halaman ini jika ingin mengikuti undian.</p>
+                </div>
+
+                <div id="print-ticket-area" class="bg-white p-6 inline-block mx-auto rounded-3xl shadow-[0_0_40px_rgba(255,255,255,0.2)] text-gray-900 border-4 border-gray-100">
+                    <h2 class="font-black text-xl border-b pb-2 mb-4">TIKET PENGUNJUNG FGAS 2026</h2>
+                    <div id="qrcode" class="flex justify-center mb-3"></div>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest font-black mb-1 mt-2">TICKET ID</p>
+                    <p class="text-xl font-black text-gray-900 tracking-wider font-mono bg-gray-100 py-1 px-4 rounded" id="ticket-id-display"></p>
+                    <p class="text-xs font-bold mt-2" id="ticket-nama"></p>
+                    <p class="text-[10px] font-bold text-gray-500 uppercase">PENGUNJUNG (DOORPRIZE UMUM)</p>
+                </div>
+
+                <button onclick="window.print()" class="mt-8 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-black px-8 py-4 rounded-full transition shadow-[0_0_20px_rgba(6,182,212,0.8)] uppercase tracking-widest w-full no-print">
+                    <i class="fas fa-print mr-2"></i> Cetak / Simpan PDF
+                </button>
+
+                <button onclick="window.location.reload()" class="mt-6 text-blue-300 font-bold hover:text-cyan-400 transition uppercase text-sm tracking-widest underline no-print">Daftar Pengunjung Lain</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Alert Modal -->
+    <div id="custom-alert" class="hidden fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity duration-300 opacity-0 no-print">
+        <div class="bg-slate-900 border border-cyan-500/50 p-6 rounded-2xl shadow-[0_0_30px_rgba(6,182,212,0.3)] max-w-sm w-full text-center transform scale-95 transition-transform duration-300" id="custom-alert-box">
+            <div class="mx-auto w-12 h-12 mb-3 bg-red-500/20 text-red-400 rounded-full flex items-center justify-center text-2xl"><i class="fas fa-exclamation-triangle"></i></div>
+            <h3 class="text-xl font-black text-cyan-400 mb-2 tracking-widest title-sport">FGAS 2026</h3>
+            <p id="custom-alert-msg" class="text-blue-100 text-sm font-semibold mb-6">Semua data wajib di isi dengan benar !</p>
+            <button onclick="closeCustomAlert()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-8 rounded-full shadow-[0_0_15px_rgba(6,182,212,0.4)] transition uppercase tracking-widest text-xs">Mengerti</button>
+        </div>
+    </div>
+
+    <!-- Sync Indicator -->
+    <div id="sync-badge" class="fixed bottom-4 left-4 bg-slate-800/80 backdrop-blur border border-slate-700 text-white px-3 py-1.5 rounded-full text-xs font-bold z-50 flex items-center gap-2 opacity-0 transition-opacity no-print">
+        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online: Sync Active
+    </div>
+
+    <script>
+        const _0xUrl = 'aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J3ejNlYlpPc0Y2cURqRmxyY2FwaXYtRWxjVVQxQ0t0Rm5oRGtBTXNMbmRRSEdEOEczZmxkVXJWQmtCQWZSTWU3eDEvZXhlYw==';
+        const SCRIPT_URL = atob(_0xUrl);
+        const APP_TOKEN = 'FGAS_SECRET_2026';
+
+        const customBg = localStorage.getItem('fgas_bg_image');
+        if(customBg) { document.getElementById('dynamic-bg').style.backgroundImage = `url(${customBg})`; }
+
+        function showCustomAlert(msg) {
+            document.getElementById('custom-alert-msg').innerText = msg;
+            const modal = document.getElementById('custom-alert');
+            const box = document.getElementById('custom-alert-box');
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); box.classList.remove('scale-95'); }, 10);
+        }
+        function closeCustomAlert() {
+            const modal = document.getElementById('custom-alert');
+            const box = document.getElementById('custom-alert-box');
+            modal.classList.add('opacity-0'); box.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        async function registerPengunjung() {
+            const btn = document.getElementById('submit-btn');
+            const nama = document.getElementById('nama').value.trim();
+            const hp = document.getElementById('hp').value.trim();
+            const umur = document.getElementById('umur').value.trim();
+            const gender = document.getElementById('gender').value;
+            const alamat = document.getElementById('alamat').value.trim();
+
+            if(!nama || !hp || !umur) { showCustomAlert("Semua data wajib di isi dengan benar !"); return; }
+
+            let visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
+            if(visitors.some(v => (v.hp === hp || v.HP === hp) && (v.type === 'Pengunjung' || v.Type === 'Pengunjung'))) {
+                showCustomAlert("MAAF! Nomor HP ini sudah terdaftar. 1 Identitas = 1 Undian."); return;
+            }
+
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> MEMPROSES...';
+            btn.disabled = true;
+
+            const ticketId = 'FGAS-' + Math.floor(Math.random() * 1000000);
+            const data = { action: 'register', token: APP_TOKEN, type: 'Pengunjung', nama, nik: '-', hp, alamat, umur, gender, ticketId };
+
+            try {
+                visitors.push(data);
+                localStorage.setItem('fgas_visitors', JSON.stringify(visitors));
+
+                fetch(SCRIPT_URL, {
+                    method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data)
+                }).then(()=>{
+                    const badge = document.getElementById('sync-badge');
+                    badge.classList.remove('opacity-0');
+                    setTimeout(() => badge.classList.add('opacity-0'), 3000);
+                }).catch(e => console.log("Background sync error"));
+
+                document.getElementById('form-section').classList.add('hidden');
+                document.getElementById('qrcode-container').classList.remove('hidden');
+
+                document.getElementById('qrcode').innerHTML = '';
+                new QRCode(document.getElementById("qrcode"), {
+                    text: ticketId, width: 220, height: 220, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H
+                });
+                document.getElementById('ticket-id-display').innerText = ticketId;
+                document.getElementById('ticket-nama').innerText = nama.toUpperCase();
+            } catch (error) {
+                // silent local fallback
+            } finally {
+                btn.innerHTML = '<i class="fas fa-qrcode mr-2"></i> BUAT BARCODE PENGUNJUNG';
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

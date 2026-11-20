@@ -89,6 +89,29 @@
                 <div class="bg-orange-500/20 border border-orange-500/50 px-4 py-2 rounded-lg flex items-center gap-2 animate-pulse"><i class="fas fa-tag text-orange-400"></i><span class="text-sm font-bold text-orange-400 tracking-widest uppercase">SEMUA LOMBA GRATIS!</span></div>
             </div>
             
+            <!-- TOMBOL KHUSUS PENGUNJUNG / DOORPRIZE -->
+            <div class="mb-6 max-w-lg">
+                <a href="pengunjung.html" class="w-full flex items-center justify-between bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-slate-950 font-black px-6 py-4 rounded-2xl shadow-[0_0_25px_rgba(249,115,22,0.5)] transition transform hover:scale-[1.02]">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-ticket-alt text-2xl"></i>
+                        <div class="text-left">
+                            <span class="block text-sm md:text-base uppercase tracking-wider leading-tight">DAFTAR PENGUNJUNG (DOORPRIZE)</span>
+                            <span class="block text-[11px] font-bold opacity-90">Klik di sini untuk ambil Barcode Undian Gratis!</span>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right text-xl"></i>
+                </a>
+            </div>
+
+            <!-- VIDEO AUTOPLAY LANDSCAPE (16:9) -->
+            <div id="video-section" class="hidden mb-8 max-w-lg w-full">
+                <div class="glass-panel p-2 rounded-2xl border border-cyan-500/40 shadow-[0_0_25px_rgba(6,182,212,0.2)]">
+                    <div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black">
+                        <video id="event-video" autoplay muted loop playsinline controls class="w-full h-full object-cover"></video>
+                    </div>
+                </div>
+            </div>
+
             <div class="bg-slate-900/80 border border-cyan-500/40 p-4 rounded-2xl mb-8 max-w-lg backdrop-blur-md shadow-[0_0_20px_rgba(6,182,212,0.2)]">
                 <p class="text-xs text-cyan-400 font-bold uppercase tracking-widest mb-3 text-center">Hitung Mundur Event</p>
                 <div class="flex justify-between text-center gap-3">
@@ -114,6 +137,14 @@
                 </div>
             </div>
             
+            <!-- RUNDOWN ACARA (PNG PORTRAIT) -->
+            <div id="rundown-section" class="hidden glass-panel p-4 rounded-2xl mb-8 max-w-lg border-l-4 border-l-orange-400">
+                <h3 class="text-lg font-bold text-orange-400 uppercase tracking-widest mb-3 border-b border-orange-500/30 pb-2"><i class="fas fa-clock mr-2"></i>Rundown Acara</h3>
+                <div class="w-full flex justify-center">
+                    <img id="event-rundown-img" src="" alt="Rundown Acara FGAS 2026" class="w-full max-w-sm rounded-xl object-contain shadow-lg border border-white/10">
+                </div>
+            </div>
+
             <div class="bg-slate-900/80 border border-green-500/30 p-4 rounded-2xl max-w-lg shadow-[0_0_15px_rgba(34,197,94,0.1)] mb-6 lg:mb-0">
                 <div class="flex items-center gap-3 border-b border-slate-700/50 pb-3 mb-3">
                     <div class="w-10 h-10 bg-green-500/20 text-green-400 rounded-full flex justify-center items-center shrink-0"><i class="fab fa-whatsapp text-xl"></i></div>
@@ -139,8 +170,8 @@
                 <div id="form-section">
                     <div class="flex justify-between items-center mb-6 border-b border-blue-500/30 pb-4">
                         <div>
-                            <h3 class="text-2xl title-sport uppercase text-cyan-400 tracking-wider mb-1">Tiket Masuk</h3>
-                            <p class="text-xs md:text-sm text-blue-200 font-semibold">1 NIK / No. HP Berlaku untuk 1 Undian.</p>
+                            <h3 class="text-2xl title-sport uppercase text-cyan-400 tracking-wider mb-1">Pendaftaran Lomba</h3>
+                            <p class="text-xs md:text-sm text-blue-200 font-semibold">Pilih kategori lomba yang ingin diikuti.</p>
                             <p class="text-[10px] text-orange-400 mt-1 uppercase font-bold tracking-widest">*Kuota Semua Lomba Terbatas</p>
                         </div>
                         <div class="bg-orange-500 text-white font-black px-4 py-2 rounded-lg text-sm shadow-lg transform rotate-3">GRATIS!</div>
@@ -151,8 +182,7 @@
                             <label class="block text-xs md:text-sm font-bold text-blue-300 uppercase tracking-wider mb-1">Kategori Pendaftaran</label>
                             <!-- UMKM REMOVED FROM PUBLIC -->
                             <select id="reg-type" onchange="handleCategoryChange()" class="w-full p-3.5 input-dark font-bold text-blue-100 text-base rounded-xl">
-                                <option value="Pengunjung" class="bg-slate-900">Pengunjung (Doorprize Umum)</option>
-                                <option value="Lomba Modifikasi Mobil" class="bg-slate-900">Lomba Modifikasi Mobil</option>
+                                                                <option value="Lomba Modifikasi Mobil" class="bg-slate-900">Lomba Modifikasi Mobil</option>
                                 <option value="Lomba Modifikasi Motor" class="bg-slate-900">Lomba Modifikasi Motor</option>
                                 <option value="Lomba Komunitas Mobil" class="bg-slate-900">Lomba Komunitas Mobil</option>
                                 <option value="Lomba Komunitas Motor" class="bg-slate-900">Lomba Komunitas Motor</option>
@@ -317,12 +347,29 @@
             });
             
             if(select.options[select.selectedIndex] && select.options[select.selectedIndex].disabled) {
-                select.value = 'Pengunjung';
+                const firstEnabled = Array.from(select.options).find(o => !o.disabled); if(firstEnabled) select.value = firstEnabled.value;
                 handleCategoryChange();
             }
         }
         window.addEventListener('DOMContentLoaded', () => {
             checkQuotas();
+            handleCategoryChange();
+
+            // Load Rundown PNG Portrait
+            const customRundown = localStorage.getItem('fgas_rundown_image');
+            if(customRundown) {
+                document.getElementById('event-rundown-img').src = customRundown;
+                document.getElementById('rundown-section').classList.remove('hidden');
+            }
+
+            // Load Autoplay Landscape Video
+            const customVideo = localStorage.getItem('fgas_video_src');
+            if(customVideo) {
+                const vidEl = document.getElementById('event-video');
+                vidEl.src = customVideo;
+                document.getElementById('video-section').classList.remove('hidden');
+                vidEl.play().catch(e => console.log('Autoplay policy:', e));
+            }
             const wa1 = localStorage.getItem('fgas_wa_1') || '6281234567890';
             const wa2 = localStorage.getItem('fgas_wa_2');
             
@@ -346,16 +393,17 @@
 
             if (type === 'Lomba Fashion Show Anak') {
                 container.innerHTML = `
-                    <p class="text-sm font-bold text-cyan-300 mb-2"><i class="fas fa-palette mr-1"></i> TEMA: Batik / Pakaian Adat</p>
-                    <label class="block text-xs font-bold text-cyan-300 uppercase mb-1">Kategori Umur</label>
-                    <select id="sub-kategori" class="w-full p-3 input-dark rounded-xl mb-2 text-base">
-                        <option value="Umur 5-7 Tahun">Umur 5-7 Tahun</option>
-                        <option value="Umur 7-9 Tahun">Umur 7-9 Tahun</option>
-                    </select>
+                    <p class="text-sm font-bold text-cyan-300 mb-1"><i class="fas fa-palette mr-1"></i> TEMA: Batik / Pakaian Adat</p>
+                    <p class="text-xs font-bold text-white bg-cyan-900/50 p-2 rounded-lg border border-cyan-500/40 mb-2"><i class="fas fa-child mr-1 text-cyan-400"></i> Kategori: <b>Umur 5 - 10 Tahun</b></p>
+                    <input type="hidden" id="sub-kategori" value="Umur 5-10 Tahun">
                     <p class="text-xs text-orange-400 font-bold bg-orange-900/40 p-2 rounded-lg border border-orange-500/30"><i class="fas fa-id-card mr-1"></i> WAJIB bawa Akta Kelahiran asli saat di lokasi. Kuota terbatas!</p>
                 `;
             } else if (type === 'Lomba Mewarnai Anak') {
-                container.innerHTML = `<p class="text-xs text-orange-400 font-bold bg-orange-900/40 p-2 rounded-lg border border-orange-500/30"><i class="fas fa-info-circle mr-1"></i> Khusus anak usia 5-6 Tahun. <b>Peserta wajib membawa meja lipat sendiri</b>, panitia hanya menyediakan kertas mewarnai.</p>`;
+                container.innerHTML = `
+                    <p class="text-xs font-bold text-white bg-cyan-900/50 p-2 rounded-lg border border-cyan-500/40 mb-2"><i class="fas fa-school mr-1 text-cyan-400"></i> Kategori: <b>TK & PAUD</b></p>
+                    <input type="hidden" id="sub-kategori" value="TK & PAUD">
+                    <p class="text-xs text-orange-400 font-bold bg-orange-900/40 p-2 rounded-lg border border-orange-500/30"><i class="fas fa-info-circle mr-1"></i> Khusus <b>TK & PAUD</b>. <b>Peserta wajib membawa meja lipat sendiri</b>, panitia hanya menyediakan kertas mewarnai.</p>
+                `;
             } else if (type === 'Modifikasi Mobil/Motor' || type === 'Lomba Modifikasi Mobil' || type === 'Lomba Modifikasi Motor') {
                 container.classList.add('hidden');
             } else {
