@@ -26,12 +26,9 @@
         }
         @keyframes gridPan { 0% { background-position: 0 0; } 100% { background-position: 50px 50px; } }
 
-        @keyframes gridMove {
-            0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); }
-            100% { transform: perspective(500px) rotateX(60deg) translateY(50px) translateZ(-200px); }
-        }
+
         
-        .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(59, 130, 246, 0.4); box-shadow: 0 0 40px rgba(59, 130, 246, 0.15); }
+        .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(59, 130, 246, 0.4); box-shadow: 0 0 40px rgba(59, 130, 246, 0.15); }
         .input-dark { background: rgba(2, 6, 23, 0.8); border: 1px solid rgba(59, 130, 246, 0.5); color: white; width: 100%; }
         .input-dark:focus { border-color: #06b6d4; outline: none; background: rgba(2, 6, 23, 0.95); box-shadow: 0 0 15px rgba(6, 182, 212, 0.4); }
         .title-sport { font-family: 'Orbitron', sans-serif; letter-spacing: 2px; line-height: 1.1; }
@@ -90,10 +87,10 @@
             </div>
             
             <!-- VIDEO AUTOPLAY LANDSCAPE (16:9) -->
-            <div id="video-section" class="hidden mb-8 max-w-lg w-full">
+            <div id="video-section" class="mb-8 max-w-lg w-full">
                 <div class="glass-panel p-2 rounded-2xl border border-cyan-500/40 shadow-[0_0_25px_rgba(6,182,212,0.2)]">
                     <div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black">
-                        <video id="event-video" autoplay muted loop playsinline controls class="w-full h-full object-cover"></video>
+                        <video id="event-video" src="video_fgas.mp4" autoplay muted loop playsinline controls preload="metadata" class="w-full h-full object-cover"></video>
                     </div>
                 </div>
             </div>
@@ -124,10 +121,10 @@
             </div>
             
             <!-- RUNDOWN ACARA (PNG PORTRAIT) -->
-            <div id="rundown-section" class="hidden glass-panel p-4 rounded-2xl mb-8 max-w-lg border-l-4 border-l-orange-400">
+            <div id="rundown-section" class="glass-panel p-4 rounded-2xl mb-8 max-w-lg border-l-4 border-l-orange-400">
                 <h3 class="text-lg font-bold text-orange-400 uppercase tracking-widest mb-3 border-b border-orange-500/30 pb-2"><i class="fas fa-clock mr-2"></i>Rundown Acara</h3>
                 <div class="w-full flex justify-center">
-                    <img id="event-rundown-img" src="" alt="Rundown Acara FGAS 2026" class="w-full max-w-sm rounded-xl object-contain shadow-lg border border-white/10">
+                    <img id="event-rundown-img" src="rundown.png" alt="Rundown Acara FGAS 2026" loading="lazy" class="w-full max-w-sm rounded-xl object-contain shadow-lg border border-white/10">
                 </div>
             </div>
 
@@ -341,19 +338,20 @@
             checkQuotas();
             handleCategoryChange();
 
-            // Load Rundown PNG Portrait
+            // Load Rundown PNG Portrait (default: rundown.png, overrideable via Admin)
             const customRundown = localStorage.getItem('fgas_rundown_image');
             if(customRundown) {
                 document.getElementById('event-rundown-img').src = customRundown;
-                document.getElementById('rundown-section').classList.remove('hidden');
             }
 
-            // Load Autoplay Landscape Video
+            // Load Autoplay Landscape Video (default: video_fgas.mp4, overrideable via Admin)
+            const vidEl = document.getElementById('event-video');
             const customVideo = localStorage.getItem('fgas_video_src');
             if(customVideo) {
-                const vidEl = document.getElementById('event-video');
                 vidEl.src = customVideo;
-                document.getElementById('video-section').classList.remove('hidden');
+            }
+            if(vidEl) {
+                vidEl.muted = true;
                 vidEl.play().catch(e => console.log('Autoplay policy:', e));
             }
             const wa1 = localStorage.getItem('fgas_wa_1') || '6281234567890';
