@@ -28,7 +28,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-full overflow-y-auto pb-10">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 h-full overflow-y-auto pb-10">
             <!-- 1. KONTROL UNDIAN DOORPRIZE -->
             <div class="bg-white/5 p-5 rounded-xl border border-white/10 space-y-3">
                 <div class="flex justify-between items-center border-b border-white/10 pb-2">
@@ -56,6 +56,24 @@
                     <input type="text" id="juara-1" class="w-full p-2.5 bg-yellow-400/20 border border-yellow-400 rounded text-white text-xs placeholder-yellow-400" placeholder="Juara 1">
                 </div>
                 <button onclick="triggerPodium()" class="w-full bg-pink-600 hover:bg-pink-500 py-3 rounded-lg font-bold text-xs transition">TAMPILKAN PODIUM DI LED</button>
+            </div>
+
+            <!-- 3. GAMES TEBAK GAMBAR (LED) -->
+            <div class="bg-cyan-950/30 p-5 rounded-xl border border-cyan-500/40 space-y-3">
+                <div class="flex justify-between items-center border-b border-cyan-500/30 pb-2">
+                    <h3 class="font-bold text-cyan-300 text-sm uppercase"><i class="fas fa-puzzle-piece mr-1"></i> 3. Games Tebak Gambar</h3>
+                    <span id="tg-status-badge" class="text-[10px] bg-slate-800 text-cyan-300 px-2 py-0.5 rounded-full font-bold">Siap</span>
+                </div>
+                <input type="file" id="tg-file" accept="image/*" onchange="prepareTebakImage(this)" class="w-full text-xs bg-black/50 border border-white/20 rounded p-2 text-slate-300">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="tg-title-input" class="w-full p-2.5 bg-black/50 border border-white/20 rounded text-white text-xs" placeholder="Judul (Opsional)" value="GAMES TEBAK GAMBAR">
+                    <input type="text" id="tg-answer-input" class="w-full p-2.5 bg-black/50 border border-white/20 rounded text-white text-xs" placeholder="Jawaban (Muncul saat dibuka)">
+                </div>
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <button onclick="startTebakGambar()" class="bg-cyan-600 hover:bg-cyan-500 py-2.5 rounded-lg font-bold text-xs transition"><i class="fas fa-eye-slash mr-1"></i> TAMPIL SEBAGIAN</button>
+                    <button onclick="openNextTebakTile()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 py-2.5 rounded-lg font-black text-xs transition"><i class="fas fa-plus-square mr-1"></i> BUKA 1 KOTAK</button>
+                </div>
+                <button onclick="revealAllTebakGambar()" class="w-full bg-green-600 hover:bg-green-500 py-2.5 rounded-lg font-black text-xs transition shadow-[0_0_15px_rgba(34,197,94,0.4)]"><i class="fas fa-eye mr-1"></i> BUKA SEMUA GAMBAR (REVEAL)</button>
             </div>
         </div>
     </div>
@@ -145,6 +163,65 @@
             localStorage.setItem('fgas_winners', JSON.stringify(winners));
 
             sendToLED({ cmd: 'SHOW_PODIUM', lomba: lomba, j1: j1, j2: j2, j3: j3 });
+        }
+        // --- GAMES TEBAK GAMBAR CONTROLLER ---
+        let tgOpenTiles = [];
+
+        function prepareTebakImage(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_W = 1280;
+                    let w = img.width, h = img.height;
+                    if (w > MAX_W) { h = Math.round(h * MAX_W / w); w = MAX_W; }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    const compressed = canvas.toDataURL('image/jpeg', 0.82);
+                    try {
+                        localStorage.setItem('fgas_tg_image', compressed);
+                        document.getElementById('tg-status-badge').innerText = 'Gambar Siap';
+                    } catch(err) {
+                        alert('Ukuran gambar terlalu besar. Gunakan gambar yang lebih kecil.');
+                    }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function startTebakGambar() {
+            const imgData = localStorage.getItem('fgas_tg_image');
+            if (!imgData) { alert('Pilih file gambar terlebih dahulu!'); return; }
+            // Reveal 2 random tiles initially (sebagian dahulu)
+            const all = [0,1,2,3,4,5,6,7,8].sort(() => Math.random() - 0.5);
+            tgOpenTiles = [all[0], all[1]];
+            const title = document.getElementById('tg-title-input').value.trim() || 'GAMES TEBAK GAMBAR';
+            const answer = document.getElementById('tg-answer-input').value.trim();
+            document.getElementById('tg-status-badge').innerText = `Terbuka ${tgOpenTiles.length}/9`;
+            sendToLED({ cmd: 'SHOW_TEBAK_GAMBAR', image: imgData, title: title, answer: answer, openIndices: tgOpenTiles });
+        }
+
+        function openNextTebakTile() {
+            const remaining = [0,1,2,3,4,5,6,7,8].filter(i => !tgOpenTiles.includes(i));
+            if (remaining.length === 0) {
+                revealAllTebakGambar();
+                return;
+            }
+            const nextTile = remaining[Math.floor(Math.random() * remaining.length)];
+            tgOpenTiles.push(nextTile);
+            document.getElementById('tg-status-badge').innerText = `Terbuka ${tgOpenTiles.length}/9`;
+            sendToLED({ cmd: 'UPDATE_TEBAK_TILES', openIndices: tgOpenTiles });
+        }
+
+        function revealAllTebakGambar() {
+            tgOpenTiles = [0,1,2,3,4,5,6,7,8];
+            const answer = document.getElementById('tg-answer-input').value.trim();
+            document.getElementById('tg-status-badge').innerText = 'Terbuka Semua!';
+            sendToLED({ cmd: 'REVEAL_TEBAK_GAMBAR', answer: answer });
         }
     </script>
 </body>
