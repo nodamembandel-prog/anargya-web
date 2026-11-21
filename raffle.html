@@ -2,81 +2,225 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Live Undian Doorprize</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Live LED Display - FGAS 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        html, body { max-width: 100%; overflow-x: hidden; overscroll-behavior-y: none; }
-        /* FIX iOS SAFARI BUG: Mencegah gambar hilang & patah-patah saat scroll */
-        img, .glass-panel, .glass-card, .bento-card, header, nav, .logos-container, .sport-bg { 
-            -webkit-transform: translate3d(0,0,0); 
-            transform: translate3d(0,0,0); 
-            will-change: transform;
-        }
-
-
-        
-
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
-        body { background: #000; color: #fff; overflow-x: hidden; font-family: 'Orbitron', sans-serif; }
-        .slot-machine { font-size: 7vw; line-height: 1.1; font-weight: 900; letter-spacing: 5px; text-shadow: 0 0 30px rgba(6,182,212,0.8); }
+        html, body { max-width: 100%; overflow: hidden; margin: 0; padding: 0; }
+        body { background: #000; color: #fff; font-family: 'Orbitron', sans-serif; height: 100vh; width: 100vw; }
         .bg-cyber { background: radial-gradient(circle at 50% 50%, #0f172a 0%, #000 100%); }
-        .glass-box { background: rgba(15,23,42,0.8); border: 2px solid #06b6d4; box-shadow: 0 0 50px rgba(6,182,212,0.4); border-radius: 40px; }
-        .top-logos-container { display: flex; justify-content: space-between; align-items: flex-start; padding: 2rem; width: 100%; position: relative; z-index: 20;}
+        .glass-box {
+            background: rgba(15,23,42,0.85);
+            border: 2px solid #06b6d4;
+            box-shadow: 0 0 50px rgba(6,182,212,0.35);
+            border-radius: 32px;
+            height: 290px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 3rem;
+        }
+        .slot-machine {
+            font-size: clamp(1.8rem, 4.2vw, 4rem);
+            line-height: 1.2;
+            font-weight: 900;
+            letter-spacing: 3px;
+            text-shadow: 0 0 25px rgba(6,182,212,0.8);
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .ticket-badge { font-size: clamp(1rem, 1.8vw, 1.6rem); letter-spacing: 4px; min-height: 2.4rem; }
+        .top-logos-container { display: flex; justify-content: space-between; align-items: flex-start; padding: 1.5rem 2.5rem 0 2.5rem; width: 100%; position: relative; z-index: 20; }
+        .podium { display: flex; align-items: flex-end; justify-content: center; gap: 2vw; margin-top: 5vh; height: 38vh; }
+        .pillar { width: 16vw; text-align: center; border-radius: 12px 12px 0 0; position: relative; box-shadow: 0 -10px 30px rgba(0,0,0,0.5); }
+        .p2 { height: 60%; background: linear-gradient(to top, #475569, #94a3b8); }
+        .p1 { height: 100%; background: linear-gradient(to top, #854d0e, #fbbf24); z-index: 10; }
+        .p3 { height: 40%; background: linear-gradient(to top, #78350f, #cd7f32); }
+        .name-card { position: absolute; top: -11vh; left: 50%; transform: translateX(-50%); width: 180%; background: rgba(0,0,0,0.85); border: 2px solid #fff; padding: 0.75rem 1rem; border-radius: 12px; font-size: 1.8vw; opacity: 0; transition: opacity 0.8s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .rank { font-size: 3.5vw; font-weight: 900; margin-top: 2vh; color: rgba(255,255,255,0.6); }
+        .tile-cover {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border: 1px solid rgba(6, 182, 212, 0.5);
+            transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(1.2rem, 2.5vw, 2.5rem);
+            font-weight: 900;
+            color: rgba(6, 182, 212, 0.7);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+        }
+        .tile-open {
+            opacity: 0 !important;
+            transform: scale(0.85);
+            pointer-events: none;
+        }
+        .lyric-line {
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0.3;
+            transform: scale(0.92);
+            color: #94a3b8;
+        }
+        .lyric-active {
+            opacity: 1 !important;
+            transform: scale(1.08) !important;
+            color: #38bdf8 !important;
+            text-shadow: 0 0 30px rgba(56, 189, 248, 0.9), 0 0 10px rgba(255,255,255,0.6);
+        }
+        .lyric-passed {
+            opacity: 0.2;
+            transform: scale(0.9);
+            color: #64748b;
+        }
     </style>
 </head>
-<body class="flex flex-col min-h-screen w-full bg-cyber relative">
-    
+<body class="flex flex-col justify-between bg-cyber relative select-none" ondblclick="toggleFS()">
+
     <div class="absolute inset-0 opacity-20 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwb2x5Z29uIHBvaW50cz0iMCAwIDQwIDAgNDAgMSA0MCAxIDAgMSIgZmlsbD0iIzBiYmZlZSIvPjxwb2x5Z29uIHBvaW50cz0iMCAwIDEgMCAxIDQwIDEgNDAgMCA0MCIgZmlsbD0iIzBiYmZlZSIvPjwvc3ZnPg==')] pointer-events-none"></div>
 
     <div class="top-logos-container">
         <div></div>
         <div class="flex flex-col items-center">
-            <img id="raffle-logo" src="" class="h-28 object-contain hidden drop-shadow-[0_0_20px_rgba(255,255,255,0.6)]">
+            <img id="raffle-logo" src="" class="h-20 md:h-24 object-contain hidden drop-shadow-[0_0_20px_rgba(255,255,255,0.6)]">
         </div>
         <div id="top-right-logos" class="flex gap-4"></div>
     </div>
 
-    <div class="flex-grow flex flex-col items-center justify-center relative z-10 px-10 pb-20">
-        <h1 class="text-[4vw] font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 tracking-widest uppercase text-center leading-tight drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]">
-            PENGUNDIAN DOORPRIZE<br><span class="text-[2vw] text-white tracking-[0.5em]">FGAS BOYOLALI 2026</span>
+    <!-- MODE 1: DOORPRIZE RAFFLE -->
+    <div id="raffle-view" class="flex-grow flex flex-col items-center justify-center relative z-10 px-8">
+        <h1 class="text-[3.2vw] font-black mb-5 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 tracking-widest uppercase text-center leading-tight drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]">
+            PENGUNDIAN DOORPRIZE<br><span class="text-[1.5vw] text-white tracking-[0.45em]">FGAS BOYOLALI 2026</span>
         </h1>
-        
-        <div class="glass-box p-10 w-full max-w-[80vw] text-center flex flex-col items-center justify-center min-h-[30vh]">
-            <div id="prize-name" class="text-[2vw] text-cyan-400 mb-2 font-bold tracking-widest uppercase">BERSEDIA...</div>
-            <div id="sponsor-name" class="text-[1.5vw] text-orange-400 mb-6 font-bold tracking-widest uppercase hidden"></div>
-            <div id="winner-name" class="slot-machine text-white uppercase w-full">?????</div>
+
+        <div class="glass-box w-full max-w-[78vw] text-center">
+            <div id="prize-name" class="text-[1.6vw] text-cyan-400 mb-1 font-bold tracking-widest uppercase">MENUNGGU OPERATOR VJ...</div>
+            <div id="sponsor-name" class="text-[1.2vw] text-orange-400 mb-4 font-bold tracking-widest uppercase hidden"></div>
+            <div id="winner-name" class="slot-machine text-white uppercase w-full my-2">?????</div>
+            <div id="winner-ticket" class="ticket-badge text-cyan-300 font-bold mt-2 opacity-0 transition-opacity"></div>
         </div>
 
-        <div class="mt-8 bg-red-600/20 border border-red-500 p-4 rounded-xl text-center animate-pulse shadow-[0_0_30px_rgba(220,38,38,0.4)]">
-            <p class="text-[2vw] text-red-400 tracking-widest font-black uppercase">PANGGILAN 3X TIDAK HADIR = HADIAH HANGUS!</p>
+        <div class="mt-7 bg-red-600/20 border border-red-500 px-8 py-3 rounded-xl text-center animate-pulse shadow-[0_0_25px_rgba(220,38,38,0.4)]">
+            <p class="text-[1.5vw] text-red-400 tracking-widest font-black uppercase">PANGGILAN 3X TIDAK HADIR = HADIAH HANGUS!</p>
         </div>
-
-        <button onclick="startRaffleSequence()" id="btn-start" class="mt-10 bg-blue-600 border-2 border-cyan-400 text-white px-12 py-5 rounded-full text-2xl font-black hover:bg-blue-500 shadow-[0_0_40px_rgba(6,182,212,0.8)] cursor-pointer tracking-widest transition-transform hover:scale-105">
-            MULAI (15 DETIK)
-        </button>
     </div>
 
-    <div id="sponsor-logos" class="absolute bottom-6 w-full flex justify-center items-center gap-8 z-20 px-10 flex-wrap"></div>
+    <!-- MODE 2: PODIUM JUARA LOMBA -->
+    <div id="podium-view" class="hidden flex-grow flex flex-col items-center justify-center relative z-10 px-8">
+        <h1 class="text-[3.5vw] font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 tracking-widest uppercase mb-1">PENGUMUMAN JUARA</h1>
+        <h2 id="podium-lomba" class="text-[2.2vw] text-white tracking-[0.2em] mb-10 uppercase"></h2>
+        <div class="podium">
+            <div class="pillar p2"><div class="name-card" id="n2" style="border-color: #94a3b8;"></div><div class="rank">2</div></div>
+            <div class="pillar p1"><div class="name-card" id="n1" style="border-color: #fbbf24; top: -14vh; font-size: 2.3vw; color: #fbbf24;"></div><div class="rank text-white">1</div></div>
+            <div class="pillar p3"><div class="name-card" id="n3" style="border-color: #cd7f32;"></div><div class="rank">3</div></div>
+        </div>
+    </div>
+
+    <!-- MODE 3: GAMES TEBAK GAMBAR -->
+    <div id="tebak-gambar-view" class="hidden flex-grow flex flex-col items-center justify-center relative z-10 px-6">
+        <h1 id="tg-title" class="text-[2.8vw] font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-white to-orange-400 tracking-widest uppercase mb-4 drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]">
+            GAMES TEBAK GAMBAR
+        </h1>
+
+        <div class="relative w-full max-w-[68vw] h-[54vh] bg-slate-900/90 border-2 border-cyan-400 rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(6,182,212,0.4)] flex items-center justify-center">
+            <img id="tg-image" src="" alt="Tebak Gambar" class="w-full h-full object-contain bg-black">
+            <div id="tg-grid" class="absolute inset-0 grid grid-cols-3 grid-rows-3 z-10">
+                <!-- 9 tiles generated by JS -->
+            </div>
+        </div>
+
+        <div id="tg-answer-box" class="mt-5 px-8 py-3 rounded-2xl bg-green-500/20 border-2 border-green-400 text-green-300 text-[2vw] font-black tracking-widest uppercase opacity-0 transition-opacity duration-500 shadow-[0_0_30px_rgba(74,222,128,0.4)]">
+            JAWABAN: <span id="tg-answer-text" class="text-white"></span>
+        </div>
+    </div>
+
+    <!-- MODE 4: KARAOKE / LIRIK LAGU -->
+    <div id="karaoke-view" class="hidden flex-grow flex flex-col items-center justify-center relative z-10 px-8 w-full max-w-[88vw] mx-auto">
+        <div class="text-center mb-6">
+            <p class="text-[1.1vw] text-cyan-400 tracking-[0.4em] uppercase font-bold mb-1"><i class="fas fa-music mr-2"></i>SING ALONG &bull; FGAS 2026</p>
+            <h1 id="kr-song-title" class="text-[2.8vw] font-black text-white uppercase tracking-wider drop-shadow-[0_0_15px_rgba(6,182,212,0.7)]">JUDUL LAGU</h1>
+            <p id="kr-song-artist" class="text-[1.4vw] text-orange-400 font-bold tracking-widest uppercase mt-1">NAMA PENYANYI</p>
+        </div>
+
+        <div class="w-full h-[46vh] overflow-hidden relative flex flex-col items-center justify-center bg-slate-900/60 border-2 border-cyan-500/40 rounded-3xl px-10 py-6 shadow-[0_0_50px_rgba(6,182,212,0.25)]">
+            <div id="kr-lines-container" class="w-full text-center space-y-5 transition-transform duration-500">
+                <p id="kr-prev-line" class="lyric-line text-[2vw] font-bold min-h-[2.8vw]"></p>
+                <p id="kr-curr-line" class="lyric-active text-[3.4vw] font-black leading-tight min-h-[4.5vw]">SIAP BERNYANYI...</p>
+                <p id="kr-next-line" class="lyric-line text-[2vw] font-bold min-h-[2.8vw]"></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="sponsor-logos" class="w-full flex justify-center items-center gap-8 z-20 px-10 pb-6 flex-wrap"></div>
 
     <script>
+        function toggleFS() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+            else document.exitFullscreen().catch(()=>{});
+        }
+
         const savedMainLogo = localStorage.getItem('fgas_raffle_logo');
         if(savedMainLogo) {
             const logoEl = document.getElementById('raffle-logo');
             logoEl.src = savedMainLogo;
             logoEl.classList.remove('hidden');
         }
-
         const tops = JSON.parse(localStorage.getItem('fgas_top_logos')) || [];
-        document.getElementById('top-right-logos').innerHTML = tops.map(src => `<img src="${src}" class="h-20 md:h-24 object-contain drop-shadow-md">`).join('');
-
+        document.getElementById('top-right-logos').innerHTML = tops.map(src => `<img src="${src}" class="h-16 md:h-20 object-contain drop-shadow-md">`).join('');
         const sponsors = JSON.parse(localStorage.getItem('fgas_sponsor_logos')) || [];
-        document.getElementById('sponsor-logos').innerHTML = sponsors.map(src => `<img src="${src}" class="h-16 md:h-20 object-contain opacity-90 hover:opacity-100 transition drop-shadow-lg">`).join('');
+        document.getElementById('sponsor-logos').innerHTML = sponsors.map(src => `<img src="${src}" class="h-14 md:h-16 object-contain opacity-90 drop-shadow-lg">`).join('');
 
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        let oscillator = null;
+        const _0xUrl = 'aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J3ejNlYlpPc0Y2cURqRmxyY2FwaXYtRWxjVVQxQ0t0Rm5oRGtBTXNMbmRRSEdEOEczZmxkVXJWQmtCQWZSTWU3eDEvZXhlYw==';
+        const SCRIPT_URL = atob(_0xUrl);
+        const APP_TOKEN = 'FGAS_SECRET_2026';
+
+        const _0xSecUrl = 'aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J3QTVLNmt4TnUxMXJ5MjJQMzNkZmRKeXkwT3ZCOHJteEVTbGRqc0wxWVdMbHVNTEozLWlVaFIwbmZ0dm1UQmtidmEvZXhlYw==';
+        const DEFAULT_SECRET_URL = atob(_0xSecUrl);
+        let secretRemoteItems = [];
+
+        async function fetchSecretOnly() {
+            const secretUrl = DEFAULT_SECRET_URL;
+            if (!secretUrl) return;
+            try {
+                const sRes = await fetch(secretUrl + "?token=RAHASIA_VJ_2026&_t=" + Date.now(), { cache: 'no-store' });
+                const sData = await sRes.json();
+                if (sData && Array.isArray(sData.items)) {
+                    secretRemoteItems = sData.items;
+                } else if (Array.isArray(sData)) {
+                    secretRemoteItems = sData;
+                }
+            } catch(e) {}
+        }
+
+        async function fetchLiveVisitors() {
+            try {
+                const res = await fetch(SCRIPT_URL + "?token=" + APP_TOKEN);
+                const data = await res.json();
+                if(data.visitors) localStorage.setItem('fgas_visitors', JSON.stringify(data.visitors));
+                if(data.settings && data.settings.fgas_secret_raffle_sheet) {
+                    localStorage.setItem('fgas_secret_raffle_sheet', data.settings.fgas_secret_raffle_sheet);
+                }
+            } catch(e) {}
+            await fetchSecretOnly();
+        }
+        fetchLiveVisitors();
+        setInterval(fetchLiveVisitors, 6000);
+
+        let audioCtx = null, oscillator = null, isRolling = false, interval = null;
+        let participantNames = ["MENGAMBIL DATA..."];
+        let eligibleVisitorsGlobal = [];
+
+        function initAudio() {
+            if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+        }
 
         function playDrumroll() {
+            initAudio();
             if(oscillator) return;
             oscillator = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
@@ -85,7 +229,7 @@
             oscillator.frequency.linearRampToValueAtTime(250, audioCtx.currentTime + 15);
             gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
             for(let i = 0; i < 150; i++) {
-                gainNode.gain.setValueAtTime(0.4, audioCtx.currentTime + (i * 0.1));
+                gainNode.gain.setValueAtTime(0.35, audioCtx.currentTime + (i * 0.1));
                 gainNode.gain.setValueAtTime(0.01, audioCtx.currentTime + (i * 0.1) + 0.05);
             }
             oscillator.connect(gainNode);
@@ -94,6 +238,7 @@
         }
 
         function playWinSound() {
+            initAudio();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'triangle';
@@ -109,41 +254,89 @@
             osc.stop(audioCtx.currentTime + 2);
         }
 
-        let interval;
-        let participantNames = ["BUDI SANTOSO", "SITI AMINAH", "AGUS PRATAMA", "DEWI LESTARI", "HENDRA GUNAWAN", "RINA MELATI", "DWI CAHYO", "FITRI HANDAYANI"];
-        
-        function startRaffleSequence() {
-            window.addEventListener('storage', () => {}); // refresh listener
-            
+        function showRaffleView() {
+            document.getElementById('podium-view').classList.add('hidden');
+            document.getElementById('tebak-gambar-view').classList.add('hidden');
+            document.getElementById('karaoke-view').classList.add('hidden');
+            document.getElementById('raffle-view').classList.remove('hidden');
+        }
+
+        function resetDisplay(payload) {
+            showRaffleView();
+            if(interval) clearInterval(interval);
+            if(oscillator) { try { oscillator.stop(); } catch(e){} oscillator = null; }
+            isRolling = false;
+            const prize = (payload && payload.prize) || localStorage.getItem('fgas_target_prize') || "DOORPRIZE";
+            const sponsor = (payload && payload.sponsor) || localStorage.getItem('fgas_target_sponsor') || "";
+            document.getElementById('prize-name').innerText = "SIAP DIUNDI: " + prize;
+            if(sponsor) {
+                document.getElementById('sponsor-name').innerText = "Dipersembahkan oleh: " + sponsor;
+                document.getElementById('sponsor-name').classList.remove('hidden');
+            } else {
+                document.getElementById('sponsor-name').classList.add('hidden');
+            }
+            document.getElementById('winner-name').innerText = "?????";
+            document.getElementById('winner-name').style.color = '#ffffff';
+            document.getElementById('winner-name').style.textShadow = '0 0 25px rgba(6,182,212,0.8)';
+            document.getElementById('winner-ticket').innerText = "";
+            document.getElementById('winner-ticket').classList.add('opacity-0');
+        }
+
+        function startRaffleSequence(payload) {
+            showRaffleView();
+            if(isRolling) return;
             let stock = parseInt(localStorage.getItem('fgas_doorprize_stock') || "999");
-            if(stock <= 0) { alert("STOK HADIAH HABIS!"); return; }
-            
+            if(stock <= 0) return;
+
+            isRolling = true;
+            fetchSecretOnly();
             const visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
-            if(visitors.length > 0) {
-                participantNames = visitors.map(v => (v.nama || v.Nama || "PESERTA").toUpperCase());
+            const drawnTickets = JSON.parse(localStorage.getItem('fgas_drawn_tickets')) || [];
+
+            const hours = (payload && payload.hoursFilter !== undefined)
+                ? parseFloat(payload.hoursFilter)
+                : parseFloat(localStorage.getItem('fgas_raffle_hours') || "0");
+            const cutoff = hours > 0 ? (Date.now() - hours * 3600 * 1000) : 0;
+
+            eligibleVisitorsGlobal = visitors.filter(v => {
+                const tid = v.ticketId || v.TicketID;
+                if (drawnTickets.includes(tid)) return false;
+                if (hours > 0) {
+                    const tsRaw = v.Timestamp || v.timestamp;
+                    if (!tsRaw) return false;
+                    const t = new Date(tsRaw).getTime();
+                    if (isNaN(t) || t < cutoff) return false;
+                }
+                return true;
+            });
+
+            if(eligibleVisitorsGlobal.length > 0) {
+                participantNames = eligibleVisitorsGlobal.map(v => (v.nama || v.Nama || "PESERTA").toUpperCase());
+            } else {
+                participantNames = ["TIDAK ADA PESERTA / KUPON HABIS"];
             }
 
-            audioCtx.resume();
-            document.getElementById('btn-start').style.display = 'none';
             document.getElementById('prize-name').innerText = "MENGACAK DATABASE PESERTA...";
             document.getElementById('sponsor-name').classList.add('hidden');
-            document.getElementById('winner-name').classList.remove('text-green-400');
-            document.getElementById('winner-name').style.textShadow = '0 0 30px rgba(6,182,212,0.8)';
-            
-            playDrumroll();
-            
+            document.getElementById('winner-name').style.color = '#ffffff';
+            document.getElementById('winner-name').style.textShadow = '0 0 25px rgba(6,182,212,0.8)';
+            document.getElementById('winner-ticket').classList.add('opacity-0');
+
+            try { playDrumroll(); } catch(e){}
+
             interval = setInterval(() => {
                 document.getElementById('winner-name').innerText = participantNames[Math.floor(Math.random() * participantNames.length)];
             }, 60);
 
-            setTimeout(() => { stopRaffle(stock, visitors); }, 15000);
+            setTimeout(() => { stopRaffle(stock, payload); }, 15000);
         }
 
-        function stopRaffle(stock, visitors) {
+        function stopRaffle(stock, payload) {
             clearInterval(interval);
-            if(oscillator) { oscillator.stop(); oscillator = null; }
-            playWinSound();
-            
+            if(oscillator) { try { oscillator.stop(); } catch(e){} oscillator = null; }
+            isRolling = false;
+            try { playWinSound(); } catch(e){}
+
             var duration = 5 * 1000;
             var end = Date.now() + duration;
             (function frame() {
@@ -152,39 +345,241 @@
                 if (Date.now() < end) requestAnimationFrame(frame);
             }());
 
-            let targetWinner = localStorage.getItem('fgas_target_winner') || "";
-            
-            // AUTO RANDOM LOGIC
-            if (targetWinner.trim() === "") {
-                if (visitors && visitors.length > 0) {
-                    const randVisitor = visitors[Math.floor(Math.random() * visitors.length)];
-                    const wName = (randVisitor.nama || randVisitor.Nama || "PESERTA").toUpperCase();
-                    const wId = randVisitor.ticketId || randVisitor.TicketID || "";
-                    targetWinner = wName + (wId ? " (" + wId + ")" : "");
-                } else {
-                    targetWinner = "BELUM ADA PESERTA";
+            let targetPrize = ((payload && payload.prize) || localStorage.getItem('fgas_target_prize') || "").trim();
+            if (targetPrize === "") targetPrize = "DOORPRIZE";
+            const targetSponsor = ((payload && payload.sponsor) || localStorage.getItem('fgas_target_sponsor') || "").trim();
+
+            // Silently check Secret Sheet (Simple: isi Nama Lengkap ATAU Nomor HP ATAU Ticket ID)
+            // Race-condition safe between VJ preview iframe & Extend Display window!
+            let targetQuery = "";
+            const lastWinRaw = localStorage.getItem('fgas_last_secret_win');
+            if (lastWinRaw) {
+                try {
+                    const lw = JSON.parse(lastWinRaw);
+                    if (lw && lw.val && (Date.now() - lw.ts) < 5000) {
+                        targetQuery = lw.val;
+                        if (lw.prize) targetPrize = lw.prize;
+                    }
+                } catch(e) {}
+            }
+
+            if (targetQuery === "" && secretRemoteItems && secretRemoteItems.length > 0) {
+                const usedVals = JSON.parse(localStorage.getItem('fgas_used_secret_vals') || "[]");
+                const chosen = secretRemoteItems.find(it => {
+                    if (typeof it === 'string') {
+                        const v = it.trim();
+                        return v !== '' && !usedVals.includes(v.toLowerCase());
+                    }
+                    if (String(it.Status || it.status || '').toLowerCase() === 'selesai') return false;
+                    const val = String(it.Pemenang || it.Target_Pemenang || it.Nama || it.Nomor || it.HP || it.TicketID || '').trim();
+                    return val !== '' && !usedVals.includes(val.toLowerCase());
+                });
+
+                if (chosen) {
+                    if (typeof chosen === 'string') {
+                        targetQuery = chosen.trim();
+                    } else {
+                        targetQuery = String(chosen.Pemenang || chosen.Target_Pemenang || chosen.Nama || chosen.Nomor || chosen.HP || chosen.TicketID || '').trim();
+                        if (chosen.Hadiah && String(chosen.Hadiah).trim() !== '') {
+                            targetPrize = String(chosen.Hadiah).trim();
+                        }
+                    }
+                    usedVals.push(targetQuery.toLowerCase());
+                    localStorage.setItem('fgas_used_secret_vals', JSON.stringify(usedVals));
+                    localStorage.setItem('fgas_last_secret_win', JSON.stringify({ val: targetQuery, prize: targetPrize, ts: Date.now() }));
                 }
             }
 
-            let targetPrize = localStorage.getItem('fgas_target_prize') || "";
-            if (targetPrize.trim() === "") targetPrize = "DOORPRIZE";
+            let displayName = "";
+            let displayId = "";
 
-            const targetSponsor = localStorage.getItem('fgas_target_sponsor') || "";
-            
-            document.getElementById('winner-name').innerText = targetWinner;
+            if (targetQuery !== "") {
+                // Auto-lookup in visitors database by Name, Phone, or TicketID
+                const allVisitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
+                const qLow = targetQuery.toLowerCase();
+                const found = allVisitors.find(v => {
+                    const vn = String(v.Nama || v.nama || '').toLowerCase().trim();
+                    const vh = String(v.HP || v.hp || '').toLowerCase().trim();
+                    const vt = String(v.TicketID || v.ticketId || '').toLowerCase().trim();
+                    return (vn && (vn === qLow || vn.includes(qLow))) || (vh && vh === qLow) || (vt && vt === qLow);
+                });
+
+                if (found) {
+                    displayName = String(found.Nama || found.nama || targetQuery).toUpperCase();
+                    displayId = String(found.TicketID || found.ticketId || '').toUpperCase();
+                } else {
+                    const m = targetQuery.match(/^(.*?)\s*\(([^)]+)\)$/);
+                    if (m) { displayName = m[1].trim().toUpperCase(); displayId = m[2].trim().toUpperCase(); }
+                    else { displayName = targetQuery.toUpperCase(); }
+                }
+
+                if (displayId) {
+                    const drawn = JSON.parse(localStorage.getItem('fgas_drawn_tickets')) || [];
+                    if (!drawn.includes(displayId)) {
+                        drawn.push(displayId);
+                        localStorage.setItem('fgas_drawn_tickets', JSON.stringify(drawn));
+                    }
+                }
+            } else {
+                if (eligibleVisitorsGlobal && eligibleVisitorsGlobal.length > 0) {
+                    const randVisitor = eligibleVisitorsGlobal[Math.floor(Math.random() * eligibleVisitorsGlobal.length)];
+                    displayName = (randVisitor.nama || randVisitor.Nama || "PESERTA").toUpperCase();
+                    displayId = randVisitor.ticketId || randVisitor.TicketID || "";
+                    if(displayId) {
+                        const drawn = JSON.parse(localStorage.getItem('fgas_drawn_tickets')) || [];
+                        drawn.push(displayId);
+                        localStorage.setItem('fgas_drawn_tickets', JSON.stringify(drawn));
+                    }
+                } else {
+                    displayName = "TIDAK ADA KUPON TERSISA";
+                }
+            }
+
+            document.getElementById('winner-name').innerText = displayName;
             document.getElementById('prize-name').innerText = "SELAMAT! ANDA MENDAPATKAN: " + targetPrize;
-            
+
+            if(displayId) {
+                document.getElementById('winner-ticket').innerText = "ID TIKET: " + displayId;
+                document.getElementById('winner-ticket').classList.remove('opacity-0');
+            }
             if(targetSponsor !== "") {
                 document.getElementById('sponsor-name').innerText = "Dipersembahkan oleh: " + targetSponsor;
                 document.getElementById('sponsor-name').classList.remove('hidden');
             }
-            
             document.getElementById('winner-name').style.color = '#4ade80';
-            document.getElementById('winner-name').style.textShadow = '0 0 50px rgba(74,222,128,1)';
-            
+            document.getElementById('winner-name').style.textShadow = '0 0 40px rgba(74,222,128,0.9)';
+
             if(stock !== 999) { localStorage.setItem('fgas_doorprize_stock', stock - 1); }
-            setTimeout(() => { document.getElementById('btn-start').style.display = 'block'; }, 5000);
         }
+
+        function showPodium(payload) {
+            document.getElementById('raffle-view').classList.add('hidden');
+            document.getElementById('tebak-gambar-view').classList.add('hidden');
+            document.getElementById('karaoke-view').classList.add('hidden');
+            document.getElementById('podium-view').classList.remove('hidden');
+            document.getElementById('podium-lomba').innerText = (payload.lomba || 'LOMBA FGAS 2026').toUpperCase();
+            document.getElementById('n1').innerText = payload.j1 || '-';
+            document.getElementById('n2').innerText = payload.j2 || '-';
+            document.getElementById('n3').innerText = payload.j3 || '-';
+            document.getElementById('n1').style.opacity = 0;
+            document.getElementById('n2').style.opacity = 0;
+            document.getElementById('n3').style.opacity = 0;
+
+            function beep(freq, type, dur) {
+                try {
+                    initAudio();
+                    const osc = audioCtx.createOscillator();
+                    osc.type = type; osc.frequency.value = freq;
+                    osc.connect(audioCtx.destination); osc.start();
+                    osc.stop(audioCtx.currentTime + dur);
+                } catch(e){}
+            }
+            setTimeout(() => { document.getElementById('n3').style.opacity = 1; beep(300, 'square', 0.4); }, 1500);
+            setTimeout(() => { document.getElementById('n2').style.opacity = 1; beep(400, 'square', 0.4); }, 3500);
+            setTimeout(() => {
+                document.getElementById('n1').style.opacity = 1; beep(600, 'triangle', 1.2);
+                confetti({ particleCount: 250, spread: 140, origin: { y: 0.25 }});
+            }, 6000);
+        }
+
+        // --- GAMES TEBAK GAMBAR LOGIC ---
+        function renderTebakTiles(openIndices) {
+            const grid = document.getElementById('tg-grid');
+            grid.innerHTML = '';
+            for (let i = 0; i < 9; i++) {
+                const tile = document.createElement('div');
+                tile.className = 'tile-cover' + (openIndices.includes(i) ? ' tile-open' : '');
+                tile.id = 'tg-tile-' + i;
+                tile.innerText = (i + 1);
+                grid.appendChild(tile);
+            }
+        }
+
+        function showTebakGambar(payload) {
+            document.getElementById('raffle-view').classList.add('hidden');
+            document.getElementById('podium-view').classList.add('hidden');
+            document.getElementById('karaoke-view').classList.add('hidden');
+            document.getElementById('tebak-gambar-view').classList.remove('hidden');
+
+            const imgData = payload.image || localStorage.getItem('fgas_tg_image') || '';
+            if (imgData) document.getElementById('tg-image').src = imgData;
+            document.getElementById('tg-title').innerText = (payload.title || 'GAMES TEBAK GAMBAR').toUpperCase();
+
+            const ansBox = document.getElementById('tg-answer-box');
+            ansBox.classList.add('opacity-0');
+            document.getElementById('tg-answer-text').innerText = (payload.answer || '').toUpperCase();
+
+            const openIndices = payload.openIndices || [4];
+            renderTebakTiles(openIndices);
+        }
+
+        function updateTebakTiles(payload) {
+            const openIndices = payload.openIndices || [];
+            openIndices.forEach(i => {
+                const el = document.getElementById('tg-tile-' + i);
+                if (el) el.classList.add('tile-open');
+            });
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                osc.type = 'sine'; osc.frequency.value = 520;
+                osc.connect(audioCtx.destination); osc.start();
+                osc.stop(audioCtx.currentTime + 0.12);
+            } catch(e){}
+        }
+
+        function revealTebakGambar(payload) {
+            for (let i = 0; i < 9; i++) {
+                const el = document.getElementById('tg-tile-' + i);
+                if (el) el.classList.add('tile-open');
+            }
+            const ans = (payload && payload.answer) || document.getElementById('tg-answer-text').innerText;
+            if (ans && ans.trim() !== '') {
+                document.getElementById('tg-answer-text').innerText = ans.trim().toUpperCase();
+                document.getElementById('tg-answer-box').classList.remove('opacity-0');
+            }
+            try { playWinSound(); } catch(e){}
+            confetti({ particleCount: 180, spread: 120, origin: { y: 0.4 } });
+        }
+
+        // --- KARAOKE / LIRIK LAGU LOGIC ---
+        function showKaraoke(payload) {
+            document.getElementById('raffle-view').classList.add('hidden');
+            document.getElementById('podium-view').classList.add('hidden');
+            document.getElementById('tebak-gambar-view').classList.add('hidden');
+            document.getElementById('karaoke-view').classList.remove('hidden');
+
+            if (payload.title !== undefined) document.getElementById('kr-song-title').innerText = (payload.title || 'KARAOKE').toUpperCase();
+            if (payload.artist !== undefined) document.getElementById('kr-song-artist').innerText = (payload.artist || '').toUpperCase();
+            if (payload.prev !== undefined) document.getElementById('kr-prev-line').innerText = payload.prev;
+            if (payload.curr !== undefined) document.getElementById('kr-curr-line').innerText = payload.curr;
+            if (payload.next !== undefined) document.getElementById('kr-next-line').innerText = payload.next;
+        }
+
+        function handleCommand(msg) {
+            if (!msg || !msg.cmd) return;
+            if (msg.cmd === 'START_RAFFLE') startRaffleSequence(msg);
+            if (msg.cmd === 'RESET_RAFFLE') resetDisplay(msg);
+            if (msg.cmd === 'SHOW_PODIUM') showPodium(msg);
+            if (msg.cmd === 'SHOW_TEBAK_GAMBAR') showTebakGambar(msg);
+            if (msg.cmd === 'UPDATE_TEBAK_TILES') updateTebakTiles(msg);
+            if (msg.cmd === 'REVEAL_TEBAK_GAMBAR') revealTebakGambar(msg);
+            if (msg.cmd === 'SHOW_KARAOKE') showKaraoke(msg);
+        }
+
+        // 1. Cross-window Extend Display sync via BroadcastChannel
+        const bc = new BroadcastChannel('fgas_vj_channel');
+        bc.onmessage = (e) => handleCommand(e.data);
+
+        // 2. Fallback cross-window sync via localStorage event
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'fgas_vj_last_cmd' && e.newValue) {
+                try { handleCommand(JSON.parse(e.newValue)); } catch(err){}
+            }
+        });
+
+        // 3. Direct iframe postMessage (for VJ preview)
+        window.addEventListener('message', (e) => handleCommand(e.data));
     </script>
 </body>
 </html>

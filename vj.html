@@ -2,124 +2,470 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VJ Control Panel - FGAS 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        html, body { max-width: 100%; overflow-x: hidden; overscroll-behavior-y: none; }
-        /* FIX iOS SAFARI BUG: Mencegah gambar hilang & patah-patah saat scroll */
-        img, .glass-panel, .glass-card, .bento-card, header, nav, .logos-container, .sport-bg { 
-            -webkit-transform: translate3d(0,0,0); 
-            transform: translate3d(0,0,0); 
-            will-change: transform;
-        }
-
-
-        
- @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap'); body { background: #0f172a; color: white; font-family: sans-serif; } .vj-panel { background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); transition: bottom 0.3s ease; } .vj-panel:hover { bottom: 0 !important; } input {font-size:16px;} </style>
+        html, body { max-width: 100%; overflow: hidden; }
+        body { background: #0f172a; color: white; font-family: sans-serif; }
+        .vj-panel { background: rgba(2,6,23,0.94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: bottom 0.3s ease; }
+        .vj-panel:hover, .vj-panel.open { bottom: 0 !important; }
+        input { font-size: 15px; box-sizing: border-box; }
+    </style>
 </head>
-<body class="h-screen w-full overflow-hidden">
+<body class="h-screen w-full overflow-hidden relative">
+    <!-- Live Mirroring Preview of LED Screen -->
     <iframe id="display-frame" src="raffle.html" class="w-full h-full border-none"></iframe>
 
-    <div class="vj-panel fixed left-0 w-full p-6 border-t border-blue-500/50 shadow-[0_-10px_30px_rgba(0,0,0,0.5)] z-50 flex flex-col gap-4" style="bottom: -85vh; height: 90vh;">
-        <div class="flex justify-between items-center border-b border-white/10 pb-2">
-            <h2 class="font-bold text-xl text-cyan-400"><i class="fas fa-sliders-h mr-2"></i> VJ CONTROL PANEL (Arahkan mouse ke bawah untuk membuka)</h2>
-            <div class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-bold animate-pulse">VJ MODE ACTIVE</div>
+    <div id="vj-drawer" class="vj-panel fixed left-0 w-full p-5 border-t border-cyan-500/50 shadow-[0_-10px_30px_rgba(0,0,0,0.7)] z-50 flex flex-col gap-4" style="bottom: -84vh; height: 88vh;">
+        <div class="flex flex-wrap justify-between items-center gap-2 border-b border-white/10 pb-2">
+            <h2 class="font-bold text-base md:text-lg text-cyan-400"><i class="fas fa-sliders-h mr-2"></i> VJ CONTROL PANEL <span class="text-xs bg-indigo-600 text-white px-2 py-0.5 rounded ml-1">V46.1 + KARAOKE</span></h2>
+            <div class="flex items-center gap-2">
+                <button onclick="openExtendDisplay()" class="bg-orange-500 hover:bg-orange-400 text-slate-950 px-3 py-1.5 rounded-lg text-xs font-black transition shadow"><i class="fas fa-desktop mr-1"></i> BUKA LAYAR LED (EXTEND DISPLAY)</button>
+                <button onclick="toggleFullscreen()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition"><i class="fas fa-expand mr-1"></i> Fullscreen</button>
+                <span id="sync-badge" class="bg-slate-800 border border-slate-600 text-slate-300 px-3 py-1 rounded-full text-xs font-bold">Standby</span>
+            </div>
         </div>
-        
-        <div class="grid grid-cols-2 gap-8 h-full overflow-y-auto pb-10">
-            <div class="bg-white/5 p-6 rounded-xl border border-white/10 space-y-4">
-                <h3 class="font-bold text-orange-400 text-lg border-b border-white/10 pb-2">1. PENGUNDIAN DOORPRIZE</h3>
-                <input type="text" id="target-winner" class="w-full p-3 bg-black/50 border border-white/20 rounded text-white" placeholder="Nama / ID Pemenang">
-                <input type="text" id="target-prize" class="w-full p-3 bg-black/50 border border-white/20 rounded text-white" placeholder="Hadiah (Motor, Kulkas, dll)">
-                <input type="text" id="target-sponsor" class="w-full p-3 bg-black/50 border border-white/20 rounded text-white" placeholder="Sponsor (opsional, cth: Bank Jateng)">
-                <button onclick="setRaffle()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded font-bold transition">SET DATA KE LAYAR LED</button>
-                <button onclick="document.getElementById('display-frame').src='raffle.html'" class="w-full bg-slate-700 hover:bg-slate-600 py-3 rounded font-bold transition text-xs">RESET TAMPILAN UNDIAN</button>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 min-h-0 overflow-y-auto pb-16">
+            <!-- 1. KONTROL UNDIAN DOORPRIZE -->
+            <div class="bg-white/5 p-5 rounded-xl border border-white/10 space-y-3">
+                <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                    <h3 class="font-bold text-orange-400 text-sm uppercase">1. Pengundian Doorprize (LED)</h3>
+                    <button onclick="resetDrawnTickets()" class="text-[11px] text-red-400 hover:text-red-300 underline"><i class="fas fa-trash mr-1"></i>Reset Kupon Terpilih</button>
+                </div>
+                <p class="text-[11px] text-slate-400">Klik <b>BUKA LAYAR LED</b> di atas, geser jendela ke layar proyektor/LED lalu double-click untuk Fullscreen. Semua tombol di sini langsung mengontrol layar LED.</p>
+                <input type="text" id="target-prize" class="w-full p-3 bg-black/50 border border-white/20 rounded text-white text-sm" placeholder="Nama Hadiah (Cth: Sepeda Listrik, Kulkas, dll)">
+                <input type="text" id="target-sponsor" class="w-full p-3 bg-black/50 border border-white/20 rounded text-white text-sm" placeholder="Sponsor (opsional, cth: Bank Jateng)">
+                <div class="bg-black/40 border border-cyan-500/30 rounded-lg p-2.5">
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="text-[11px] font-bold text-cyan-300 uppercase"><i class="fas fa-clock mr-1"></i> Filter Durasi Input Pengunjung</label>
+                        <span id="eligible-count-badge" class="text-[10px] bg-cyan-900/70 text-cyan-200 px-2 py-0.5 rounded-full font-bold">0 Kupon Siap</span>
+                    </div>
+                    <select id="raffle-duration" onchange="updateEligibleCount()" class="w-full p-2 bg-slate-900 border border-white/20 rounded text-white text-xs font-bold">
+                        <option value="0">Semua Waktu (Tanpa Batas)</option>
+                        <option value="1">1 Jam Terakhir</option>
+                        <option value="2">2 Jam Terakhir</option>
+                        <option value="3">3 Jam Terakhir</option>
+                        <option value="4">4 Jam Terakhir</option>
+                        <option value="6">6 Jam Terakhir</option>
+                        <option value="12">12 Jam Terakhir</option>
+                        <option value="24">24 Jam Terakhir</option>
+                        <option value="48">48 Jam Terakhir</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3 pt-1">
+                    <button onclick="setRaffle()" class="bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-bold text-xs transition">SET HADIAH KE LED</button>
+                    <button onclick="startRaffleOnLED()" class="bg-green-600 hover:bg-green-500 py-3 rounded-lg font-black text-xs transition shadow-[0_0_15px_rgba(34,197,94,0.5)]"><i class="fas fa-play mr-1"></i> MULAI UNDIAN (15 DTK)</button>
+                </div>
+                <button onclick="resetRaffleOnLED()" class="w-full bg-slate-700 hover:bg-slate-600 py-2.5 rounded-lg font-bold transition text-xs">RESET LAYAR UNDIAN</button>
             </div>
 
-            <div class="bg-white/5 p-6 rounded-xl border border-white/10 space-y-4">
-                <h3 class="font-bold text-pink-400 text-lg border-b border-white/10 pb-2">2. PENGUMUMAN JUARA LOMBA</h3>
-                <p class="text-xs text-gray-400">Atur pemenang dan tampilkan podium dramatis di Layar LED.</p>
-                <input type="text" id="kategori-lomba" class="w-full p-3 bg-black/50 border border-white/20 rounded text-white" placeholder="Nama Lomba (Cth: Fashion Show Anak)">
-                
+            <!-- 2. PENGUMUMAN JUARA LOMBA -->
+            <div class="bg-white/5 p-5 rounded-xl border border-white/10 space-y-3">
+                <h3 class="font-bold text-pink-400 text-sm uppercase border-b border-white/10 pb-2">2. Pengumuman Juara Lomba (LED)</h3>
+                <p class="text-[11px] text-slate-400">Atur pemenang lomba dan tampilkan podium dramatis langsung ke layar LED Extend Display.</p>
+                <input type="text" id="kategori-lomba" class="w-full p-3 bg-black/50 border border-white/20 rounded text-white text-sm" placeholder="Nama Lomba (Cth: Fashion Show Anak)">
                 <div class="grid grid-cols-3 gap-2">
-                    <input type="text" id="juara-3" class="w-full p-3 bg-[#cd7f32]/20 border border-[#cd7f32] rounded text-white placeholder-[#cd7f32]" placeholder="Nama Juara 3">
-                    <input type="text" id="juara-2" class="w-full p-3 bg-gray-400/20 border border-gray-400 rounded text-white placeholder-gray-400" placeholder="Nama Juara 2">
-                    <input type="text" id="juara-1" class="w-full p-3 bg-yellow-400/20 border border-yellow-400 rounded text-white placeholder-yellow-400" placeholder="Nama Juara 1">
+                    <input type="text" id="juara-3" class="w-full p-2.5 bg-[#cd7f32]/20 border border-[#cd7f32] rounded text-white text-xs placeholder-[#cd7f32]" placeholder="Juara 3">
+                    <input type="text" id="juara-2" class="w-full p-2.5 bg-gray-400/20 border border-gray-400 rounded text-white text-xs placeholder-gray-400" placeholder="Juara 2">
+                    <input type="text" id="juara-1" class="w-full p-2.5 bg-yellow-400/20 border border-yellow-400 rounded text-white text-xs placeholder-yellow-400" placeholder="Juara 1">
                 </div>
-                <button onclick="triggerPodium()" class="w-full bg-pink-600 hover:bg-pink-500 py-3 rounded font-bold transition">TAMPILKAN PODIUM DI LED</button>
+                <button onclick="triggerPodium()" class="w-full bg-pink-600 hover:bg-pink-500 py-3 rounded-lg font-bold text-xs transition">TAMPILKAN PODIUM DI LED</button>
+            </div>
+
+            <!-- 3. GAMES TEBAK GAMBAR (LED) -->
+            <div class="bg-cyan-950/30 p-5 rounded-xl border border-cyan-500/40 space-y-3">
+                <div class="flex justify-between items-center border-b border-cyan-500/30 pb-2">
+                    <h3 class="font-bold text-cyan-300 text-sm uppercase"><i class="fas fa-puzzle-piece mr-1"></i> 3. Games Tebak Gambar</h3>
+                    <span id="tg-status-badge" class="text-[10px] bg-slate-800 text-cyan-300 px-2 py-0.5 rounded-full font-bold">Siap</span>
+                </div>
+                <input type="file" id="tg-file" accept="image/*" onchange="prepareTebakImage(this)" class="w-full text-xs bg-black/50 border border-white/20 rounded p-2 text-slate-300">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="tg-title-input" class="w-full p-2.5 bg-black/50 border border-white/20 rounded text-white text-xs" placeholder="Judul (Opsional)" value="GAMES TEBAK GAMBAR">
+                    <input type="text" id="tg-answer-input" class="w-full p-2.5 bg-black/50 border border-white/20 rounded text-white text-xs" placeholder="Jawaban (Muncul saat dibuka)">
+                </div>
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <button onclick="startTebakGambar()" class="bg-cyan-600 hover:bg-cyan-500 py-2.5 rounded-lg font-bold text-xs transition"><i class="fas fa-eye-slash mr-1"></i> TAMPIL SEBAGIAN</button>
+                    <button onclick="openNextTebakTile()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 py-2.5 rounded-lg font-black text-xs transition"><i class="fas fa-plus-square mr-1"></i> BUKA 1 KOTAK</button>
+                </div>
+                <button onclick="revealAllTebakGambar()" class="w-full bg-green-600 hover:bg-green-500 py-2.5 rounded-lg font-black text-xs transition shadow-[0_0_15px_rgba(34,197,94,0.4)]"><i class="fas fa-eye mr-1"></i> BUKA SEMUA GAMBAR (REVEAL)</button>
+            </div>
+
+            <!-- 4. KARAOKE / LIRIK LAGU AUTO-JALAN (LED) -->
+            <div class="bg-indigo-950/40 p-5 rounded-xl border border-indigo-400/40 space-y-3">
+                <div class="flex justify-between items-center border-b border-indigo-400/30 pb-2">
+                    <h3 class="font-bold text-indigo-300 text-sm uppercase"><i class="fas fa-microphone-alt mr-1"></i> 4. Karaoke / Lirik Lagu</h3>
+                    <span id="kr-status" class="text-[10px] bg-slate-800 text-indigo-300 px-2 py-0.5 rounded-full font-bold">Siap</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="kr-title" class="w-full p-2.5 bg-black/50 border border-white/20 rounded text-white text-xs" placeholder="Judul Lagu (Cth: Kangen)">
+                    <input type="text" id="kr-artist" class="w-full p-2.5 bg-black/50 border border-white/20 rounded text-white text-xs" placeholder="Penyanyi (Cth: Dewa 19)">
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="searchLyrics()" id="btn-search-lyrics" class="flex-1 bg-indigo-600 hover:bg-indigo-500 py-2 rounded-lg font-bold text-xs transition"><i class="fas fa-search mr-1"></i> CARI LIRIK OTOMATIS</button>
+                    <select id="kr-speed" class="bg-slate-900 border border-white/20 rounded-lg px-2 text-xs text-white font-bold" title="Kecepatan jika lirik tanpa timestamp">
+                        <option value="3000">Cepat (3d)</option>
+                        <option value="4500" selected>Normal (4.5d)</option>
+                        <option value="6000">Pelan (6d)</option>
+                    </select>
+                </div>
+                <textarea id="kr-lyrics-box" rows="2" class="w-full p-2 bg-black/50 border border-white/20 rounded text-slate-200 text-[11px] font-mono" placeholder="Lirik otomatis muncul di sini (atau paste lirik manual)..."></textarea>
+                <div class="grid grid-cols-4 gap-1.5">
+                    <button onclick="playKaraoke()" class="bg-green-600 hover:bg-green-500 py-2 rounded-lg font-black text-xs transition"><i class="fas fa-play"></i> PLAY</button>
+                    <button onclick="pauseKaraoke()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 py-2 rounded-lg font-black text-xs transition"><i class="fas fa-pause"></i> PAUSE</button>
+                    <button onclick="stepKaraoke(-1)" class="bg-slate-700 hover:bg-slate-600 py-2 rounded-lg font-bold text-xs transition"><i class="fas fa-step-backward"></i></button>
+                    <button onclick="stepKaraoke(1)" class="bg-slate-700 hover:bg-slate-600 py-2 rounded-lg font-bold text-xs transition"><i class="fas fa-step-forward"></i></button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        const _0xUrl = 'aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J3ejNlYlpPc0Y2cURqRmxyY2FwaXYtRWxjVVQxQ0t0Rm5oRGtBTXNMbmRRSEdEOEczZmxkVXJWQmtCQWZSTWU3eDEvZXhlYw==';
+        const SCRIPT_URL = atob(_0xUrl);
+        const APP_TOKEN = 'FGAS_SECRET_2026';
+
+        const bc = new BroadcastChannel('fgas_vj_channel');
+        let ledWindow = null;
+
+        function openExtendDisplay() {
+            ledWindow = window.open('raffle.html', 'FGAS_LED_SCREEN', 'width=1280,height=720,menubar=no,toolbar=no,location=no,status=no');
+            if(!ledWindow) alert('Pop-up diblokir browser! Izinkan pop-up untuk membuka jendela Extend Display.');
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => alert("Tekan F11 untuk Fullscreen"));
+            else document.exitFullscreen();
+        }
+
+        function sendToLED(payload) {
+            payload._ts = Date.now();
+            // 1. Send to Extend Display via BroadcastChannel
+            bc.postMessage(payload);
+            // 2. Fallback via localStorage event
+            localStorage.setItem('fgas_vj_last_cmd', JSON.stringify(payload));
+            // 3. Send to local mirroring preview iframe
+            const frame = document.getElementById('display-frame');
+            if(frame && frame.contentWindow) frame.contentWindow.postMessage(payload, '*');
+        }
+
+        async function fetchData() {
+            try {
+                const res = await fetch(SCRIPT_URL + "?token=" + APP_TOKEN);
+                const data = await res.json();
+                if(data.visitors) { localStorage.setItem('fgas_visitors', JSON.stringify(data.visitors)); updateEligibleCount(); }
+                const badge = document.getElementById('sync-badge');
+                badge.className = "bg-green-900 border border-green-500 text-green-400 px-3 py-1 rounded-full text-xs font-bold";
+                badge.innerHTML = 'Live Synced';
+                setTimeout(() => {
+                    badge.className = "bg-slate-800 border border-slate-600 text-slate-300 px-3 py-1 rounded-full text-xs font-bold";
+                    badge.innerHTML = 'Standby';
+                }, 2500);
+            } catch(e) {}
+        }
+        fetchData();
+        setInterval(fetchData, 10000);
+
+        function resetDrawnTickets() {
+            if(confirm("Yakin ingin mereset riwayat pemenang undian?")) {
+                localStorage.removeItem('fgas_drawn_tickets');
+                localStorage.removeItem('fgas_used_secret_idx');
+                localStorage.removeItem('fgas_used_secret_vals');
+                localStorage.removeItem('fgas_last_secret_win');
+                alert("Berhasil direset!");
+            }
+        }
+
+        function updateEligibleCount() {
+            const hours = parseFloat(document.getElementById('raffle-duration').value || "0");
+            localStorage.setItem('fgas_raffle_hours', String(hours));
+            const visitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
+            const drawnTickets = JSON.parse(localStorage.getItem('fgas_drawn_tickets')) || [];
+            const now = Date.now();
+            const cutoff = hours > 0 ? now - (hours * 3600 * 1000) : 0;
+
+            const eligible = visitors.filter(v => {
+                const tid = v.ticketId || v.TicketID;
+                if (drawnTickets.includes(tid)) return false;
+                if (hours > 0) {
+                    const tsRaw = v.Timestamp || v.timestamp;
+                    if (!tsRaw) return false;
+                    const t = new Date(tsRaw).getTime();
+                    if (isNaN(t) || t < cutoff) return false;
+                }
+                return true;
+            });
+
+            const badge = document.getElementById('eligible-count-badge');
+            if (badge) badge.innerText = eligible.length + ' Kupon Siap';
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedHours = localStorage.getItem('fgas_raffle_hours') || "0";
+            const sel = document.getElementById('raffle-duration');
+            if (sel) sel.value = savedHours;
+            updateEligibleCount();
+        });
+
         function setRaffle() {
-            localStorage.setItem('fgas_target_winner', document.getElementById('target-winner').value);
-            localStorage.setItem('fgas_target_prize', document.getElementById('target-prize').value);
-            localStorage.setItem('fgas_target_sponsor', document.getElementById('target-sponsor').value);
-            document.getElementById('display-frame').src = 'raffle.html';
+            const prize = document.getElementById('target-prize').value.trim();
+            const sponsor = document.getElementById('target-sponsor').value.trim();
+            const hours = parseFloat(document.getElementById('raffle-duration').value || "0");
+            localStorage.setItem('fgas_target_prize', prize);
+            localStorage.setItem('fgas_target_sponsor', sponsor);
+            localStorage.setItem('fgas_raffle_hours', String(hours));
+            updateEligibleCount();
+            sendToLED({ cmd: 'RESET_RAFFLE', prize: prize, sponsor: sponsor, hoursFilter: hours });
+        }
+
+        function startRaffleOnLED() {
+            const prize = document.getElementById('target-prize').value.trim();
+            const sponsor = document.getElementById('target-sponsor').value.trim();
+            const hours = parseFloat(document.getElementById('raffle-duration').value || "0");
+            localStorage.setItem('fgas_target_prize', prize);
+            localStorage.setItem('fgas_target_sponsor', sponsor);
+            localStorage.setItem('fgas_raffle_hours', String(hours));
+            updateEligibleCount();
+            sendToLED({ cmd: 'START_RAFFLE', prize: prize, sponsor: sponsor, hoursFilter: hours });
+        }
+
+        function resetRaffleOnLED() {
+            setRaffle();
         }
 
         function triggerPodium() {
-            const lomba = document.getElementById('kategori-lomba').value;
-            const j1 = document.getElementById('juara-1').value;
-            const j2 = document.getElementById('juara-2').value;
-            const j3 = document.getElementById('juara-3').value;
+            const lomba = document.getElementById('kategori-lomba').value || "PENGUMUMAN LOMBA";
+            const j1 = document.getElementById('juara-1').value || "-";
+            const j2 = document.getElementById('juara-2').value || "-";
+            const j3 = document.getElementById('juara-3').value || "-";
 
-            const podiumHTML = `<!DOCTYPE html>
-            <html lang="id">
-            <head>
-                <meta charset="UTF-8">
-                <script src="https://cdn.tailwindcss.com"></`+`script>
-                <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></`+`script>
-                <style>
-        html, body { max-width: 100%; overflow-x: hidden; overscroll-behavior-y: none; }
-        /* FIX iOS SAFARI BUG: Mencegah gambar hilang & patah-patah saat scroll */
-        img, .glass-panel, .glass-card, .bento-card, header, nav, .logos-container, .sport-bg { 
-            -webkit-transform: translate3d(0,0,0); 
-            transform: translate3d(0,0,0); 
-            will-change: transform;
+            const winners = JSON.parse(localStorage.getItem('fgas_winners') || "[]");
+            winners.push(`${lomba.toUpperCase()}<br><span class='text-white mt-1 block font-normal text-[10px]'>1st: ${j1} &bull; 2nd: ${j2} &bull; 3rd: ${j3}</span>`);
+            localStorage.setItem('fgas_winners', JSON.stringify(winners));
+
+            sendToLED({ cmd: 'SHOW_PODIUM', lomba: lomba, j1: j1, j2: j2, j3: j3 });
+        }
+        // --- GAMES TEBAK GAMBAR CONTROLLER ---
+        let tgOpenTiles = [];
+
+        function prepareTebakImage(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_W = 1280;
+                    let w = img.width, h = img.height;
+                    if (w > MAX_W) { h = Math.round(h * MAX_W / w); w = MAX_W; }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    const compressed = canvas.toDataURL('image/jpeg', 0.82);
+                    try {
+                        localStorage.setItem('fgas_tg_image', compressed);
+                        document.getElementById('tg-status-badge').innerText = 'Gambar Siap';
+                    } catch(err) {
+                        alert('Ukuran gambar terlalu besar. Gunakan gambar yang lebih kecil.');
+                    }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
         }
 
+        function startTebakGambar() {
+            const imgData = localStorage.getItem('fgas_tg_image');
+            if (!imgData) { alert('Pilih file gambar terlebih dahulu!'); return; }
+            // Reveal 2 random tiles initially (sebagian dahulu)
+            const all = [0,1,2,3,4,5,6,7,8].sort(() => Math.random() - 0.5);
+            tgOpenTiles = [all[0], all[1]];
+            const title = document.getElementById('tg-title-input').value.trim() || 'GAMES TEBAK GAMBAR';
+            const answer = document.getElementById('tg-answer-input').value.trim();
+            document.getElementById('tg-status-badge').innerText = `Terbuka ${tgOpenTiles.length}/9`;
+            sendToLED({ cmd: 'SHOW_TEBAK_GAMBAR', image: imgData, title: title, answer: answer, openIndices: tgOpenTiles });
+        }
 
-        
+        function openNextTebakTile() {
+            const remaining = [0,1,2,3,4,5,6,7,8].filter(i => !tgOpenTiles.includes(i));
+            if (remaining.length === 0) {
+                revealAllTebakGambar();
+                return;
+            }
+            const nextTile = remaining[Math.floor(Math.random() * remaining.length)];
+            tgOpenTiles.push(nextTile);
+            document.getElementById('tg-status-badge').innerText = `Terbuka ${tgOpenTiles.length}/9`;
+            sendToLED({ cmd: 'UPDATE_TEBAK_TILES', openIndices: tgOpenTiles });
+        }
 
-                    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
-                    body { background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #000 100%); color: #fff; overflow: hidden; font-family: 'Orbitron', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
-                    .podium { display: flex; align-items: flex-end; justify-content: center; gap: 2vw; margin-top: 5vh; height: 40vh; }
-                    .pillar { width: 15vw; text-align: center; border-radius: 10px 10px 0 0; position: relative; box-shadow: 0 -10px 30px rgba(0,0,0,0.5); }
-                    .p2 { height: 60%; background: linear-gradient(to top, #475569, #94a3b8); }
-                    .p1 { height: 100%; background: linear-gradient(to top, #854d0e, #fbbf24); z-index: 10; }
-                    .p3 { height: 40%; background: linear-gradient(to top, #78350f, #cd7f32); }
-                    .name-card { position: absolute; top: -10vh; left: 50%; transform: translateX(-50%); width: 200%; background: rgba(0,0,0,0.8); border: 2px solid #fff; padding: 1rem; border-radius: 10px; font-size: 2vw; opacity: 0; transition: opacity 1s; }
-                    .rank { font-size: 4vw; font-weight: 900; margin-top: 2vh; color: rgba(255,255,255,0.5); }
-                </style>
-            </head>
-            <body>
-                <h1 class="text-[4vw] font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 tracking-widest uppercase mb-2">PENGUMUMAN JUARA</h1>
-                <h2 class="text-[3vw] text-white tracking-[0.2em] mb-10">${lomba.toUpperCase()}</h2>
-                
-                <div class="podium">
-                    <div class="pillar p2"><div class="name-card" id="n2" style="border-color: #94a3b8;">${j2}</div><div class="rank">2</div></div>
-                    <div class="pillar p1"><div class="name-card" id="n1" style="border-color: #fbbf24; top: -15vh; font-size: 3vw; color: #fbbf24;">${j1}</div><div class="rank text-white">1</div></div>
-                    <div class="pillar p3"><div class="name-card" id="n3" style="border-color: #cd7f32;">${j3}</div><div class="rank">3</div></div>
-                </div>
+        function revealAllTebakGambar() {
+            tgOpenTiles = [0,1,2,3,4,5,6,7,8];
+            const answer = document.getElementById('tg-answer-input').value.trim();
+            document.getElementById('tg-status-badge').innerText = 'Terbuka Semua!';
+            sendToLED({ cmd: 'REVEAL_TEBAK_GAMBAR', answer: answer });
+        }
+        // --- KARAOKE / LIRIK LAGU CONTROLLER ---
+        let krLines = []; // [{ time: ms|null, text: string }]
+        let krIndex = 0;
+        let krTimer = null;
+        let krPlaying = false;
+        let krStartTime = 0;
+        let krElapsed = 0;
+        let krHasTimestamps = false;
 
-                <script>
-                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    function beep(freq, type, dur) { const osc = audioCtx.createOscillator(); osc.type = type; osc.frequency.value = freq; osc.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + dur); }
-                    
-                    setTimeout(() => { document.getElementById('n3').style.opacity = 1; beep(300, 'square', 0.5); }, 2000);
-                    setTimeout(() => { document.getElementById('n2').style.opacity = 1; beep(400, 'square', 0.5); }, 5000);
-                    setTimeout(() => { 
-                        document.getElementById('n1').style.opacity = 1; beep(600, 'triangle', 1.5); 
-                        confetti({ particleCount: 300, spread: 160, origin: { y: 0.2 }}); 
-                    }, 9000);
-                </`+`script>
-            </body>
-            </html>`;
-            
-            const blob = new Blob([podiumHTML], {type: 'text/html'});
-            document.getElementById('display-frame').src = URL.createObjectURL(blob);
+        function parseLRC(lrcText) {
+            const rawLines = lrcText.split(/\r?\n/);
+            const parsed = [];
+            let hasTs = false;
+            const tsRegex = /\[(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?\]/g;
+
+            rawLines.forEach(line => {
+                const matches = [...line.matchAll(tsRegex)];
+                const text = line.replace(tsRegex, '').trim();
+                if (matches.length > 0) {
+                    hasTs = true;
+                    matches.forEach(m => {
+                        const min = parseInt(m[1], 10);
+                        const sec = parseInt(m[2], 10);
+                        const ms = m[3] ? parseInt(m[3].padEnd(3, '0'), 10) : 0;
+                        if (text) parsed.push({ time: (min * 60 + sec) * 1000 + ms, text });
+                    });
+                } else if (text) {
+                    parsed.push({ time: null, text });
+                }
+            });
+            if (hasTs) parsed.sort((a, b) => (a.time || 0) - (b.time || 0));
+            return { lines: parsed, hasTimestamps: hasTs };
+        }
+
+        async function searchLyrics() {
+            const title = document.getElementById('kr-title').value.trim();
+            const artist = document.getElementById('kr-artist').value.trim();
+            if (!title) { alert('Masukkan judul lagu terlebih dahulu!'); return; }
+
+            const btn = document.getElementById('btn-search-lyrics');
+            const status = document.getElementById('kr-status');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> MENCARI...';
+            btn.disabled = true;
+            status.innerText = 'Mencari...';
+
+            try {
+                const q = encodeURIComponent((title + ' ' + artist).trim());
+                const res = await fetch('https://lrclib.net/api/search?q=' + q);
+                const data = await res.json();
+
+                if (Array.isArray(data) && data.length > 0) {
+                    // Prefer syncedLyrics first
+                    const best = data.find(d => d.syncedLyrics) || data.find(d => d.plainLyrics) || data[0];
+                    const lyr = best.syncedLyrics || best.plainLyrics || '';
+                    if (lyr) {
+                        document.getElementById('kr-lyrics-box').value = lyr;
+                        if (best.trackName) document.getElementById('kr-title').value = best.trackName;
+                        if (best.artistName) document.getElementById('kr-artist').value = best.artistName;
+                        status.innerText = best.syncedLyrics ? 'Lirik Sync Siap!' : 'Lirik Teks Siap!';
+                        pauseKaraoke();
+                        krIndex = 0;
+                        krElapsed = 0;
+                    } else {
+                        status.innerText = 'Lirik Kosong';
+                        alert('Lirik tidak ditemukan. Anda bisa paste lirik manual di kotak teks.');
+                    }
+                } else {
+                    status.innerText = 'Tidak Ditemukan';
+                    alert('Lagu tidak ditemukan di database. Silakan paste lirik manual di kotak teks.');
+                }
+            } catch (e) {
+                status.innerText = 'Error Koneksi';
+                alert('Gagal mengambil lirik. Pastikan internet aktif atau paste lirik manual.');
+            } finally {
+                btn.innerHTML = '<i class="fas fa-search mr-1"></i> CARI LIRIK OTOMATIS';
+                btn.disabled = false;
+            }
+        }
+
+        function broadcastKaraokeLine() {
+            const title = document.getElementById('kr-title').value.trim() || 'KARAOKE';
+            const artist = document.getElementById('kr-artist').value.trim();
+            const prev = krIndex > 0 && krLines[krIndex - 1] ? krLines[krIndex - 1].text : '';
+            const curr = krLines[krIndex] ? krLines[krIndex].text : '♪ ♪ ♪';
+            const next = krLines[krIndex + 1] ? krLines[krIndex + 1].text : '';
+            document.getElementById('kr-status').innerText = `Baris ${krIndex + 1}/${krLines.length}`;
+            sendToLED({ cmd: 'SHOW_KARAOKE', title, artist, prev, curr, next });
+        }
+
+        function playKaraoke() {
+            const raw = document.getElementById('kr-lyrics-box').value.trim();
+            if (!raw) { alert('Cari lirik atau paste lirik terlebih dahulu!'); return; }
+
+            const parsed = parseLRC(raw);
+            krLines = parsed.lines;
+            krHasTimestamps = parsed.hasTimestamps;
+            if (krLines.length === 0) return;
+
+            pauseKaraoke();
+            krPlaying = true;
+            if (krIndex >= krLines.length) { krIndex = 0; krElapsed = 0; }
+
+            broadcastKaraokeLine();
+
+            if (krHasTimestamps) {
+                // Synced LRC timer
+                if (krIndex > 0 && krLines[krIndex].time !== null) {
+                    krElapsed = krLines[krIndex].time;
+                }
+                krStartTime = Date.now() - krElapsed;
+                krTimer = setInterval(() => {
+                    krElapsed = Date.now() - krStartTime;
+                    let newIdx = krIndex;
+                    while (newIdx + 1 < krLines.length && krLines[newIdx + 1].time <= krElapsed) {
+                        newIdx++;
+                    }
+                    if (newIdx !== krIndex) {
+                        krIndex = newIdx;
+                        broadcastKaraokeLine();
+                    }
+                    if (krIndex >= krLines.length - 1 && krElapsed > (krLines[krLines.length - 1].time + 8000)) {
+                        pauseKaraoke();
+                    }
+                }, 200);
+            } else {
+                // Plain lyrics auto-advance by chosen speed
+                const speedMs = parseInt(document.getElementById('kr-speed').value || '4500', 10);
+                krTimer = setInterval(() => {
+                    if (krIndex + 1 < krLines.length) {
+                        krIndex++;
+                        broadcastKaraokeLine();
+                    } else {
+                        pauseKaraoke();
+                    }
+                }, speedMs);
+            }
+        }
+
+        function pauseKaraoke() {
+            krPlaying = false;
+            if (krTimer) { clearInterval(krTimer); krTimer = null; }
+            if (krLines.length > 0) {
+                document.getElementById('kr-status').innerText = `Pause (${krIndex + 1}/${krLines.length})`;
+            }
+        }
+
+        function stepKaraoke(delta) {
+            const raw = document.getElementById('kr-lyrics-box').value.trim();
+            if (!raw) return;
+            if (krLines.length === 0) {
+                const parsed = parseLRC(raw);
+                krLines = parsed.lines;
+                krHasTimestamps = parsed.hasTimestamps;
+            }
+            krIndex = Math.max(0, Math.min(krLines.length - 1, krIndex + delta));
+            if (krHasTimestamps && krLines[krIndex] && krLines[krIndex].time !== null) {
+                krElapsed = krLines[krIndex].time;
+                krStartTime = Date.now() - krElapsed;
+            }
+            broadcastKaraokeLine();
         }
     </script>
 </body>
