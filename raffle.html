@@ -6,6 +6,7 @@
     <title>Live LED Display - FGAS 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
         html, body { max-width: 100%; overflow: hidden; margin: 0; padding: 0; }
@@ -107,6 +108,25 @@
         }
         .answer-pop {
             animation: answerRevealPop 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .finish-line {
+            background-image: linear-gradient(45deg, #fff 25%, #000 25%),
+                              linear-gradient(-45deg, #fff 25%, #000 25%),
+                              linear-gradient(45deg, transparent 75%, #fff 75%),
+                              linear-gradient(-45deg, transparent 75%, #fff 75%);
+            background-size: 16px 16px;
+            background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+        }
+        .racer-bar {
+            transition: width 0.18s linear;
+        }
+        .icon-face-right {
+            display: inline-block;
+            transform: scaleX(-1);
+        }
+        .icon-rocket-right {
+            display: inline-block;
+            transform: rotate(45deg);
         }
     </style>
 </head>
@@ -233,6 +253,114 @@
                 <span id="ai-answer-text" class="block text-[3vw] font-black text-white tracking-wider uppercase drop-shadow-[0_0_15px_rgba(52,211,153,0.9)]"></span>
             </div>
         </div>
+    </div>
+
+    <!-- MODE 6: GAMES KOCOK-KOCOK (SCAN QR & LIVE RACE) -->
+    <div id="kocok-view" class="hidden flex-grow flex flex-col items-center justify-center relative z-10 px-6 w-full max-w-[92vw] mx-auto">
+
+        <!-- SUB 6A: LOBBY + QR CODE -->
+        <div id="kc-lobby" class="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            <div class="lg:col-span-5 flex flex-col items-center">
+                <div class="bg-white p-5 rounded-3xl shadow-[0_0_50px_rgba(6,182,212,0.5)] border-4 border-cyan-400">
+                    <div id="kc-qrcode" class="flex items-center justify-center"></div>
+                </div>
+                <div class="mt-4 text-center">
+                    <span class="bg-cyan-500/20 border border-cyan-400 text-cyan-300 px-5 py-1.5 rounded-full text-[1.2vw] font-black tracking-widest uppercase">
+                        SCAN QR DARI HP KAMU!
+                    </span>
+                    <p id="kc-room-label" class="text-[1.1vw] text-slate-300 font-bold tracking-widest mt-2 uppercase">ROOM: -</p>
+                </div>
+            </div>
+            <div class="lg:col-span-7 flex flex-col items-start justify-center bg-slate-900/75 border-2 border-cyan-500/40 rounded-3xl p-6 md:p-8 min-h-[46vh] shadow-[0_0_40px_rgba(6,182,212,0.2)]">
+                <div class="w-full flex justify-between items-center border-b border-white/10 pb-3 mb-4">
+                    <div>
+                        <p class="text-[1vw] text-amber-400 font-bold tracking-[0.3em] uppercase">LIVE STAGE GAME</p>
+                        <h1 class="text-[2.6vw] font-black text-white tracking-wider uppercase">GAMES KOCOK-KOCOK!</h1>
+                    </div>
+                    <div class="bg-emerald-500/20 border-2 border-emerald-400 px-5 py-2 rounded-2xl text-center">
+                        <span class="block text-[0.8vw] text-emerald-300 font-bold uppercase tracking-widest">PEMAIN SIAP</span>
+                        <span id="kc-lobby-count" class="block text-[2.6vw] font-black text-white leading-none">0</span>
+                    </div>
+                </div>
+                <p class="text-[1.1vw] text-cyan-200 mb-3 font-bold">Scan QR ➔ Ketik Nama ➔ Kocok HP Secepatnya Saat Mulai!</p>
+                <div id="kc-lobby-players" class="w-full flex flex-wrap gap-2 max-h-[26vh] overflow-hidden content-start">
+                    <span class="text-slate-400 italic text-[1.2vw]">Menunggu penonton scan QR Code...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUB 6B: COUNTDOWN 3-2-1 -->
+        <div id="kc-countdown" class="hidden flex flex-col items-center justify-center text-center">
+            <p class="text-[2vw] text-amber-300 tracking-[0.4em] font-black uppercase mb-2">PEGANG HP ERAT-ERAT!</p>
+            <div id="kc-cd-num" class="text-[16vw] font-black leading-none text-amber-400 drop-shadow-[0_0_50px_rgba(251,191,36,0.9)]">3</div>
+            <p class="text-[1.6vw] text-cyan-300 tracking-widest uppercase mt-2">SIAP KOCOK HP SECEPATNYA...</p>
+        </div>
+
+        <!-- SUB 6C: LIVE RACING LANES -->
+        <div id="kc-race" class="hidden w-full flex flex-col">
+            <div class="w-full flex justify-between items-center mb-3 bg-slate-900/80 border border-cyan-500/40 rounded-2xl px-6 py-3">
+                <div class="flex items-center gap-3">
+                    <span id="kc-race-icon-hdr" class="text-[2.5vw]">🏎️</span>
+                    <div>
+                        <h2 class="text-[2vw] font-black text-cyan-300 tracking-widest uppercase leading-tight">KOCOK HP SEKARANG!!</h2>
+                        <p id="kc-race-sub" class="text-[1vw] text-slate-300 font-bold tracking-widest uppercase">TOP 8 TERCEPAT LIVE</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="text-center">
+                        <span class="block text-[0.8vw] text-slate-400 font-bold uppercase">TOTAL PEMAIN</span>
+                        <span id="kc-race-total" class="text-[2vw] font-black text-white">0</span>
+                    </div>
+                    <div class="bg-amber-500/20 border-2 border-amber-400 px-5 py-1 rounded-2xl text-center min-w-[9vw]">
+                        <span class="block text-[0.8vw] text-amber-300 font-bold uppercase">WAKTU</span>
+                        <span id="kc-race-timer" class="text-[2.8vw] font-black text-amber-400 leading-none">20s</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative w-full bg-slate-950/85 border-2 border-cyan-500/40 rounded-3xl p-4 pr-10 overflow-hidden shadow-[0_0_40px_rgba(6,182,212,0.2)]">
+                <!-- Finish Line Strip -->
+                <div class="finish-line absolute top-0 bottom-0 right-4 w-4 opacity-80 z-0"></div>
+                <div id="kc-lanes" class="relative z-10 space-y-2.5">
+                    <!-- Dynamic Top 8 Lanes -->
+                </div>
+            </div>
+        </div>
+
+        <!-- SUB 6D: PODIUM JUARA KOCOK-KOCOK -->
+        <div id="kc-finish" class="hidden w-full flex flex-col items-center justify-center text-center">
+            <h1 class="text-[3vw] font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-white to-cyan-300 tracking-widest uppercase mb-1">
+                🏆 PEMENANG GAMES KOCOK-KOCOK 🏆
+            </h1>
+            <p class="text-[1.2vw] text-cyan-300 tracking-[0.35em] uppercase mb-8">TERCEPAT &amp; TERHEBOH DI PANGGUNG!</p>
+
+            <div class="grid grid-cols-3 gap-5 w-full max-w-[76vw] items-end">
+                <!-- Juara 2 -->
+                <div class="bg-slate-800/90 border-2 border-slate-300 rounded-3xl p-5 flex flex-col items-center shadow-xl">
+                    <span class="text-[3vw]">🥈</span>
+                    <span class="text-[1.1vw] text-slate-300 font-bold tracking-widest uppercase">JUARA 2</span>
+                    <p id="kc-win-2-name" class="text-[2vw] font-black text-white uppercase truncate w-full mt-1">-</p>
+                    <p id="kc-win-2-score" class="text-[1.2vw] text-cyan-300 font-bold mt-1">0 Kocokan</p>
+                </div>
+                <!-- Juara 1 -->
+                <div class="bg-gradient-to-b from-amber-500/30 to-slate-900/95 border-4 border-amber-400 rounded-3xl p-6 flex flex-col items-center shadow-[0_0_50px_rgba(251,191,36,0.5)] transform -translate-y-4">
+                    <span class="text-[4vw]">🏆</span>
+                    <span class="text-[1.3vw] text-amber-300 font-black tracking-widest uppercase">JUARA 1</span>
+                    <p id="kc-win-1-name" class="text-[2.6vw] font-black text-amber-300 uppercase truncate w-full mt-1">-</p>
+                    <p id="kc-win-1-score" class="text-[1.4vw] text-white font-black mt-1">0 Kocokan</p>
+                </div>
+                <!-- Juara 3 -->
+                <div class="bg-amber-950/60 border-2 border-amber-600 rounded-3xl p-5 flex flex-col items-center shadow-xl">
+                    <span class="text-[3vw]">🥉</span>
+                    <span class="text-[1.1vw] text-amber-500 font-bold tracking-widest uppercase">JUARA 3</span>
+                    <p id="kc-win-3-name" class="text-[2vw] font-black text-white uppercase truncate w-full mt-1">-</p>
+                    <p id="kc-win-3-score" class="text-[1.2vw] text-cyan-300 font-bold mt-1">0 Kocokan</p>
+                </div>
+            </div>
+
+            <div id="kc-win-others" class="mt-5 flex flex-wrap justify-center gap-3 text-[1.1vw] font-bold text-slate-300"></div>
+        </div>
+
     </div>
 
     <div id="sponsor-logos" class="w-full flex justify-center items-center gap-8 z-20 px-10 pb-6 flex-wrap"></div>
@@ -388,6 +516,7 @@
             document.getElementById('karaoke-view').classList.add('hidden');
             document.getElementById('karaoke-full-view').classList.add('hidden');
             document.getElementById('apaini-view').classList.add('hidden');
+            document.getElementById('kocok-view').classList.add('hidden');
             document.getElementById('raffle-view').classList.remove('hidden');
         }
 
@@ -611,6 +740,7 @@
             document.getElementById('karaoke-view').classList.add('hidden');
             document.getElementById('karaoke-full-view').classList.add('hidden');
             document.getElementById('apaini-view').classList.add('hidden');
+            document.getElementById('kocok-view').classList.add('hidden');
             document.getElementById('podium-view').classList.remove('hidden');
             document.getElementById('podium-lomba').innerText = (payload.lomba || 'LOMBA FGAS 2026').toUpperCase();
             document.getElementById('n1').innerText = payload.j1 || '-';
@@ -656,6 +786,7 @@
             document.getElementById('karaoke-view').classList.add('hidden');
             document.getElementById('karaoke-full-view').classList.add('hidden');
             document.getElementById('apaini-view').classList.add('hidden');
+            document.getElementById('kocok-view').classList.add('hidden');
             document.getElementById('tebak-gambar-view').classList.remove('hidden');
 
             const imgData = payload.image || localStorage.getItem('fgas_tg_image') || '';
@@ -705,6 +836,7 @@
             document.getElementById('podium-view').classList.add('hidden');
             document.getElementById('tebak-gambar-view').classList.add('hidden');
             document.getElementById('apaini-view').classList.add('hidden');
+            document.getElementById('kocok-view').classList.add('hidden');
 
             const mode = payload.mode || localStorage.getItem('fgas_kr_mode') || 'normal';
             const title = (payload.title || 'KARAOKE').toUpperCase();
@@ -716,6 +848,7 @@
             if (mode === 'normal') {
                 document.getElementById('karaoke-full-view').classList.add('hidden');
             document.getElementById('apaini-view').classList.add('hidden');
+            document.getElementById('kocok-view').classList.add('hidden');
                 document.getElementById('karaoke-view').classList.remove('hidden');
                 document.getElementById('kr-song-title').innerText = title;
                 document.getElementById('kr-song-artist').innerText = artist;
@@ -807,6 +940,7 @@
             document.getElementById('tebak-gambar-view').classList.add('hidden');
             document.getElementById('karaoke-view').classList.add('hidden');
             document.getElementById('karaoke-full-view').classList.add('hidden');
+            document.getElementById('kocok-view').classList.add('hidden');
             document.getElementById('apaini-view').classList.remove('hidden');
         }
 
@@ -884,6 +1018,148 @@
             confetti({ particleCount: 200, spread: 130, origin: { y: 0.5 } });
         }
 
+        // --- GAMES KOCOK-KOCOK LED RENDERER ---
+        let lastKcQrUrl = '';
+        const KC_BAR_COLORS = [
+            'from-amber-400 to-yellow-300',
+            'from-cyan-400 to-blue-500',
+            'from-pink-500 to-rose-400',
+            'from-emerald-400 to-teal-500',
+            'from-purple-500 to-indigo-400',
+            'from-orange-500 to-amber-400',
+            'from-sky-400 to-indigo-500',
+            'from-lime-400 to-emerald-500'
+        ];
+
+        function showKocokSub(subId) {
+            ['raffle-view', 'podium-view', 'tebak-gambar-view', 'karaoke-view', 'karaoke-full-view', 'apaini-view'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+            document.getElementById('kocok-view').classList.remove('hidden');
+            ['kc-lobby', 'kc-countdown', 'kc-race', 'kc-finish'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(subId).classList.remove('hidden');
+        }
+
+        function formatRacerIcon(icon) {
+            if (icon === '🚀') return `<span class="icon-rocket-right">${icon}</span>`;
+            if (icon === '🏎️' || icon === '🏍️' || icon === '🐄' || icon === '🏃') return `<span class="icon-face-right">${icon}</span>`;
+            return `<span>${icon || '🏎️'}</span>`;
+        }
+
+        function renderKocokLobby(payload) {
+            showKocokSub('kc-lobby');
+            const joinUrl = payload.joinUrl || '';
+            document.getElementById('kc-room-label').innerText = 'KODE ROOM: ' + (payload.roomId || '-');
+            if (joinUrl && joinUrl !== lastKcQrUrl) {
+                lastKcQrUrl = joinUrl;
+                const qrDiv = document.getElementById('kc-qrcode');
+                qrDiv.innerHTML = '';
+                new QRCode(qrDiv, {
+                    text: joinUrl,
+                    width: 240,
+                    height: 240,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+            }
+            const players = payload.players || [];
+            document.getElementById('kc-lobby-count').innerText = players.length;
+            const listDiv = document.getElementById('kc-lobby-players');
+            if (players.length === 0) {
+                listDiv.innerHTML = '<span class="text-slate-400 italic text-[1.2vw]">Menunggu penonton scan QR Code...</span>';
+            } else {
+                const recent = players.slice(-28).reverse();
+                listDiv.innerHTML = recent.map(p => {
+                    const safe = String(p.name || 'PEMAIN').replace(/</g, '&lt;');
+                    return `<span class="bg-cyan-500/20 border border-cyan-400/60 text-white px-3 py-1 rounded-full text-[1.05vw] font-bold uppercase shadow">${payload.icon || '🏎️'} ${safe}</span>`;
+                }).join('');
+            }
+        }
+
+        function renderKocokCountdown(payload) {
+            showKocokSub('kc-countdown');
+            const num = payload.count || 3;
+            const el = document.getElementById('kc-cd-num');
+            el.innerText = num;
+            el.classList.remove('answer-pop');
+            void el.offsetWidth;
+            el.classList.add('answer-pop');
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.value = num === 1 ? 880 : 520;
+                osc.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.18);
+            } catch(e){}
+        }
+
+        function renderKocokRace(payload) {
+            showKocokSub('kc-race');
+            const icon = payload.icon || '🏎️';
+            document.getElementById('kc-race-icon-hdr').innerText = icon;
+            document.getElementById('kc-race-total').innerText = payload.totalPlayers || 0;
+            const tLeft = Math.max(0, Number(payload.timeLeft || 0));
+            document.getElementById('kc-race-timer').innerText = tLeft.toFixed(1) + 's';
+
+            const top = payload.top || [];
+            const maxScore = Math.max(25, top.length > 0 ? (top[0].score || 1) : 25);
+            const lanesDiv = document.getElementById('kc-lanes');
+
+            if (top.length === 0) {
+                lanesDiv.innerHTML = '<div class="text-center py-10 text-[1.6vw] text-cyan-300 font-bold">AYO KOCOK HP SEKARANG!</div>';
+                return;
+            }
+
+            lanesDiv.innerHTML = top.slice(0, 8).map((p, idx) => {
+                const pct = Math.min(96, Math.max(4, Math.round((p.score / maxScore) * 94)));
+                const grad = KC_BAR_COLORS[idx % KC_BAR_COLORS.length];
+                const safeName = String(p.name || 'PEMAIN').replace(/</g, '&lt;');
+                const medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `#${idx + 1}`));
+                return `
+                    <div class="flex items-center gap-3 bg-slate-900/75 border border-white/10 rounded-xl px-3 py-1.5">
+                        <div class="w-[15vw] shrink-0 flex items-center gap-2 overflow-hidden">
+                            <span class="text-[1.2vw] font-black text-amber-300 w-[2.4vw] text-center shrink-0">${medal}</span>
+                            <span class="text-[1.15vw] font-black text-white uppercase truncate">${safeName}</span>
+                        </div>
+                        <div class="flex-grow relative h-[4.4vh] bg-black/50 rounded-full overflow-visible border border-white/10 flex items-center">
+                            <div class="racer-bar h-full rounded-full bg-gradient-to-r ${grad} relative flex items-center justify-end pr-1" style="width:${pct}%">
+                                <span class="text-[2vw] leading-none drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] translate-x-2">${formatRacerIcon(icon)}</span>
+                            </div>
+                        </div>
+                        <div class="w-[5vw] text-right font-black text-[1.4vw] text-cyan-300 shrink-0">${p.score}</div>
+                    </div>`;
+            }).join('');
+        }
+
+        function renderKocokFinish(payload) {
+            showKocokSub('kc-finish');
+            const top = payload.top || [];
+            const setWin = (rank, idx) => {
+                const p = top[idx];
+                document.getElementById(`kc-win-${rank}-name`).innerText = p ? p.name : '-';
+                document.getElementById(`kc-win-${rank}-score`).innerText = p ? (p.score + ' Kocokan') : '0 Kocokan';
+            };
+            setWin(1, 0);
+            setWin(2, 1);
+            setWin(3, 2);
+
+            const othersDiv = document.getElementById('kc-win-others');
+            const rest = top.slice(3, 6);
+            othersDiv.innerHTML = rest.map((p, i) => {
+                const safe = String(p.name || '').replace(/</g, '&lt;');
+                return `<span class="bg-slate-800/90 border border-white/15 px-4 py-1.5 rounded-full">#${i + 4} ${safe} (${p.score})</span>`;
+            }).join('');
+
+            try { playWinSound(); } catch(e){}
+            confetti({ particleCount: 260, spread: 150, origin: { y: 0.35 } });
+        }
+
         function handleCommand(msg) {
             if (!msg || !msg.cmd) return;
             if (msg.cmd === 'START_RAFFLE') startRaffleSequence(msg);
@@ -897,6 +1173,10 @@
             if (msg.cmd === 'APAINI_SHOW_CLUE') showApaIniClue(msg);
             if (msg.cmd === 'APAINI_VERDICT') showApaIniVerdict(msg);
             if (msg.cmd === 'APAINI_REVEAL') revealApaIniAnswer(msg);
+            if (msg.cmd === 'KOCOK_LOBBY') renderKocokLobby(msg);
+            if (msg.cmd === 'KOCOK_COUNTDOWN') renderKocokCountdown(msg);
+            if (msg.cmd === 'KOCOK_RACE') renderKocokRace(msg);
+            if (msg.cmd === 'KOCOK_FINISH') renderKocokFinish(msg);
         }
 
         // 1. Cross-window Extend Display sync via BroadcastChannel
