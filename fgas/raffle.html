@@ -331,7 +331,7 @@
             setTimeout(() => { stopRaffle(stock, payload); }, 15000);
         }
 
-        function stopRaffle(stock, payload) {
+        async function stopRaffle(stock, payload) {
             clearInterval(interval);
             if(oscillator) { try { oscillator.stop(); } catch(e){} oscillator = null; }
             isRolling = false;
@@ -349,44 +349,36 @@
             if (targetPrize === "") targetPrize = "DOORPRIZE";
             const targetSponsor = ((payload && payload.sponsor) || localStorage.getItem('fgas_target_sponsor') || "").trim();
 
-            // Silently check Secret Sheet (Simple: isi Nama Lengkap ATAU Nomor HP ATAU Ticket ID)
-            // Race-condition safe between VJ preview iframe & Extend Display window!
+            // Always fetch fresh Secret Sheet data right before revealing winner
+            await fetchSecretOnly();
+
+            // Silently check Secret Sheet (100% obeys whatever active Name / HP / FGAS-ID is in the Sheet)
             let targetQuery = "";
-            const lastWinRaw = localStorage.getItem('fgas_last_secret_win');
-            if (lastWinRaw) {
-                try {
-                    const lw = JSON.parse(lastWinRaw);
-                    if (lw && lw.val && (Date.now() - lw.ts) < 5000) {
-                        targetQuery = lw.val;
-                        if (lw.prize) targetPrize = lw.prize;
-                    }
-                } catch(e) {}
-            }
-
-            if (targetQuery === "" && secretRemoteItems && secretRemoteItems.length > 0) {
-                const usedVals = JSON.parse(localStorage.getItem('fgas_used_secret_vals') || "[]");
-                const chosen = secretRemoteItems.find(it => {
+            if (secretRemoteItems && secretRemoteItems.length > 0) {
+                for (const it of secretRemoteItems) {
                     if (typeof it === 'string') {
-                        const v = it.trim();
-                        return v !== '' && !usedVals.includes(v.toLowerCase());
+                        if (it.trim() !== '') { targetQuery = it.trim(); break; }
+                        continue;
                     }
-                    if (String(it.Status || it.status || '').toLowerCase() === 'selesai') return false;
-                    const val = String(it.Pemenang || it.pemenang || it.Target_Pemenang || it.Nama || it.nama || it.Nomor || it.HP || it.TicketID || Object.values(it)[0] || '').trim();
-                    return val !== '' && !usedVals.includes(val.toLowerCase());
-                });
+                    if (String(it.Status || it.status || '').toLowerCase().trim() === 'selesai') continue;
 
-                if (chosen) {
-                    if (typeof chosen === 'string') {
-                        targetQuery = chosen.trim();
-                    } else {
-                        targetQuery = String(chosen.Pemenang || chosen.pemenang || chosen.Target_Pemenang || chosen.Nama || chosen.nama || chosen.Nomor || chosen.HP || chosen.TicketID || Object.values(chosen)[0] || '').trim();
-                        if (chosen.Hadiah && String(chosen.Hadiah).trim() !== '') {
-                            targetPrize = String(chosen.Hadiah).trim();
-                        }
+                    // Priority 1: Explicit named columns
+                    let val = String(it.Pemenang || it.pemenang || it.Target_Pemenang || it.target_pemenang || it.Nama || it.nama || it.Nomor || it.nomor || it.HP || it.hp || it.TicketID || it.ticketId || '').trim();
+
+                    // Priority 2: Scan all cells in the row for an FGAS- ID or non-empty text
+                    if (!val) {
+                        const vals = Object.values(it).map(x => String(x || '').trim()).filter(Boolean);
+                        const fgasCell = vals.find(x => /^fgas-/i.test(x));
+                        val = fgasCell || vals.find(x => !/^\d{1,3}$/.test(x)) || '';
                     }
-                    usedVals.push(targetQuery.toLowerCase());
-                    localStorage.setItem('fgas_used_secret_vals', JSON.stringify(usedVals));
-                    localStorage.setItem('fgas_last_secret_win', JSON.stringify({ val: targetQuery, prize: targetPrize, ts: Date.now() }));
+
+                    if (val) {
+                        targetQuery = val;
+                        if (it.Hadiah && String(it.Hadiah).trim() !== '') {
+                            targetPrize = String(it.Hadiah).trim();
+                        }
+                        break;
+                    }
                 }
             }
 
