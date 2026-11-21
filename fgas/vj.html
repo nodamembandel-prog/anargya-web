@@ -20,7 +20,7 @@
 
     <div id="vj-drawer" class="vj-panel fixed left-0 w-full p-5 border-t border-cyan-500/50 shadow-[0_-10px_30px_rgba(0,0,0,0.7)] z-50 flex flex-col gap-4" style="bottom: -84vh; height: 88vh;">
         <div class="flex flex-wrap justify-between items-center gap-2 border-b border-white/10 pb-2">
-            <h2 class="font-bold text-base md:text-lg text-cyan-400"><i class="fas fa-sliders-h mr-2"></i> VJ CONTROL PANEL (Arahkan mouse ke bawah)</h2>
+            <h2 class="font-bold text-base md:text-lg text-cyan-400"><i class="fas fa-sliders-h mr-2"></i> VJ CONTROL PANEL <span class="text-xs bg-indigo-600 text-white px-2 py-0.5 rounded ml-1">V46.1 + KARAOKE</span></h2>
             <div class="flex items-center gap-2">
                 <button onclick="openExtendDisplay()" class="bg-orange-500 hover:bg-orange-400 text-slate-950 px-3 py-1.5 rounded-lg text-xs font-black transition shadow"><i class="fas fa-desktop mr-1"></i> BUKA LAYAR LED (EXTEND DISPLAY)</button>
                 <button onclick="toggleFullscreen()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition"><i class="fas fa-expand mr-1"></i> Fullscreen</button>
@@ -28,7 +28,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 h-full overflow-y-auto pb-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 min-h-0 overflow-y-auto pb-16">
             <!-- 1. KONTROL UNDIAN DOORPRIZE -->
             <div class="bg-white/5 p-5 rounded-xl border border-white/10 space-y-3">
                 <div class="flex justify-between items-center border-b border-white/10 pb-2">
@@ -91,6 +91,33 @@
                     <button onclick="openNextTebakTile()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 py-2.5 rounded-lg font-black text-xs transition"><i class="fas fa-plus-square mr-1"></i> BUKA 1 KOTAK</button>
                 </div>
                 <button onclick="revealAllTebakGambar()" class="w-full bg-green-600 hover:bg-green-500 py-2.5 rounded-lg font-black text-xs transition shadow-[0_0_15px_rgba(34,197,94,0.4)]"><i class="fas fa-eye mr-1"></i> BUKA SEMUA GAMBAR (REVEAL)</button>
+            </div>
+
+            <!-- 4. KARAOKE / LIRIK LAGU AUTO-JALAN (LED) -->
+            <div class="bg-indigo-950/40 p-5 rounded-xl border border-indigo-400/40 space-y-3">
+                <div class="flex justify-between items-center border-b border-indigo-400/30 pb-2">
+                    <h3 class="font-bold text-indigo-300 text-sm uppercase"><i class="fas fa-microphone-alt mr-1"></i> 4. Karaoke / Lirik Lagu</h3>
+                    <span id="kr-status" class="text-[10px] bg-slate-800 text-indigo-300 px-2 py-0.5 rounded-full font-bold">Siap</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="kr-title" class="w-full p-2.5 bg-black/50 border border-white/20 rounded text-white text-xs" placeholder="Judul Lagu (Cth: Kangen)">
+                    <input type="text" id="kr-artist" class="w-full p-2.5 bg-black/50 border border-white/20 rounded text-white text-xs" placeholder="Penyanyi (Cth: Dewa 19)">
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="searchLyrics()" id="btn-search-lyrics" class="flex-1 bg-indigo-600 hover:bg-indigo-500 py-2 rounded-lg font-bold text-xs transition"><i class="fas fa-search mr-1"></i> CARI LIRIK OTOMATIS</button>
+                    <select id="kr-speed" class="bg-slate-900 border border-white/20 rounded-lg px-2 text-xs text-white font-bold" title="Kecepatan jika lirik tanpa timestamp">
+                        <option value="3000">Cepat (3d)</option>
+                        <option value="4500" selected>Normal (4.5d)</option>
+                        <option value="6000">Pelan (6d)</option>
+                    </select>
+                </div>
+                <textarea id="kr-lyrics-box" rows="2" class="w-full p-2 bg-black/50 border border-white/20 rounded text-slate-200 text-[11px] font-mono" placeholder="Lirik otomatis muncul di sini (atau paste lirik manual)..."></textarea>
+                <div class="grid grid-cols-4 gap-1.5">
+                    <button onclick="playKaraoke()" class="bg-green-600 hover:bg-green-500 py-2 rounded-lg font-black text-xs transition"><i class="fas fa-play"></i> PLAY</button>
+                    <button onclick="pauseKaraoke()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 py-2 rounded-lg font-black text-xs transition"><i class="fas fa-pause"></i> PAUSE</button>
+                    <button onclick="stepKaraoke(-1)" class="bg-slate-700 hover:bg-slate-600 py-2 rounded-lg font-bold text-xs transition"><i class="fas fa-step-backward"></i></button>
+                    <button onclick="stepKaraoke(1)" class="bg-slate-700 hover:bg-slate-600 py-2 rounded-lg font-bold text-xs transition"><i class="fas fa-step-forward"></i></button>
+                </div>
             </div>
         </div>
     </div>
@@ -278,6 +305,167 @@
             const answer = document.getElementById('tg-answer-input').value.trim();
             document.getElementById('tg-status-badge').innerText = 'Terbuka Semua!';
             sendToLED({ cmd: 'REVEAL_TEBAK_GAMBAR', answer: answer });
+        }
+        // --- KARAOKE / LIRIK LAGU CONTROLLER ---
+        let krLines = []; // [{ time: ms|null, text: string }]
+        let krIndex = 0;
+        let krTimer = null;
+        let krPlaying = false;
+        let krStartTime = 0;
+        let krElapsed = 0;
+        let krHasTimestamps = false;
+
+        function parseLRC(lrcText) {
+            const rawLines = lrcText.split(/\r?\n/);
+            const parsed = [];
+            let hasTs = false;
+            const tsRegex = /\[(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?\]/g;
+
+            rawLines.forEach(line => {
+                const matches = [...line.matchAll(tsRegex)];
+                const text = line.replace(tsRegex, '').trim();
+                if (matches.length > 0) {
+                    hasTs = true;
+                    matches.forEach(m => {
+                        const min = parseInt(m[1], 10);
+                        const sec = parseInt(m[2], 10);
+                        const ms = m[3] ? parseInt(m[3].padEnd(3, '0'), 10) : 0;
+                        if (text) parsed.push({ time: (min * 60 + sec) * 1000 + ms, text });
+                    });
+                } else if (text) {
+                    parsed.push({ time: null, text });
+                }
+            });
+            if (hasTs) parsed.sort((a, b) => (a.time || 0) - (b.time || 0));
+            return { lines: parsed, hasTimestamps: hasTs };
+        }
+
+        async function searchLyrics() {
+            const title = document.getElementById('kr-title').value.trim();
+            const artist = document.getElementById('kr-artist').value.trim();
+            if (!title) { alert('Masukkan judul lagu terlebih dahulu!'); return; }
+
+            const btn = document.getElementById('btn-search-lyrics');
+            const status = document.getElementById('kr-status');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> MENCARI...';
+            btn.disabled = true;
+            status.innerText = 'Mencari...';
+
+            try {
+                const q = encodeURIComponent((title + ' ' + artist).trim());
+                const res = await fetch('https://lrclib.net/api/search?q=' + q);
+                const data = await res.json();
+
+                if (Array.isArray(data) && data.length > 0) {
+                    // Prefer syncedLyrics first
+                    const best = data.find(d => d.syncedLyrics) || data.find(d => d.plainLyrics) || data[0];
+                    const lyr = best.syncedLyrics || best.plainLyrics || '';
+                    if (lyr) {
+                        document.getElementById('kr-lyrics-box').value = lyr;
+                        if (best.trackName) document.getElementById('kr-title').value = best.trackName;
+                        if (best.artistName) document.getElementById('kr-artist').value = best.artistName;
+                        status.innerText = best.syncedLyrics ? 'Lirik Sync Siap!' : 'Lirik Teks Siap!';
+                        pauseKaraoke();
+                        krIndex = 0;
+                        krElapsed = 0;
+                    } else {
+                        status.innerText = 'Lirik Kosong';
+                        alert('Lirik tidak ditemukan. Anda bisa paste lirik manual di kotak teks.');
+                    }
+                } else {
+                    status.innerText = 'Tidak Ditemukan';
+                    alert('Lagu tidak ditemukan di database. Silakan paste lirik manual di kotak teks.');
+                }
+            } catch (e) {
+                status.innerText = 'Error Koneksi';
+                alert('Gagal mengambil lirik. Pastikan internet aktif atau paste lirik manual.');
+            } finally {
+                btn.innerHTML = '<i class="fas fa-search mr-1"></i> CARI LIRIK OTOMATIS';
+                btn.disabled = false;
+            }
+        }
+
+        function broadcastKaraokeLine() {
+            const title = document.getElementById('kr-title').value.trim() || 'KARAOKE';
+            const artist = document.getElementById('kr-artist').value.trim();
+            const prev = krIndex > 0 && krLines[krIndex - 1] ? krLines[krIndex - 1].text : '';
+            const curr = krLines[krIndex] ? krLines[krIndex].text : '♪ ♪ ♪';
+            const next = krLines[krIndex + 1] ? krLines[krIndex + 1].text : '';
+            document.getElementById('kr-status').innerText = `Baris ${krIndex + 1}/${krLines.length}`;
+            sendToLED({ cmd: 'SHOW_KARAOKE', title, artist, prev, curr, next });
+        }
+
+        function playKaraoke() {
+            const raw = document.getElementById('kr-lyrics-box').value.trim();
+            if (!raw) { alert('Cari lirik atau paste lirik terlebih dahulu!'); return; }
+
+            const parsed = parseLRC(raw);
+            krLines = parsed.lines;
+            krHasTimestamps = parsed.hasTimestamps;
+            if (krLines.length === 0) return;
+
+            pauseKaraoke();
+            krPlaying = true;
+            if (krIndex >= krLines.length) { krIndex = 0; krElapsed = 0; }
+
+            broadcastKaraokeLine();
+
+            if (krHasTimestamps) {
+                // Synced LRC timer
+                if (krIndex > 0 && krLines[krIndex].time !== null) {
+                    krElapsed = krLines[krIndex].time;
+                }
+                krStartTime = Date.now() - krElapsed;
+                krTimer = setInterval(() => {
+                    krElapsed = Date.now() - krStartTime;
+                    let newIdx = krIndex;
+                    while (newIdx + 1 < krLines.length && krLines[newIdx + 1].time <= krElapsed) {
+                        newIdx++;
+                    }
+                    if (newIdx !== krIndex) {
+                        krIndex = newIdx;
+                        broadcastKaraokeLine();
+                    }
+                    if (krIndex >= krLines.length - 1 && krElapsed > (krLines[krLines.length - 1].time + 8000)) {
+                        pauseKaraoke();
+                    }
+                }, 200);
+            } else {
+                // Plain lyrics auto-advance by chosen speed
+                const speedMs = parseInt(document.getElementById('kr-speed').value || '4500', 10);
+                krTimer = setInterval(() => {
+                    if (krIndex + 1 < krLines.length) {
+                        krIndex++;
+                        broadcastKaraokeLine();
+                    } else {
+                        pauseKaraoke();
+                    }
+                }, speedMs);
+            }
+        }
+
+        function pauseKaraoke() {
+            krPlaying = false;
+            if (krTimer) { clearInterval(krTimer); krTimer = null; }
+            if (krLines.length > 0) {
+                document.getElementById('kr-status').innerText = `Pause (${krIndex + 1}/${krLines.length})`;
+            }
+        }
+
+        function stepKaraoke(delta) {
+            const raw = document.getElementById('kr-lyrics-box').value.trim();
+            if (!raw) return;
+            if (krLines.length === 0) {
+                const parsed = parseLRC(raw);
+                krLines = parsed.lines;
+                krHasTimestamps = parsed.hasTimestamps;
+            }
+            krIndex = Math.max(0, Math.min(krLines.length - 1, krIndex + delta));
+            if (krHasTimestamps && krLines[krIndex] && krLines[krIndex].time !== null) {
+                krElapsed = krLines[krIndex].time;
+                krStartTime = Date.now() - krElapsed;
+            }
+            broadcastKaraokeLine();
         }
     </script>
 </body>

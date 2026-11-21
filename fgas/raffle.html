@@ -60,6 +60,23 @@
             transform: scale(0.85);
             pointer-events: none;
         }
+        .lyric-line {
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0.3;
+            transform: scale(0.92);
+            color: #94a3b8;
+        }
+        .lyric-active {
+            opacity: 1 !important;
+            transform: scale(1.08) !important;
+            color: #38bdf8 !important;
+            text-shadow: 0 0 30px rgba(56, 189, 248, 0.9), 0 0 10px rgba(255,255,255,0.6);
+        }
+        .lyric-passed {
+            opacity: 0.2;
+            transform: scale(0.9);
+            color: #64748b;
+        }
     </style>
 </head>
 <body class="flex flex-col justify-between bg-cyber relative select-none" ondblclick="toggleFS()">
@@ -118,6 +135,23 @@
 
         <div id="tg-answer-box" class="mt-5 px-8 py-3 rounded-2xl bg-green-500/20 border-2 border-green-400 text-green-300 text-[2vw] font-black tracking-widest uppercase opacity-0 transition-opacity duration-500 shadow-[0_0_30px_rgba(74,222,128,0.4)]">
             JAWABAN: <span id="tg-answer-text" class="text-white"></span>
+        </div>
+    </div>
+
+    <!-- MODE 4: KARAOKE / LIRIK LAGU -->
+    <div id="karaoke-view" class="hidden flex-grow flex flex-col items-center justify-center relative z-10 px-8 w-full max-w-[88vw] mx-auto">
+        <div class="text-center mb-6">
+            <p class="text-[1.1vw] text-cyan-400 tracking-[0.4em] uppercase font-bold mb-1"><i class="fas fa-music mr-2"></i>SING ALONG &bull; FGAS 2026</p>
+            <h1 id="kr-song-title" class="text-[2.8vw] font-black text-white uppercase tracking-wider drop-shadow-[0_0_15px_rgba(6,182,212,0.7)]">JUDUL LAGU</h1>
+            <p id="kr-song-artist" class="text-[1.4vw] text-orange-400 font-bold tracking-widest uppercase mt-1">NAMA PENYANYI</p>
+        </div>
+
+        <div class="w-full h-[46vh] overflow-hidden relative flex flex-col items-center justify-center bg-slate-900/60 border-2 border-cyan-500/40 rounded-3xl px-10 py-6 shadow-[0_0_50px_rgba(6,182,212,0.25)]">
+            <div id="kr-lines-container" class="w-full text-center space-y-5 transition-transform duration-500">
+                <p id="kr-prev-line" class="lyric-line text-[2vw] font-bold min-h-[2.8vw]"></p>
+                <p id="kr-curr-line" class="lyric-active text-[3.4vw] font-black leading-tight min-h-[4.5vw]">SIAP BERNYANYI...</p>
+                <p id="kr-next-line" class="lyric-line text-[2vw] font-bold min-h-[2.8vw]"></p>
+            </div>
         </div>
     </div>
 
@@ -223,6 +257,7 @@
         function showRaffleView() {
             document.getElementById('podium-view').classList.add('hidden');
             document.getElementById('tebak-gambar-view').classList.add('hidden');
+            document.getElementById('karaoke-view').classList.add('hidden');
             document.getElementById('raffle-view').classList.remove('hidden');
         }
 
@@ -420,6 +455,7 @@
         function showPodium(payload) {
             document.getElementById('raffle-view').classList.add('hidden');
             document.getElementById('tebak-gambar-view').classList.add('hidden');
+            document.getElementById('karaoke-view').classList.add('hidden');
             document.getElementById('podium-view').classList.remove('hidden');
             document.getElementById('podium-lomba').innerText = (payload.lomba || 'LOMBA FGAS 2026').toUpperCase();
             document.getElementById('n1').innerText = payload.j1 || '-';
@@ -462,6 +498,7 @@
         function showTebakGambar(payload) {
             document.getElementById('raffle-view').classList.add('hidden');
             document.getElementById('podium-view').classList.add('hidden');
+            document.getElementById('karaoke-view').classList.add('hidden');
             document.getElementById('tebak-gambar-view').classList.remove('hidden');
 
             const imgData = payload.image || localStorage.getItem('fgas_tg_image') || '';
@@ -505,6 +542,20 @@
             confetti({ particleCount: 180, spread: 120, origin: { y: 0.4 } });
         }
 
+        // --- KARAOKE / LIRIK LAGU LOGIC ---
+        function showKaraoke(payload) {
+            document.getElementById('raffle-view').classList.add('hidden');
+            document.getElementById('podium-view').classList.add('hidden');
+            document.getElementById('tebak-gambar-view').classList.add('hidden');
+            document.getElementById('karaoke-view').classList.remove('hidden');
+
+            if (payload.title !== undefined) document.getElementById('kr-song-title').innerText = (payload.title || 'KARAOKE').toUpperCase();
+            if (payload.artist !== undefined) document.getElementById('kr-song-artist').innerText = (payload.artist || '').toUpperCase();
+            if (payload.prev !== undefined) document.getElementById('kr-prev-line').innerText = payload.prev;
+            if (payload.curr !== undefined) document.getElementById('kr-curr-line').innerText = payload.curr;
+            if (payload.next !== undefined) document.getElementById('kr-next-line').innerText = payload.next;
+        }
+
         function handleCommand(msg) {
             if (!msg || !msg.cmd) return;
             if (msg.cmd === 'START_RAFFLE') startRaffleSequence(msg);
@@ -513,6 +564,7 @@
             if (msg.cmd === 'SHOW_TEBAK_GAMBAR') showTebakGambar(msg);
             if (msg.cmd === 'UPDATE_TEBAK_TILES') updateTebakTiles(msg);
             if (msg.cmd === 'REVEAL_TEBAK_GAMBAR') revealTebakGambar(msg);
+            if (msg.cmd === 'SHOW_KARAOKE') showKaraoke(msg);
         }
 
         // 1. Cross-window Extend Display sync via BroadcastChannel
