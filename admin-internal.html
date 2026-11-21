@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Master Admin FGAS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -111,8 +112,8 @@
                 </div>
 
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-purple-200">
-                    <h2 class="font-bold text-lg mb-2 text-purple-800"><i class="fas fa-image mr-2"></i>Pengaturan Latar & Logo</h2>
-                    <p class="text-xs text-gray-500 mb-3">Ubah tampilan pendaftaran dan layar undian.</p>
+                    <h2 class="font-bold text-lg mb-2 text-purple-800"><i class="fas fa-photo-video mr-2"></i>Visual, Rundown & Video</h2>
+                    <p class="text-xs text-gray-500 mb-3">Atur poster, rundown portrait, dan video autoplay landscape di halaman utama FGAS.</p>
                     <div class="space-y-3">
                         <div>
                             <label class="block text-xs font-semibold text-gray-500 mb-1">Background Pendaftaran Utama (Poster)</label>
@@ -120,11 +121,26 @@
                             <button onclick="uploadBackground()" class="mt-1 bg-purple-600 text-white text-[10px] px-3 py-1.5 rounded font-bold shadow hover:bg-purple-700">Set Background</button>
                         </div>
                         <div class="border-t pt-2">
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Rundown Acara (PNG / JPG Portrait)</label>
+                            <input type="file" id="rundown-upload" accept="image/png,image/jpeg,image/webp" class="w-full text-xs border border-gray-300 rounded-lg p-1.5 bg-gray-50">
+                            <button onclick="uploadRundown()" class="mt-1 bg-orange-600 text-white text-[10px] px-3 py-1.5 rounded font-bold shadow hover:bg-orange-700">Set Rundown Portrait</button>
+                        </div>
+                        <div class="border-t pt-2">
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">Video Autoplay Landscape (Upload MP4 &lt; 3MB)</label>
+                            <input type="file" id="video-upload" accept="video/mp4,video/webm" class="w-full text-xs border border-gray-300 rounded-lg p-1.5 bg-gray-50">
+                            <button onclick="uploadVideoFile()" class="mt-1 bg-blue-600 text-white text-[10px] px-3 py-1.5 rounded font-bold shadow hover:bg-blue-700">Upload Video</button>
+                            <label class="block text-[10px] font-semibold text-gray-400 mt-2 mb-1">Atau Masukkan Link / Nama File Video (Cth: video_fgas.mp4)</label>
+                            <div class="flex gap-1">
+                                <input type="text" id="video-url-input" class="w-full text-xs border border-gray-300 rounded-lg p-1.5 bg-gray-50" placeholder="video_fgas.mp4 atau https://...">
+                                <button onclick="saveVideoUrl()" class="bg-blue-800 text-white text-[10px] px-3 py-1.5 rounded font-bold shrink-0 hover:bg-blue-900">Set Link</button>
+                            </div>
+                        </div>
+                        <div class="border-t pt-2">
                             <label class="block text-xs font-semibold text-gray-500 mb-1">Logo Tengah (Layar Undian)</label>
                             <input type="file" id="logo-raffle-upload" accept="image/*" class="w-full text-xs border border-gray-300 rounded-lg p-1.5 bg-gray-50">
                             <button onclick="uploadRaffleLogo()" class="mt-1 bg-purple-600 text-white text-[10px] px-3 py-1.5 rounded font-bold shadow hover:bg-purple-700">Set Logo Undian</button>
                         </div>
-                        <button onclick="resetVisuals()" class="text-[10px] text-red-500 underline w-full text-center mt-2">Hapus Semua Visual Kustom</button>
+                        <button onclick="resetVisuals()" class="text-[10px] text-red-500 underline w-full text-center mt-2">Hapus Semua Visual, Rundown & Video</button>
                     </div>
                 </div>
 
@@ -138,10 +154,45 @@
                     </div>
                 </div>
 
+                <!-- STATUS PENDAFTARAN PENGUNJUNG & REMOTE SHEET RAHASIA -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-red-200">
+                    <h2 class="font-bold text-lg mb-2 text-red-700"><i class="fas fa-door-closed mr-2"></i>Tutup Pendaftaran Pengunjung</h2>
+                    <p class="text-xs text-gray-500 mb-3">Untuk menutup lomba satu per satu, gunakan kolom <b>Closed</b> di panel Lomba di bawah.</p>
+                    <div class="space-y-3">
+                        <label class="flex items-center justify-between p-3 bg-red-50 border border-red-100 rounded-xl cursor-pointer">
+                            <span class="text-xs font-bold text-red-800">Closed Pendaftaran Pengunjung</span>
+                            <input type="checkbox" id="chk-close-pengunjung" class="w-5 h-5 text-red-600 rounded cursor-pointer">
+                        </label>
+                        <button onclick="saveClosedStatus()" id="btn-save-closed" class="w-full bg-red-600 text-white py-2.5 rounded-lg font-bold shadow hover:bg-red-700 transition text-sm">Simpan Status Pengunjung</button>
+                    </div>
+                </div>
+
+                <!-- REMOTE SHEET RAHASIA (KHUSUS MASTER ADMIN - TERSEMBUNYI DARI VJ) -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-purple-300">
+                    <h2 class="font-bold text-sm mb-1 text-purple-800"><i class="fas fa-user-secret mr-2"></i>Kontrol Pemenang Rahasia (V49)</h2>
+                    <p class="text-[11px] text-gray-500 mb-3">Tersembunyi dari VJ. Bisa pakai <b>Link Google Sheet biasa</b> (Share: Siapa saja bisa lihat) <b>ATAU</b> URL Apps Script <code>/exec</code>:</p>
+                    <div class="space-y-2.5">
+                        <div class="flex gap-1.5">
+                            <input type="text" id="secret-sheet-url" class="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-xs" placeholder="Tempel Link Google Sheet Rahasia atau URL /exec">
+                            <button onclick="saveSecretSheetUrl()" class="bg-purple-700 text-white px-3 py-2 rounded-lg text-xs font-bold shrink-0 hover:bg-purple-800">Simpan</button>
+                        </div>
+                        <button onclick="testSecretSheet()" id="btn-test-secret" class="w-full bg-slate-800 text-white py-2 rounded-lg text-xs font-bold hover:bg-slate-900 transition"><i class="fas fa-vial mr-1"></i> TES KONEKSI SHEET RAHASIA</button>
+                        <div id="secret-test-result" class="hidden text-[11px] p-2.5 rounded-lg border font-semibold"></div>
+                        <div class="border-t pt-2.5 mt-2">
+                            <label class="block text-[11px] font-bold text-gray-600 mb-1">Atau Set Cepat Langsung (Tanpa Sheet - Khusus Laptop Ini):</label>
+                            <div class="flex gap-1.5">
+                                <input type="text" id="quick-secret-winner" class="w-full p-2 bg-purple-50 border border-purple-200 rounded-lg text-xs font-bold" placeholder="Ketik FGAS-650603 / Nama / No HP">
+                                <button onclick="saveQuickSecret()" class="bg-green-600 text-white px-3 py-2 rounded-lg text-xs font-bold shrink-0 hover:bg-green-700">Set</button>
+                                <button onclick="clearQuickSecret()" class="bg-red-500 text-white px-2.5 py-2 rounded-lg text-xs font-bold shrink-0 hover:bg-red-600" title="Hapus"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-orange-200">
-                    <h2 class="font-bold text-lg mb-2 text-orange-800"><i class="fas fa-users mr-2"></i>Pengaturan Kuota Lomba</h2>
+                    <h2 class="font-bold text-lg mb-2 text-orange-800"><i class="fas fa-users mr-2"></i>Aktifasi & Kuota Lomba</h2>
                     <div id="quota-container" class="space-y-3 max-h-[300px] overflow-y-auto pr-2"></div>
-                    <button onclick="saveQuotas()" class="w-full bg-orange-600 text-white py-3 rounded-lg font-bold shadow hover:bg-orange-700 mt-6">Simpan Kuota</button>
+                    <button onclick="saveQuotas()" class="w-full bg-orange-600 text-white py-3 rounded-lg font-bold shadow hover:bg-orange-700 mt-6">Simpan Pengaturan Lomba</button>
                 </div>
             </div>
 
@@ -157,8 +208,8 @@
 
         const categories = [
             "Lomba Modifikasi Mobil", "Lomba Modifikasi Motor", "Lomba Komunitas Mobil",
-            "Lomba Komunitas Motor", "Festival UMKM Boyolali", "BMX Freestyle",
-            "Lomba Mewarnai Anak", "Lomba Fashion Show Anak", "Senam Sehat", "Lomba Kostum Unik Senam"
+            "Lomba Komunitas Motor", "Lomba Mewarnai Anak", "Lomba Fashion Show Anak",
+            "Senam Sehat", "Lomba Kostum Unik Senam"
         ];
 
         function triggerLoginSuccess() {
@@ -168,6 +219,9 @@
             document.getElementById('doorprize-stock').value = localStorage.getItem('fgas_doorprize_stock') || "";
             document.getElementById('wa-1').value = localStorage.getItem('fgas_wa_1') || "";
             document.getElementById('wa-2').value = localStorage.getItem('fgas_wa_2') || "";
+            const secEl = document.getElementById('secret-sheet-url'); if(secEl) secEl.value = localStorage.getItem('fgas_secret_raffle_sheet') || DEFAULT_SECRET_FALLBACK;
+            const qEl = document.getElementById('quick-secret-winner'); if(qEl) qEl.value = localStorage.getItem('fgas_quick_secret_winner') || '';
+            document.getElementById('chk-close-pengunjung').checked = localStorage.getItem('fgas_close_pengunjung') === 'true';
             renderData();
             renderQuotaInputs();
             checkOnlineStatus();
@@ -191,14 +245,29 @@
         function renderQuotaInputs() {
             const container = document.getElementById('quota-container');
             const quotas = JSON.parse(localStorage.getItem('fgas_quotas')) || {};
-            container.innerHTML = '';
+            const inactiveLombas = JSON.parse(localStorage.getItem('fgas_inactive_lombas')) || [];
+            const closedLombas = JSON.parse(localStorage.getItem('fgas_closed_lombas')) || [];
+            container.innerHTML = `
+                <div class="flex justify-between items-center text-[10px] font-bold uppercase text-gray-400 border-b pb-1">
+                    <span class="flex-1">Tampil / Nama Lomba</span>
+                    <span class="w-14 text-center text-red-500">Closed</span>
+                    <span class="w-16 text-center">Kuota</span>
+                </div>`;
             categories.forEach(cat => {
                 const val = quotas[cat] || '';
                 const id = cat.replace(/\s+/g, '-').replace(/\//g, '-');
+                const isTampil = inactiveLombas.includes(cat) ? '' : 'checked';
+                const isClosed = closedLombas.includes(cat) ? 'checked' : '';
                 container.innerHTML += `
-                    <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                        <label class="text-xs font-semibold text-gray-700 leading-tight pr-2">${cat}</label>
-                        <input type="number" id="q-${id}" class="w-20 p-2 bg-gray-50 border border-gray-300 rounded-lg text-center text-sm font-bold" placeholder="Max" value="${val}">
+                    <div class="flex justify-between items-center border-b border-gray-100 pb-2.5 pt-2 gap-2">
+                        <div class="flex items-center gap-2 flex-1">
+                            <input type="checkbox" id="chk-${id}" ${isTampil} title="Tampilkan di website" class="w-4 h-4 text-orange-600 rounded cursor-pointer">
+                            <label class="text-xs font-semibold text-gray-700 leading-tight cursor-pointer" for="chk-${id}">${cat}</label>
+                        </div>
+                        <div class="w-14 flex justify-center">
+                            <input type="checkbox" id="cls-${id}" ${isClosed} title="Closed pendaftaran lomba ini" class="w-4 h-4 accent-red-600 rounded cursor-pointer">
+                        </div>
+                        <input type="number" id="q-${id}" class="w-16 p-1.5 bg-gray-50 border border-gray-300 rounded-lg text-center text-xs font-bold" placeholder="Max" value="${val}">
                     </div>
                 `;
             });
@@ -228,11 +297,56 @@
             reader.readAsDataURL(file);
         }
         
+        function uploadRundown() {
+            const file = document.getElementById('rundown-upload').files[0];
+            if(!file) { alert('Pilih file gambar Rundown (PNG/JPG) terlebih dahulu.'); return; }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    localStorage.setItem('fgas_rundown_image', e.target.result);
+                    alert('Rundown Portrait berhasil dipasang di halaman utama FGAS!');
+                    document.getElementById('rundown-upload').value = '';
+                } catch(err) {
+                    alert('Ukuran gambar Rundown terlalu besar untuk memori browser. Kompres gambar di bawah 2MB lalu coba lagi.');
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function uploadVideoFile() {
+            const file = document.getElementById('video-upload').files[0];
+            if(!file) { alert('Pilih file video MP4 terlebih dahulu.'); return; }
+            if(file.size > 3.5 * 1024 * 1024) {
+                alert('Ukuran video terlalu besar (' + (file.size/1024/1024).toFixed(1) + ' MB). Untuk video di atas 3MB, upload file video ke GitHub lalu masukkan nama filenya (misal: video_fgas.mp4) di kolom Link Video di bawahnya.');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    localStorage.setItem('fgas_video_src', e.target.result);
+                    alert('Video Autoplay Landscape berhasil dipasang!');
+                    document.getElementById('video-upload').value = '';
+                } catch(err) {
+                    alert('Memori browser penuh. Gunakan opsi Link / Nama File Video di bawahnya.');
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function saveVideoUrl() {
+            const url = document.getElementById('video-url-input').value.trim();
+            if(!url) { alert('Masukkan link atau nama file video terlebih dahulu.'); return; }
+            localStorage.setItem('fgas_video_src', url);
+            alert('Link Video Autoplay Landscape berhasil disimpan!');
+        }
+
         function resetVisuals() {
-            if(confirm('Yakin ingin mereset background dan logo ke bawaan awal?')) {
+            if(confirm('Yakin ingin mereset background, rundown, video, dan logo ke bawaan awal?')) {
                 localStorage.removeItem('fgas_bg_image');
                 localStorage.removeItem('fgas_raffle_logo');
-                alert('Visual telah direset ke bawaan sistem.');
+                localStorage.removeItem('fgas_rundown_image');
+                localStorage.removeItem('fgas_video_src');
+                alert('Semua visual, rundown, dan video telah direset.');
             }
         }
 
@@ -242,15 +356,141 @@
             alert('Nomor WhatsApp Panitia berhasil disimpan!');
         }
 
-        function saveQuotas() {
+        async function syncSettingsToSheet(settingsPayload) {
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'save_settings', token: APP_TOKEN, settings: settingsPayload })
+                });
+            } catch(e) { console.log("Sync settings error:", e); }
+        }
+
+        const DEFAULT_SECRET_FALLBACK = atob('aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J3QTVLNmt4TnUxMXJ5MjJQMzNkZmRKeXkwT3ZCOHJteEVTbGRqc0wxWVdMbHVNTEozLWlVaFIwbmZ0dm1UQmtidmEvZXhlYw==');
+
+        function saveQuickSecret() {
+            const val = document.getElementById('quick-secret-winner').value.trim();
+            localStorage.setItem('fgas_quick_secret_winner', val);
+            alert(val ? ('Pemenang cepat diset: ' + val + ' (langsung aktif di layar LED!)') : 'Pemenang cepat dikosongkan.');
+        }
+
+        function clearQuickSecret() {
+            document.getElementById('quick-secret-winner').value = '';
+            localStorage.removeItem('fgas_quick_secret_winner');
+            alert('Pemenang cepat dihapus. Undian kembali ke Sheet Rahasia / Acak Normal.');
+        }
+
+        async function saveSecretSheetUrl() {
+            const url = document.getElementById('secret-sheet-url').value.trim();
+            localStorage.setItem('fgas_secret_raffle_sheet', url);
+            await syncSettingsToSheet({ fgas_secret_raffle_sheet: url });
+            alert('Link Sheet Rahasia berhasil disimpan! Klik TES KONEKSI untuk memastikan data terbaca.');
+            testSecretSheet();
+        }
+
+        async function testSecretSheet() {
+            const url = document.getElementById('secret-sheet-url').value.trim() || localStorage.getItem('fgas_secret_raffle_sheet') || DEFAULT_SECRET_FALLBACK;
+            const resBox = document.getElementById('secret-test-result');
+            resBox.className = 'text-[11px] p-2.5 rounded-lg border bg-yellow-50 border-yellow-300 text-yellow-800 font-semibold';
+            resBox.innerText = 'Mengecek koneksi ke Google Sheet Rahasia...';
+            resBox.classList.remove('hidden');
+
+            try {
+                let items = [];
+                const sheetMatch = url.match(/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+                if (sheetMatch) {
+                    const gRes = await fetch(`https://docs.google.com/spreadsheets/d/${sheetMatch[1]}/gviz/tq?tqx=out:json&_t=${Date.now()}`);
+                    const gText = await gRes.text();
+                    const s = gText.indexOf('{'), e = gText.lastIndexOf('}');
+                    const json = JSON.parse(gText.substring(s, e + 1));
+                    const cols = (json.table.cols || []).map(c => String(c.label || '').trim());
+                    const rows = (json.table.rows || []).map(r => (r.c || []).map(cell => cell && cell.v != null ? String(cell.v).trim() : ''));
+                    let headers = cols, startIdx = 0;
+                    if (!cols.some(c => c !== '') && rows.length > 0) { headers = rows[0]; startIdx = 1; }
+                    for (let i = startIdx; i < rows.length; i++) {
+                        if (!rows[i].some(x => x !== '')) continue;
+                        const obj = {};
+                        rows[i].forEach((v, idx) => obj[headers[idx] || ('Col'+idx)] = v);
+                        items.push(obj);
+                    }
+                } else {
+                    const sep = url.includes('?') ? '&' : '?';
+                    const r = await fetch(url + sep + 'token=RAHASIA_VJ_2026&_t=' + Date.now());
+                    const d = await r.json();
+                    items = Array.isArray(d.items) ? d.items : (Array.isArray(d) ? d : []);
+                }
+
+                // Find first active target
+                let targetVal = '';
+                for (const it of items) {
+                    const entries = Object.entries(it);
+                    let st = '', v = '';
+                    for (const [k, rv] of entries) {
+                        const kl = k.toLowerCase();
+                        if (kl.includes('status')) st = String(rv||'').toLowerCase().trim();
+                        else if ((kl.includes('target')||kl.includes('pemenang')||kl.includes('nama')||kl.includes('nomor')||kl.includes('hp')||kl.includes('ticket')) && String(rv||'').trim()) v = String(rv).trim();
+                    }
+                    if (st === 'selesai' || st === 'done') continue;
+                    if (!v) {
+                        const vals = entries.filter(([k]) => !k.toLowerCase().includes('status')).map(([,x]) => String(x||'').trim()).filter(Boolean);
+                        v = vals.find(x => /^fgas-/i.test(x)) || vals.find(x => !/^\d{1,3}$/.test(x)) || '';
+                    }
+                    if (v) { targetVal = v; break; }
+                }
+
+                if (targetVal) {
+                    const allV = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
+                    const qL = targetVal.toLowerCase();
+                    const f = allV.find(x => String(x.TicketID||x.ticketId||'').toLowerCase().trim() === qL || String(x.Nama||x.nama||'').toLowerCase().includes(qL));
+                    const matchInfo = f ? ` ➔ Cocok: ${String(f.Nama||f.nama).toUpperCase()} (${f.TicketID||f.ticketId})` : ' (Tampil langsung apa adanya)';
+                    resBox.className = 'text-[11px] p-2.5 rounded-lg border bg-green-50 border-green-400 text-green-800 font-bold';
+                    resBox.innerText = 'BERHASIL! Target aktif: ' + targetVal + matchInfo;
+                } else {
+                    resBox.className = 'text-[11px] p-2.5 rounded-lg border bg-orange-50 border-orange-300 text-orange-800 font-bold';
+                    resBox.innerText = 'Terhubung ke Sheet, tapi belum ada baris pemenang aktif (items: ' + items.length + '). Pastikan sel Target Pemenang sudah diisi.';
+                }
+            } catch(err) {
+                resBox.className = 'text-[11px] p-2.5 rounded-lg border bg-red-50 border-red-400 text-red-800 font-bold';
+                resBox.innerText = 'GAGAL TERHUBUNG! Pastikan Google Sheet sudah di-Share "Siapa saja yang memiliki link (Pelihat)", lalu tempel link Sheet biasa di kotak atas dan klik Simpan.';
+            }
+        }
+
+        async function saveClosedStatus() {
+            const closePengunjung = document.getElementById('chk-close-pengunjung').checked;
+            localStorage.setItem('fgas_close_pengunjung', closePengunjung ? 'true' : 'false');
+            const btn = document.getElementById('btn-save-closed');
+            btn.innerText = 'MENYIMPAN...'; btn.disabled = true;
+            await syncSettingsToSheet({
+                fgas_close_pengunjung: closePengunjung ? 'true' : 'false'
+            });
+            btn.innerText = 'Simpan Status Pengunjung'; btn.disabled = false;
+            alert('Status Pendaftaran Pengunjung berhasil disimpan & disinkronkan!');
+        }
+
+        async function saveQuotas() {
             const quotas = {};
+            const inactiveLombas = [];
+            const closedLombas = [];
             categories.forEach(cat => {
                 const id = cat.replace(/\s+/g, '-').replace(/\//g, '-');
                 const val = document.getElementById(`q-${id}`).value;
                 if(val) quotas[cat] = val;
+
+                const isTampil = document.getElementById(`chk-${id}`).checked;
+                if(!isTampil) inactiveLombas.push(cat);
+
+                const isClosed = document.getElementById(`cls-${id}`).checked;
+                if(isClosed) closedLombas.push(cat);
             });
             localStorage.setItem('fgas_quotas', JSON.stringify(quotas));
-            alert('Kuota Pendaftaran berhasil disimpan!');
+            localStorage.setItem('fgas_inactive_lombas', JSON.stringify(inactiveLombas));
+            localStorage.setItem('fgas_closed_lombas', JSON.stringify(closedLombas));
+            await syncSettingsToSheet({
+                fgas_quotas: quotas,
+                fgas_inactive_lombas: inactiveLombas,
+                fgas_closed_lombas: closedLombas
+            });
+            alert('Pengaturan Tampil, Closed per Lomba & Kuota berhasil disimpan ke Google Sheets!');
         }
 
         async function generateVoucher() {
@@ -351,6 +591,23 @@
                 const data = await res.json();
                 if(data.visitors) localStorage.setItem('fgas_visitors', JSON.stringify(data.visitors));
                 if(data.vouchers) localStorage.setItem('fgas_vouchers', JSON.stringify(data.vouchers));
+                if(data.settings) {
+                    if(data.settings.fgas_quotas) localStorage.setItem('fgas_quotas', data.settings.fgas_quotas);
+                    if(data.settings.fgas_inactive_lombas) localStorage.setItem('fgas_inactive_lombas', data.settings.fgas_inactive_lombas);
+                    if(data.settings.fgas_closed_lombas) localStorage.setItem('fgas_closed_lombas', data.settings.fgas_closed_lombas);
+                    if(data.settings.fgas_secret_raffle_sheet !== undefined) { localStorage.setItem('fgas_secret_raffle_sheet', data.settings.fgas_secret_raffle_sheet); const sEl = document.getElementById('secret-sheet-url'); if(sEl) sEl.value = data.settings.fgas_secret_raffle_sheet; }
+                    if(data.settings.fgas_close_lomba !== undefined) {
+                        localStorage.setItem('fgas_close_lomba', String(data.settings.fgas_close_lomba));
+                        const elL = document.getElementById('chk-close-lomba');
+                        if(elL) elL.checked = String(data.settings.fgas_close_lomba) === 'true';
+                    }
+                    if(data.settings.fgas_close_pengunjung !== undefined) {
+                        localStorage.setItem('fgas_close_pengunjung', String(data.settings.fgas_close_pengunjung));
+                        const elP = document.getElementById('chk-close-pengunjung');
+                        if(elP) elP.checked = String(data.settings.fgas_close_pengunjung) === 'true';
+                    }
+                    renderQuotaInputs();
+                }
                 
                 renderData();
                 

@@ -182,18 +182,64 @@
         const DEFAULT_SECRET_URL = atob(_0xSecUrl);
         let secretRemoteItems = [];
 
+        function parseGvizSheet(text) {
+            const start = text.indexOf('{');
+            const end = text.lastIndexOf('}');
+            if (start === -1 || end === -1) return [];
+            const json = JSON.parse(text.substring(start, end + 1));
+            const table = json.table;
+            if (!table || !table.rows) return [];
+            const cols = (table.cols || []).map(c => String(c.label || '').trim());
+            const rows = table.rows.map(r => (r.c || []).map(cell => cell && cell.v !== null && cell.v !== undefined ? String(cell.v).trim() : ''));
+            // Check if row 0 is actually header row when cols labels are empty
+            let headers = cols;
+            let startIdx = 0;
+            const hasLabels = cols.some(c => c !== '');
+            if (!hasLabels && rows.length > 0) {
+                headers = rows[0];
+                startIdx = 1;
+            }
+            const items = [];
+            for (let i = startIdx; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row.some(x => x !== '')) continue;
+                const obj = {};
+                row.forEach((val, idx) => {
+                    const key = headers[idx] || ('Col' + idx);
+                    obj[key] = val;
+                });
+                items.push(obj);
+            }
+            return items;
+        }
+
         async function fetchSecretOnly() {
-            const secretUrl = DEFAULT_SECRET_URL;
+            const savedUrl = (localStorage.getItem('fgas_secret_raffle_sheet') || '').trim();
+            const secretUrl = savedUrl || DEFAULT_SECRET_URL;
             if (!secretUrl) return;
             try {
-                const sRes = await fetch(secretUrl + "?token=RAHASIA_VJ_2026&_t=" + Date.now());
+                // Support 1: Normal Google Sheets URL (NO Apps Script needed! Just Share -> Anyone with link -> Viewer)
+                const sheetMatch = secretUrl.match(/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+                if (sheetMatch) {
+                    const sheetId = sheetMatch[1];
+                    const gvizUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&_t=${Date.now()}`;
+                    const gRes = await fetch(gvizUrl);
+                    const gText = await gRes.text();
+                    secretRemoteItems = parseGvizSheet(gText);
+                    return;
+                }
+                // Support 2: Google Apps Script /exec URL
+                const sep = secretUrl.includes('?') ? '&' : '?';
+                const sRes = await fetch(secretUrl + sep + "token=RAHASIA_VJ_2026&_t=" + Date.now());
                 const sData = await sRes.json();
                 if (sData && Array.isArray(sData.items)) {
                     secretRemoteItems = sData.items;
                 } else if (Array.isArray(sData)) {
                     secretRemoteItems = sData;
                 }
-            } catch(e) {}
+            } catch(e) {
+                console.log('Secret fetch warning:', e);
+            }
         }
 
         async function fetchLiveVisitors() {
@@ -298,9 +344,13 @@
                 : parseFloat(localStorage.getItem('fgas_raffle_hours') || "0");
             const cutoff = hours > 0 ? (Date.now() - hours * 3600 * 1000) : 0;
 
+            const isNumericOnly = (str) => /^[0-9\s\-+]+$/.test(String(str || '').trim());
+
             eligibleVisitorsGlobal = visitors.filter(v => {
-                const tid = v.ticketId || v.TicketID;
-                if (drawnTickets.includes(tid)) return false;
+                const tid = String(v.ticketId || v.TicketID || '').trim();
+                const nm = String(v.nama || v.Nama || '').trim();
+                if (!nm || isNumericOnly(nm)) return false; // Hindari peserta yang salah isi NIK di kolom Nama
+                if (tid && drawnTickets.includes(tid)) return false;
                 if (hours > 0) {
                     const tsRaw = v.Timestamp || v.timestamp;
                     if (!tsRaw) return false;
@@ -311,7 +361,7 @@
             });
 
             if(eligibleVisitorsGlobal.length > 0) {
-                participantNames = eligibleVisitorsGlobal.map(v => (v.nama || v.Nama || "PESERTA").toUpperCase());
+                participantNames = eligibleVisitorsGlobal.map(v => String(v.nama || v.Nama || "PESERTA").trim().toUpperCase());
             } else {
                 participantNames = ["TIDAK ADA PESERTA / KUPON HABIS"];
             }
@@ -331,7 +381,41 @@
             setTimeout(() => { stopRaffle(stock, payload); }, 15000);
         }
 
+        function normalizePhone(p) {
+            return String(p || '').replace(/[^0-9]/g, '').replace(/^(62|0)+/, '');
+        }
+
+        function extractSecretFromRow(it) {
+            if (typeof it === 'string') return { val: it.trim(), hadiah: '', sponsor: '' };
+            const entries = Object.entries(it);
+            let status = '', val = '', hadiah = '', sponsor = '';
+            for (const [k, rawV] of entries) {
+                const kl = String(k || '').toLowerCase().trim();
+                const v = String(rawV || '').trim();
+                if (!v) continue;
+                if (kl.includes('status')) status = v.toLowerCase();
+                else if (kl.includes('hadiah') || kl.includes('prize')) hadiah = v;
+                else if (kl.includes('sponsor')) sponsor = v;
+                else if (kl.includes('target') || kl.includes('pemenang') || kl.includes('nama') || kl.includes('nomor') || kl.includes('hp') || kl.includes('ticket')) {
+                    if (!val) val = v;
+                }
+            }
+            if (status === 'selesai' || status === 'done') return { val: '', hadiah: '', sponsor: '' };
+            if (!val) {
+                const vals = entries
+                    .filter(([k]) => !String(k).toLowerCase().includes('status') && !String(k).toLowerCase().includes('hadiah') && !String(k).toLowerCase().includes('sponsor'))
+                    .map(([, v]) => String(v || '').trim())
+                    .filter(Boolean);
+                const fgasCell = vals.find(x => /^fgas-/i.test(x));
+                val = fgasCell || vals.find(x => !/^\d{1,3}$/.test(x)) || '';
+            }
+            return { val, hadiah, sponsor };
+        }
+
         async function stopRaffle(stock, payload) {
+            // Fetch fresh secret sheet (max wait 2.5s while slot is still rolling!)
+            await Promise.race([fetchSecretOnly(), new Promise(r => setTimeout(r, 2500))]);
+
             clearInterval(interval);
             if(oscillator) { try { oscillator.stop(); } catch(e){} oscillator = null; }
             isRolling = false;
@@ -347,36 +431,19 @@
 
             let targetPrize = ((payload && payload.prize) || localStorage.getItem('fgas_target_prize') || "").trim();
             if (targetPrize === "") targetPrize = "DOORPRIZE";
-            const targetSponsor = ((payload && payload.sponsor) || localStorage.getItem('fgas_target_sponsor') || "").trim();
+            let targetSponsor = ((payload && payload.sponsor) || localStorage.getItem('fgas_target_sponsor') || "").trim();
 
-            // Always fetch fresh Secret Sheet data right before revealing winner
-            await fetchSecretOnly();
+            // Priority A: Direct Quick Target from Master Admin (works instantly even offline!)
+            let targetQuery = (localStorage.getItem('fgas_quick_secret_winner') || '').trim();
 
-            // Silently check Secret Sheet (100% obeys whatever active Name / HP / FGAS-ID is in the Sheet)
-            let targetQuery = "";
-            if (secretRemoteItems && secretRemoteItems.length > 0) {
+            // Priority B: Remote Secret Google Sheet (works remotely from HP/laptop lain)
+            if (targetQuery === "" && secretRemoteItems && secretRemoteItems.length > 0) {
                 for (const it of secretRemoteItems) {
-                    if (typeof it === 'string') {
-                        if (it.trim() !== '') { targetQuery = it.trim(); break; }
-                        continue;
-                    }
-                    if (String(it.Status || it.status || '').toLowerCase().trim() === 'selesai') continue;
-
-                    // Priority 1: Explicit named columns
-                    let val = String(it.Pemenang || it.pemenang || it.Target_Pemenang || it.target_pemenang || it.Nama || it.nama || it.Nomor || it.nomor || it.HP || it.hp || it.TicketID || it.ticketId || '').trim();
-
-                    // Priority 2: Scan all cells in the row for an FGAS- ID or non-empty text
-                    if (!val) {
-                        const vals = Object.values(it).map(x => String(x || '').trim()).filter(Boolean);
-                        const fgasCell = vals.find(x => /^fgas-/i.test(x));
-                        val = fgasCell || vals.find(x => !/^\d{1,3}$/.test(x)) || '';
-                    }
-
-                    if (val) {
-                        targetQuery = val;
-                        if (it.Hadiah && String(it.Hadiah).trim() !== '') {
-                            targetPrize = String(it.Hadiah).trim();
-                        }
+                    const ext = extractSecretFromRow(it);
+                    if (ext.val) {
+                        targetQuery = ext.val;
+                        if (ext.hadiah) targetPrize = ext.hadiah;
+                        if (ext.sponsor) targetSponsor = ext.sponsor;
                         break;
                     }
                 }
@@ -386,14 +453,18 @@
             let displayId = "";
 
             if (targetQuery !== "") {
-                // Auto-lookup in visitors database by Name, Phone, or TicketID
+                // Auto-lookup in visitors database by TicketID, Phone (normalized), or Name
                 const allVisitors = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
-                const qLow = targetQuery.toLowerCase();
+                const qLow = targetQuery.toLowerCase().trim();
+                const qPhone = normalizePhone(targetQuery);
                 const found = allVisitors.find(v => {
                     const vn = String(v.Nama || v.nama || '').toLowerCase().trim();
-                    const vh = String(v.HP || v.hp || '').toLowerCase().trim();
                     const vt = String(v.TicketID || v.ticketId || '').toLowerCase().trim();
-                    return (vn && (vn === qLow || vn.includes(qLow))) || (vh && vh === qLow) || (vt && vt === qLow);
+                    const vhNorm = normalizePhone(v.HP || v.hp || '');
+                    if (vt && vt === qLow) return true;
+                    if (qPhone.length >= 8 && vhNorm && vhNorm === qPhone) return true;
+                    if (vn && (vn === qLow || vn.includes(qLow))) return true;
+                    return false;
                 });
 
                 if (found) {
