@@ -5,22 +5,161 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VJ Control Panel - FGAS 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@600;700&display=swap');
         html, body { max-width: 100%; overflow: hidden; }
         body { background: #0f172a; color: white; font-family: sans-serif; }
+        body.kocok-player-mode {
+            overflow-x: hidden;
+            overflow-y: auto;
+            background: radial-gradient(circle at 50% 30%, #0f172a 0%, #020617 100%);
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100dvh;
+            height: auto;
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .font-sport { font-family: 'Orbitron', sans-serif; }
+        .kc-glass-card {
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(6, 182, 212, 0.45);
+            box-shadow: 0 0 35px rgba(6, 182, 212, 0.22);
+        }
+        @keyframes pulseShake {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-12deg) scale(1.06); }
+            75% { transform: rotate(12deg) scale(1.06); }
+        }
+        .animate-phone-shake { animation: pulseShake 0.45s ease-in-out infinite; }
+        .flash-hit {
+            box-shadow: 0 0 60px rgba(74, 222, 128, 0.9) !important;
+            border-color: #4ade80 !important;
+            transform: scale(0.96);
+        }
         .vj-panel { background: rgba(2,6,23,0.94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: bottom 0.3s ease; }
         .vj-panel:hover, .vj-panel.open { bottom: 0 !important; }
         input { font-size: 15px; box-sizing: border-box; }
     </style>
 </head>
 <body class="h-screen w-full overflow-hidden relative">
-    <!-- Live Mirroring Preview of LED Screen -->
-    <iframe id="display-frame" src="raffle.html" class="w-full h-full border-none"></iframe>
+    <!-- ================================================= -->
+    <!-- MODE PENONTON (OTOMATIS TAMPIL SAAT SCAN QR KOCOK) -->
+    <!-- ================================================= -->
+    <div id="kocok-player-root" class="hidden min-h-[100dvh] w-full flex flex-col items-center justify-between p-4">
+        <div class="w-full max-w-md flex justify-between items-center py-2 border-b border-white/10">
+            <div class="flex items-center gap-2">
+                <span class="text-xl">📱</span>
+                <div>
+                    <h1 class="font-sport text-sm font-black text-cyan-400 tracking-wider">KOCOK-KOCOK</h1>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">LIVE STAGE GAME</p>
+                </div>
+            </div>
+            <div class="bg-slate-800 border border-slate-600 text-slate-300 px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5">
+                <span id="kcp-conn-dot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                <span id="kcp-conn-text">Siap</span>
+            </div>
+        </div>
+
+        <div class="w-full max-w-md flex-grow flex flex-col justify-center my-4">
+            <!-- SCREEN 1: JOIN -->
+            <div id="kcp-screen-join" class="kc-glass-card rounded-3xl p-6 text-center space-y-5">
+                <div class="w-20 h-20 mx-auto rounded-full bg-cyan-500/20 border-2 border-cyan-400 flex items-center justify-center text-4xl shadow-[0_0_25px_rgba(6,182,212,0.4)]">🏁</div>
+                <div>
+                    <h2 class="font-sport text-2xl font-black text-white uppercase tracking-wider">SIAP BALAPAN?</h2>
+                    <p class="text-sm text-cyan-200 mt-1">Masukkan nama panggilanmu, lalu kocok HP secepat mungkin saat aba-aba dimulai!</p>
+                </div>
+                <div class="text-left space-y-3">
+                    <div>
+                        <label class="block text-xs font-bold text-cyan-300 uppercase tracking-wider mb-1">Nama Pemain (Tampil di LED)</label>
+                        <input type="text" id="kcp-player-name" maxlength="16" class="w-full p-3.5 bg-slate-950/80 border border-cyan-500/50 rounded-xl text-white text-base font-bold outline-none focus:border-cyan-300 uppercase" placeholder="KETIK NAMAMU...">
+                    </div>
+                    <div id="kcp-room-box" class="hidden">
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Kode Room</label>
+                        <input type="text" id="kcp-room-input" class="w-full p-3 bg-slate-950/80 border border-slate-600 rounded-xl text-cyan-300 text-sm font-mono font-bold uppercase" placeholder="FGAS-123">
+                    </div>
+                </div>
+                <button onclick="kcpJoinGame()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-sport font-black text-base tracking-widest uppercase shadow-[0_0_25px_rgba(6,182,212,0.5)] active:scale-95 transition">
+                    <i class="fas fa-bolt mr-2"></i> GABUNG &amp; AKTIFKAN SENSOR
+                </button>
+                <p class="text-[11px] text-slate-400">Genggam HP dengan erat saat mengocok agar tidak terlepas!</p>
+            </div>
+
+            <!-- SCREEN 2: LOBBY -->
+            <div id="kcp-screen-lobby" class="hidden kc-glass-card rounded-3xl p-6 text-center space-y-5">
+                <div class="w-24 h-24 mx-auto rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-5xl animate-bounce">
+                    <span id="kcp-lobby-icon">🏎️</span>
+                </div>
+                <div>
+                    <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/50 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">TERHUBUNG KE LED!</span>
+                    <h2 id="kcp-lobby-name" class="font-sport text-2xl font-black text-white mt-3 uppercase">PEMAIN</h2>
+                    <p class="text-sm text-cyan-200 mt-1">Lihat namamu di layar LED! Tunggu aba-aba dari MC &amp; VJ untuk mulai mengocok HP.</p>
+                </div>
+                <div class="bg-slate-900/80 border border-white/10 rounded-xl p-3 text-xs text-slate-300">
+                    <i class="fas fa-mobile-alt text-cyan-400 mr-1"></i> <span id="kcp-sensor-text">Mengecek sensor gerak HP...</span>
+                </div>
+            </div>
+
+            <!-- SCREEN 3: COUNTDOWN -->
+            <div id="kcp-screen-countdown" class="hidden kc-glass-card rounded-3xl p-8 text-center space-y-4 border-amber-400">
+                <p class="font-sport text-sm text-amber-300 tracking-[0.3em] uppercase">BERSIAP KOCOK HP!</p>
+                <div id="kcp-cd-number" class="font-sport text-8xl font-black text-amber-400 drop-shadow-[0_0_30px_rgba(251,191,36,0.9)]">3</div>
+                <p class="text-sm text-white font-bold uppercase">Pegang HP dengan erat...</p>
+            </div>
+
+            <!-- SCREEN 4: RACING -->
+            <div id="kcp-screen-race" class="hidden flex flex-col items-center space-y-4 w-full">
+                <div class="w-full flex justify-between items-center bg-slate-900/90 border border-cyan-500/40 rounded-2xl px-4 py-3">
+                    <div>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase">SISA WAKTU</p>
+                        <p id="kcp-race-timer" class="font-sport text-2xl font-black text-amber-400">20s</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase">SKOR KOCOKAN</p>
+                        <p id="kcp-race-score" class="font-sport text-3xl font-black text-emerald-400">0</p>
+                    </div>
+                </div>
+                <button id="kcp-tap-zone" onpointerdown="kcpManualTap()" class="w-full py-10 px-6 rounded-3xl bg-gradient-to-br from-emerald-600/30 via-cyan-600/20 to-blue-700/30 border-4 border-cyan-400 flex flex-col items-center justify-center gap-3 shadow-[0_0_40px_rgba(6,182,212,0.35)] transition-all duration-75">
+                    <div class="text-6xl animate-phone-shake">📱</div>
+                    <h2 class="font-sport text-2xl font-black text-white tracking-wider uppercase">KOCOK HP SEKARANG!!</h2>
+                    <p class="text-xs text-cyan-200 font-bold uppercase tracking-widest bg-black/40 px-4 py-1.5 rounded-full">Goyangkan HP cepat atau TAP kotak ini!</p>
+                </button>
+                <p id="kcp-race-tag" class="text-xs font-bold text-slate-400 uppercase tracking-widest"></p>
+            </div>
+
+            <!-- SCREEN 5: FINISH -->
+            <div id="kcp-screen-finish" class="hidden kc-glass-card rounded-3xl p-6 text-center space-y-4 border-emerald-400">
+                <div id="kcp-fin-emoji" class="text-6xl">🏁</div>
+                <h2 id="kcp-fin-title" class="font-sport text-2xl font-black text-emerald-400 uppercase">WAKTU HABIS!</h2>
+                <div class="bg-slate-950/70 border border-white/10 rounded-2xl p-4">
+                    <p class="text-xs text-slate-400 uppercase font-bold">Total Kocokan Kamu</p>
+                    <p id="kcp-fin-score" class="font-sport text-5xl font-black text-white my-1">0</p>
+                    <p id="kcp-fin-rank" class="text-sm font-bold text-amber-300 mt-2">Menunggu hasil akhir di layar LED...</p>
+                </div>
+                <p class="text-xs text-slate-400">Tunggu VJ membuka ronde berikutnya untuk main lagi!</p>
+            </div>
+        </div>
+
+        <div class="w-full max-w-md text-center text-[10px] text-slate-500 font-bold tracking-widest uppercase py-1">
+            Room: <span id="kcp-footer-room" class="text-cyan-400">-</span> &bull; FGAS 2026 Interactive Stage
+        </div>
+    </div>
+
+    <!-- ================================================= -->
+    <!-- MODE OPERATOR VJ (DEFAULT SAAT BUKA fgas/vj)      -->
+    <!-- ================================================= -->
+    <div id="vj-mode-root" class="h-screen w-full overflow-hidden relative">
+    <!-- Live Mirroring Preview of LED Screen (loaded only in VJ mode) -->
+    <iframe id="display-frame" src="about:blank" class="w-full h-full border-none"></iframe>
 
     <div id="vj-drawer" class="vj-panel fixed left-0 w-full p-5 border-t border-cyan-500/50 shadow-[0_-10px_30px_rgba(0,0,0,0.7)] z-50 flex flex-col gap-4" style="bottom: -84vh; height: 88vh;">
         <div class="flex flex-wrap justify-between items-center gap-2 border-b border-white/10 pb-2">
-            <h2 class="font-bold text-base md:text-lg text-cyan-400"><i class="fas fa-sliders-h mr-2"></i> VJ CONTROL PANEL <span class="text-xs bg-indigo-600 text-white px-2 py-0.5 rounded ml-1">V52 • 61 KOTA RI (512 SOAL)</span></h2>
+            <h2 class="font-bold text-base md:text-lg text-cyan-400"><i class="fas fa-sliders-h mr-2"></i> VJ CONTROL PANEL <span class="text-xs bg-indigo-600 text-white px-2 py-0.5 rounded ml-1">V54 • ALL-IN-ONE + KOCOK</span></h2>
             <div class="flex items-center gap-2">
                 <button onclick="openExtendDisplay()" class="bg-orange-500 hover:bg-orange-400 text-slate-950 px-3 py-1.5 rounded-lg text-xs font-black transition shadow"><i class="fas fa-desktop mr-1"></i> BUKA LAYAR LED (EXTEND DISPLAY)</button>
                 <button onclick="toggleFullscreen()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition"><i class="fas fa-expand mr-1"></i> Fullscreen</button>
@@ -288,7 +427,74 @@
                     </div>
                 </div>
             </div>
+
+            <!-- 6. GAMES KOCOK-KOCOK HP PENONTON (SCAN QR -> BALAPAN LIVE LED) -->
+            <div class="md:col-span-2 bg-emerald-950/35 p-5 rounded-xl border border-emerald-400/50 space-y-3">
+                <div class="flex flex-wrap justify-between items-center gap-2 border-b border-emerald-400/30 pb-2">
+                    <h3 class="font-bold text-emerald-300 text-sm uppercase"><i class="fas fa-mobile-alt mr-1.5"></i> 6. Games "KOCOK-KOCOK" (Scan QR HP Penonton ➔ Balapan Live LED)</h3>
+                    <div class="flex items-center gap-2">
+                        <span id="kc-mqtt-badge" class="text-[10px] bg-slate-800 border border-slate-600 text-slate-300 px-2.5 py-0.5 rounded-full font-bold">Server: Standby</span>
+                        <span id="kc-vj-players-badge" class="text-[10px] bg-emerald-900/80 text-emerald-300 px-2.5 py-0.5 rounded-full font-bold">0 Pemain</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-3">
+                    <!-- Kiri: Setting Room, Durasi, Ikon -->
+                    <div class="lg:col-span-5 space-y-2.5">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] font-bold text-emerald-300 uppercase mb-1">Durasi Balapan</label>
+                                <select id="kc-duration" class="w-full p-2 bg-slate-900 border border-emerald-400/40 rounded-lg text-white text-xs font-bold">
+                                    <option value="15">15 Detik (Cepat)</option>
+                                    <option value="20" selected>20 Detik (Ideal)</option>
+                                    <option value="30">30 Detik (Seru)</option>
+                                    <option value="45">45 Detik (Panjang)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-emerald-300 uppercase mb-1">Ikon Balapan LED</label>
+                                <select id="kc-icon" class="w-full p-2 bg-slate-900 border border-emerald-400/40 rounded-lg text-white text-xs font-bold">
+                                    <option value="🏎️" selected>🏎️ Mobil Balap (Auto Show)</option>
+                                    <option value="🏍️">🏍️ Motor Sport</option>
+                                    <option value="🐄">🐄 Sapi Boyolali</option>
+                                    <option value="🚀">🚀 Roket Turbo</option>
+                                    <option value="🏃">🏃 Pelari Sprint</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="bg-black/40 border border-white/15 rounded-lg p-2.5 flex items-center justify-between gap-2">
+                            <div class="truncate">
+                                <span class="block text-[9px] text-slate-400 uppercase font-bold">Link Join Penonton (Otomatis jadi QR di LED):</span>
+                                <a id="kc-join-url-link" href="#" target="_blank" class="text-[11px] text-cyan-300 underline truncate block">Klik "Buka Lobby + QR" dulu...</a>
+                            </div>
+                            <button onclick="copyKocokUrl()" class="bg-slate-700 hover:bg-slate-600 text-white px-2.5 py-1.5 rounded text-[10px] font-bold shrink-0"><i class="fas fa-copy"></i> Copy</button>
+                        </div>
+
+                        <button onclick="simulateKocokBots()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-600 text-amber-300 py-2 rounded-lg font-bold text-[11px] transition">
+                            <i class="fas fa-robot mr-1"></i> TAMBAH 6 BOT SIMULASI (UNTUK TES TANPA HP)
+                        </button>
+                    </div>
+
+                    <!-- Kanan: Tombol Kontrol Live & Daftar Pemain -->
+                    <div class="lg:col-span-7 space-y-2.5">
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="openKocokLobby()" class="bg-cyan-600 hover:bg-cyan-500 text-white py-3 rounded-lg font-black text-xs transition shadow"><i class="fas fa-qrcode mr-1"></i> 1. BUKA LOBBY + QR</button>
+                            <button onclick="startKocokRace()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 py-3 rounded-lg font-black text-xs transition shadow-[0_0_15px_rgba(16,185,129,0.5)]"><i class="fas fa-flag-checkered mr-1"></i> 2. MULAI BALAPAN!</button>
+                            <button onclick="stopKocokEarly()" class="bg-red-600 hover:bg-red-500 text-white py-3 rounded-lg font-black text-xs transition"><i class="fas fa-stop-circle mr-1"></i> SELESAIKAN</button>
+                        </div>
+
+                        <div class="bg-black/50 border border-white/10 rounded-xl p-3 h-28 overflow-y-auto">
+                            <p class="text-[10px] text-slate-400 font-bold uppercase mb-1.5">Live Monitor Peserta &amp; Skor:</p>
+                            <div id="kc-vj-live-list" class="flex flex-wrap gap-1.5 text-[11px]">
+                                <span class="text-slate-500 italic">Belum ada lobby aktif. Klik "1. BUKA LOBBY + QR" untuk memulai.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
     </div>
 
     <script>
@@ -334,8 +540,15 @@
                 }, 2500);
             } catch(e) {}
         }
-        fetchData();
-        setInterval(fetchData, 10000);
+        const _pageParams = new URLSearchParams(window.location.search);
+        const IS_KOCOK_PLAYER = (_pageParams.get('play') === 'kocok') || (!!_pageParams.get('room'));
+
+        if (!IS_KOCOK_PLAYER) {
+            const _df = document.getElementById('display-frame');
+            if (_df) _df.src = 'raffle.html';
+            fetchData();
+            setInterval(fetchData, 10000);
+        }
 
         function resetDrawnTickets() {
             if(confirm("Yakin ingin mereset riwayat pemenang undian?")) {
@@ -880,6 +1093,519 @@
             const answer = document.getElementById('ai-answer-input').value.trim();
             if (!answer) { alert('Isi Kunci Jawaban terlebih dahulu!'); return; }
             sendToLED({ cmd: 'APAINI_REVEAL', answer: answer });
+        }
+        // --- GAMES "KOCOK-KOCOK" HOST CONTROLLER (MQTT REAL-TIME) ---
+        const KC_BROKERS = [
+            { name: 'EMQX', url: 'wss://broker.emqx.io:8084/mqtt' },
+            { name: 'HiveMQ', url: 'wss://broker.hivemq.com:8884/mqtt' }
+        ];
+        let kcBrokerIdx = 0;
+        let kcClient = null;
+        let kcRoomId = '';
+        let kcPhase = 'IDLE'; // IDLE | LOBBY | COUNTDOWN | RACING | FINISHED
+        let kcPlayers = {};   // { id: { id, name, score, isBot } }
+        let kcRaceTimer = null;
+        let kcBotTimer = null;
+        let kcCdTimer = null;
+        let kcRaceEndTs = 0;
+        let kcDurationSec = 20;
+
+        function setKcBadge(status, text) {
+            const el = document.getElementById('kc-mqtt-badge');
+            if (!el) return;
+            el.innerText = text;
+            if (status === 'ok') el.className = 'text-[10px] bg-emerald-900 border border-emerald-400 text-emerald-300 px-2.5 py-0.5 rounded-full font-bold';
+            else if (status === 'err') el.className = 'text-[10px] bg-red-900 border border-red-400 text-red-300 px-2.5 py-0.5 rounded-full font-bold';
+            else el.className = 'text-[10px] bg-amber-900 border border-amber-400 text-amber-300 px-2.5 py-0.5 rounded-full font-bold';
+        }
+
+        function buildKocokJoinUrl() {
+            const u = new URL(window.location.href);
+            u.search = `?play=kocok&room=${encodeURIComponent(kcRoomId)}&b=${kcBrokerIdx}`;
+            u.hash = '';
+            return u.href;
+        }
+
+        function updateKocokUrlDisplay() {
+            const url = buildKocokJoinUrl();
+            const a = document.getElementById('kc-join-url-link');
+            if (a) { a.href = url; a.innerText = url; }
+        }
+
+        function copyKocokUrl() {
+            if (!kcRoomId) { alert('Klik "1. BUKA LOBBY + QR" terlebih dahulu!'); return; }
+            const url = buildKocokJoinUrl();
+            navigator.clipboard.writeText(url).then(() => alert('Link join berhasil disalin:\n' + url)).catch(() => prompt('Salin link ini:', url));
+        }
+
+        function connectKocokMQTT(onReady) {
+            if (kcClient) {
+                try { kcClient.end(true); } catch(e){}
+                kcClient = null;
+            }
+            const broker = KC_BROKERS[kcBrokerIdx];
+            setKcBadge('wait', `Menghubungkan (${broker.name})...`);
+            let connectedOnce = false;
+
+            kcClient = mqtt.connect(broker.url, {
+                clientId: 'fgas_vj_host_' + Math.random().toString(36).substring(2, 8),
+                clean: true,
+                connectTimeout: 6000,
+                reconnectPeriod: 2500
+            });
+
+            const fallbackGuard = setTimeout(() => {
+                if (!connectedOnce && kcBrokerIdx === 0) {
+                    kcBrokerIdx = 1;
+                    connectKocokMQTT(onReady);
+                }
+            }, 6500);
+
+            kcClient.on('connect', () => {
+                connectedOnce = true;
+                clearTimeout(fallbackGuard);
+                setKcBadge('ok', `Online (${broker.name})`);
+                updateKocokUrlDisplay();
+                if (kcRoomId) {
+                    kcClient.subscribe(`fgas2026_kocok/${kcRoomId}/join`);
+                    kcClient.subscribe(`fgas2026_kocok/${kcRoomId}/score`);
+                    publishKocokState({ phase: kcPhase, icon: getKcIcon() });
+                }
+                if (onReady) onReady();
+            });
+
+            kcClient.on('error', () => setKcBadge('err', 'Error Server'));
+
+            kcClient.on('message', (topic, buf) => {
+                try {
+                    const data = JSON.parse(buf.toString());
+                    if (topic.endsWith('/join')) {
+                        if (!data.id || !data.name) return;
+                        if (!kcPlayers[data.id]) {
+                            kcPlayers[data.id] = { id: data.id, name: String(data.name).substring(0, 16).toUpperCase(), score: 0, isBot: false };
+                        } else {
+                            kcPlayers[data.id].name = String(data.name).substring(0, 16).toUpperCase();
+                        }
+                        refreshKocokVJMonitor();
+                        if (kcPhase === 'LOBBY') pushKocokLobbyToLED();
+                    } else if (topic.endsWith('/score')) {
+                        if (kcPhase !== 'RACING' && kcPhase !== 'FINISHED') return;
+                        if (!data.id) return;
+                        if (!kcPlayers[data.id]) {
+                            kcPlayers[data.id] = { id: data.id, name: String(data.name || 'PEMAIN').substring(0, 16).toUpperCase(), score: 0, isBot: false };
+                        }
+                        const sc = parseInt(data.score, 10) || 0;
+                        if (sc > kcPlayers[data.id].score) kcPlayers[data.id].score = sc;
+                    }
+                } catch(e){}
+            });
+        }
+
+        function getKcIcon() {
+            const el = document.getElementById('kc-icon');
+            return el ? el.value : '🏎️';
+        }
+
+        function publishKocokState(payload) {
+            if (!kcClient || !kcClient.connected || !kcRoomId) return;
+            kcClient.publish(`fgas2026_kocok/${kcRoomId}/state`, JSON.stringify(payload), { retain: true });
+        }
+
+        function clearAllKocokTimers() {
+            if (kcRaceTimer) { clearInterval(kcRaceTimer); kcRaceTimer = null; }
+            if (kcBotTimer) { clearInterval(kcBotTimer); kcBotTimer = null; }
+            if (kcCdTimer) { clearInterval(kcCdTimer); kcCdTimer = null; }
+        }
+
+        function getSortedKocokPlayers() {
+            return Object.values(kcPlayers).sort((a, b) => b.score - a.score);
+        }
+
+        function refreshKocokVJMonitor() {
+            const list = getSortedKocokPlayers();
+            const badge = document.getElementById('kc-vj-players-badge');
+            if (badge) badge.innerText = list.length + ' Pemain';
+            const box = document.getElementById('kc-vj-live-list');
+            if (!box) return;
+            if (list.length === 0) {
+                box.innerHTML = '<span class="text-slate-400 italic">Lobby terbuka! Menunggu penonton scan QR Code di LED...</span>';
+                return;
+            }
+            box.innerHTML = list.slice(0, 30).map((p, i) => {
+                const safe = String(p.name).replace(/</g, '&lt;');
+                return `<span class="bg-emerald-900/50 border border-emerald-500/40 px-2 py-0.5 rounded text-white font-bold">#${i + 1} ${safe}: <b class="text-amber-300">${p.score}</b></span>`;
+            }).join('');
+        }
+
+        function pushKocokLobbyToLED() {
+            sendToLED({
+                cmd: 'KOCOK_LOBBY',
+                roomId: kcRoomId,
+                joinUrl: buildKocokJoinUrl(),
+                icon: getKcIcon(),
+                players: Object.values(kcPlayers)
+            });
+        }
+
+        function openKocokLobby() {
+            clearAllKocokTimers();
+            kcRoomId = 'FGAS-' + Math.floor(100 + Math.random() * 900);
+            kcPlayers = {};
+            kcPhase = 'LOBBY';
+            updateKocokUrlDisplay();
+            refreshKocokVJMonitor();
+            pushKocokLobbyToLED();
+
+            connectKocokMQTT(() => {
+                pushKocokLobbyToLED();
+                publishKocokState({ phase: 'LOBBY', icon: getKcIcon() });
+            });
+        }
+
+        function simulateKocokBots() {
+            if (!kcRoomId || kcPhase === 'IDLE') {
+                openKocokLobby();
+            }
+            const botNames = ['BUDI', 'SITI', 'ANDI', 'RINA', 'JOKO', 'DEWI', 'AGUS', 'MAYA', 'RAMA', 'PUTRI'];
+            for (let i = 0; i < 6; i++) {
+                const bid = 'BOT_' + (i + 1) + '_' + Math.floor(Math.random() * 99);
+                const bname = botNames[Math.floor(Math.random() * botNames.length)] + ' (BOT)';
+                kcPlayers[bid] = { id: bid, name: bname, score: 0, isBot: true };
+            }
+            refreshKocokVJMonitor();
+            if (kcPhase === 'LOBBY') pushKocokLobbyToLED();
+        }
+
+        function startKocokRace() {
+            if (!kcRoomId) { alert('Klik "1. BUKA LOBBY + QR" terlebih dahulu!'); return; }
+            if (Object.keys(kcPlayers).length === 0) {
+                alert('Belum ada penonton yang scan QR! Tunggu peserta masuk atau klik "TAMBAH 6 BOT SIMULASI" untuk tes.');
+                return;
+            }
+            clearAllKocokTimers();
+            // Reset all player scores to 0 for fresh race
+            Object.values(kcPlayers).forEach(p => { p.score = 0; });
+            kcDurationSec = parseInt(document.getElementById('kc-duration').value || '20', 10);
+            kcPhase = 'COUNTDOWN';
+
+            let cd = 3;
+            sendToLED({ cmd: 'KOCOK_COUNTDOWN', count: cd });
+            publishKocokState({ phase: 'COUNTDOWN', count: cd, icon: getKcIcon() });
+
+            kcCdTimer = setInterval(() => {
+                cd--;
+                if (cd > 0) {
+                    sendToLED({ cmd: 'KOCOK_COUNTDOWN', count: cd });
+                    publishKocokState({ phase: 'COUNTDOWN', count: cd, icon: getKcIcon() });
+                } else {
+                    clearInterval(kcCdTimer);
+                    kcCdTimer = null;
+                    beginKocokActiveRace();
+                }
+            }, 1000);
+        }
+
+        function beginKocokActiveRace() {
+            kcPhase = 'RACING';
+            kcRaceEndTs = Date.now() + (kcDurationSec * 1000);
+            publishKocokState({ phase: 'RACING', timeLeft: kcDurationSec, duration: kcDurationSec, icon: getKcIcon() });
+
+            // Simulate bot shaking if any bots exist
+            kcBotTimer = setInterval(() => {
+                if (kcPhase !== 'RACING') return;
+                Object.values(kcPlayers).forEach(p => {
+                    if (p.isBot) p.score += Math.floor(Math.random() * 4);
+                });
+            }, 220);
+
+            let lastStatePub = 0;
+            kcRaceTimer = setInterval(() => {
+                const remainMs = kcRaceEndTs - Date.now();
+                const remainSec = Math.max(0, remainMs / 1000);
+                const sorted = getSortedKocokPlayers();
+
+                sendToLED({
+                    cmd: 'KOCOK_RACE',
+                    icon: getKcIcon(),
+                    timeLeft: remainSec,
+                    totalPlayers: sorted.length,
+                    top: sorted.slice(0, 8)
+                });
+                refreshKocokVJMonitor();
+
+                if (Date.now() - lastStatePub >= 1000) {
+                    lastStatePub = Date.now();
+                    publishKocokState({ phase: 'RACING', timeLeft: Math.ceil(remainSec), duration: kcDurationSec, icon: getKcIcon() });
+                }
+
+                if (remainMs <= 0) {
+                    finishKocokRace();
+                }
+            }, 160);
+        }
+
+        function stopKocokEarly() {
+            if (kcPhase === 'RACING' || kcPhase === 'COUNTDOWN') {
+                finishKocokRace();
+            }
+        }
+
+        function finishKocokRace() {
+            clearAllKocokTimers();
+            kcPhase = 'FINISHED';
+            const sorted = getSortedKocokPlayers();
+            const ranks = sorted.map((p, idx) => ({ id: p.id, name: p.name, score: p.score, rank: idx + 1 }));
+
+            publishKocokState({ phase: 'FINISHED', ranks: ranks, icon: getKcIcon() });
+            sendToLED({ cmd: 'KOCOK_FINISH', top: sorted.slice(0, 6), icon: getKcIcon() });
+            refreshKocokVJMonitor();
+
+            // Save top 3 to winners log
+            if (sorted.length > 0) {
+                const winners = JSON.parse(localStorage.getItem('fgas_winners') || "[]");
+                const w1 = sorted[0] ? `${sorted[0].name} (${sorted[0].score})` : '-';
+                const w2 = sorted[1] ? `${sorted[1].name} (${sorted[1].score})` : '-';
+                const w3 = sorted[2] ? `${sorted[2].name} (${sorted[2].score})` : '-';
+                winners.push(`GAMES KOCOK-KOCOK<br><span class='text-white mt-1 block font-normal text-[10px]'>1st: ${w1} &bull; 2nd: ${w2} &bull; 3rd: ${w3}</span>`);
+                localStorage.setItem('fgas_winners', JSON.stringify(winners));
+            }
+        }
+
+        // ============================================================
+        // INTEGRATED MOBILE PLAYER LOGIC (?play=kocok&room=FGAS-XXX)
+        // ============================================================
+        let kcpRoomId = (_pageParams.get('room') || '').trim().toUpperCase();
+        let kcpBrokerIdx = parseInt(_pageParams.get('b') || '0', 10);
+        if (isNaN(kcpBrokerIdx) || kcpBrokerIdx < 0 || kcpBrokerIdx >= KC_BROKERS.length) kcpBrokerIdx = 0;
+
+        const kcpPlayerId = 'P_' + Math.random().toString(36).substring(2, 9);
+        let kcpPlayerName = '';
+        let kcpClient = null;
+        let kcpPhase = 'JOIN';
+        let kcpScore = 0;
+        let kcpLastSent = -1;
+        let kcpSensorActive = false;
+        let kcpLastShake = 0;
+        let kcpLastTap = 0;
+        let kcpLastX = null, kcpLastY = null, kcpLastZ = null;
+        let kcpSendTimer = null;
+
+        function kcpSetBadge(state, label) {
+            const dot = document.getElementById('kcp-conn-dot');
+            const txt = document.getElementById('kcp-conn-text');
+            if (txt) txt.innerText = label;
+            if (!dot) return;
+            if (state === 'ok') dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+            else if (state === 'err') dot.className = 'w-2 h-2 rounded-full bg-red-500';
+            else dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
+        }
+
+        function kcpShowScreen(name) {
+            ['join', 'lobby', 'countdown', 'race', 'finish'].forEach(s => {
+                const el = document.getElementById('kcp-screen-' + s);
+                if (el) el.classList.add('hidden');
+            });
+            const tgt = document.getElementById('kcp-screen-' + name);
+            if (tgt) tgt.classList.remove('hidden');
+        }
+
+        async function kcpRequestSensor() {
+            const stEl = document.getElementById('kcp-sensor-text');
+            try {
+                if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                    const perm = await DeviceMotionEvent.requestPermission();
+                    if (perm === 'granted') {
+                        kcpAttachMotion();
+                        if (stEl) stEl.innerHTML = '<b class="text-emerald-400">Sensor Kocok HP Aktif!</b> (Goyangkan HP cepat saat mulai)';
+                    } else {
+                        if (stEl) stEl.innerHTML = '<b class="text-amber-300">Sensor tidak diizinkan.</b> Gunakan tombol TAP cepat di layar!';
+                    }
+                } else if ('DeviceMotionEvent' in window) {
+                    kcpAttachMotion();
+                    if (stEl) stEl.innerHTML = '<b class="text-emerald-400">Sensor Kocok HP Aktif!</b> (Bisa kocok HP atau TAP layar)';
+                } else {
+                    if (stEl) stEl.innerHTML = '<b class="text-amber-300">Mode TAP Layar Aktif!</b> Tekan layar secepatnya saat mulai.';
+                }
+            } catch (e) {
+                if (stEl) stEl.innerHTML = '<b class="text-amber-300">Mode TAP Layar siap!</b> Tekan tombol besar saat balapan dimulai.';
+            }
+        }
+
+        function kcpAttachMotion() {
+            if (kcpSensorActive) return;
+            kcpSensorActive = true;
+            window.addEventListener('devicemotion', (e) => {
+                if (kcpPhase !== 'RACING') return;
+                const now = Date.now();
+                if (now - kcpLastShake < 85) return;
+                const acc = e.acceleration;
+                if (acc && acc.x !== null && (Math.abs(acc.x) > 0.1 || Math.abs(acc.y) > 0.1 || Math.abs(acc.z) > 0.1)) {
+                    const mag = Math.sqrt(acc.x * acc.x + acc.y * acc.y + acc.z * acc.z);
+                    if (mag > 11.5) { kcpLastShake = now; kcpAddPoint(1); }
+                    return;
+                }
+                const accG = e.accelerationIncludingGravity;
+                if (accG && accG.x !== null) {
+                    if (kcpLastX !== null) {
+                        const delta = Math.abs(accG.x - kcpLastX) + Math.abs(accG.y - kcpLastY) + Math.abs(accG.z - kcpLastZ);
+                        if (delta > 19) { kcpLastShake = now; kcpAddPoint(1); }
+                    }
+                    kcpLastX = accG.x; kcpLastY = accG.y; kcpLastZ = accG.z;
+                }
+            }, true);
+        }
+
+        function kcpManualTap() {
+            if (kcpPhase !== 'RACING') return;
+            const now = Date.now();
+            if (now - kcpLastTap < 110) return;
+            kcpLastTap = now;
+            kcpAddPoint(1);
+        }
+
+        function kcpAddPoint(pts) {
+            kcpScore += pts;
+            const scEl = document.getElementById('kcp-race-score');
+            if (scEl) scEl.innerText = kcpScore;
+            const z = document.getElementById('kcp-tap-zone');
+            if (z) {
+                z.classList.add('flash-hit');
+                setTimeout(() => z.classList.remove('flash-hit'), 70);
+            }
+            if (kcpScore % 5 === 0 && navigator.vibrate) {
+                try { navigator.vibrate(25); } catch(e){}
+            }
+        }
+
+        function kcpPublishJoin() {
+            if (!kcpClient || !kcpClient.connected || !kcpPlayerName) return;
+            kcpClient.publish(`fgas2026_kocok/${kcpRoomId}/join`, JSON.stringify({ id: kcpPlayerId, name: kcpPlayerName }));
+        }
+
+        function kcpPublishScore(force) {
+            if (!kcpClient || !kcpClient.connected || !kcpPlayerName) return;
+            if (!force && kcpScore === kcpLastSent) return;
+            kcpLastSent = kcpScore;
+            kcpClient.publish(`fgas2026_kocok/${kcpRoomId}/score`, JSON.stringify({ id: kcpPlayerId, name: kcpPlayerName, score: kcpScore }));
+        }
+
+        function kcpStopLoop() {
+            if (kcpSendTimer) { clearInterval(kcpSendTimer); kcpSendTimer = null; }
+        }
+
+        function kcpStartLoop() {
+            kcpStopLoop();
+            kcpSendTimer = setInterval(() => {
+                if (kcpPhase === 'RACING') kcpPublishScore(false);
+            }, 220);
+        }
+
+        function kcpHandleHostState(st) {
+            if (!st || !st.phase) return;
+            if (st.icon) {
+                const ic = document.getElementById('kcp-lobby-icon');
+                if (ic) ic.innerText = st.icon;
+            }
+            if (st.phase === 'LOBBY') {
+                kcpPhase = 'LOBBY'; kcpScore = 0; kcpLastSent = -1;
+                kcpStopLoop(); kcpShowScreen('lobby'); kcpPublishJoin();
+            } else if (st.phase === 'COUNTDOWN') {
+                kcpPhase = 'COUNTDOWN'; kcpScore = 0; kcpLastSent = -1;
+                document.getElementById('kcp-cd-number').innerText = st.count || 3;
+                kcpShowScreen('countdown');
+                if (navigator.vibrate) try { navigator.vibrate(40); } catch(e){}
+            } else if (st.phase === 'RACING') {
+                if (kcpPhase !== 'RACING') {
+                    kcpPhase = 'RACING';
+                    document.getElementById('kcp-race-score').innerText = kcpScore;
+                    document.getElementById('kcp-race-tag').innerText = 'PEMAIN: ' + kcpPlayerName;
+                    kcpShowScreen('race');
+                    kcpStartLoop();
+                    if (navigator.vibrate) try { navigator.vibrate([80, 40, 80]); } catch(e){}
+                }
+                if (st.timeLeft !== undefined) {
+                    document.getElementById('kcp-race-timer').innerText = Math.max(0, Math.ceil(st.timeLeft)) + 's';
+                }
+            } else if (st.phase === 'FINISHED') {
+                kcpPhase = 'FINISHED';
+                kcpPublishScore(true); kcpStopLoop();
+                document.getElementById('kcp-fin-score').innerText = kcpScore;
+                let rankText = 'Terima kasih sudah ikut seru-seruan!';
+                let emoji = '🏁', title = 'WAKTU HABIS!';
+                if (Array.isArray(st.ranks)) {
+                    const me = st.ranks.find(r => r.id === kcpPlayerId);
+                    if (me) {
+                        if (me.rank === 1) { emoji = '🏆'; title = 'JUARA 1!!'; rankText = 'LUAR BIASA! Kamu yang tercepat (#1)!'; }
+                        else if (me.rank === 2) { emoji = '🥈'; title = 'JUARA 2!'; rankText = 'KEREN! Kamu finish di posisi #2!'; }
+                        else if (me.rank === 3) { emoji = '🥉'; title = 'JUARA 3!'; rankText = 'MANTAP! Kamu naik podium #3!'; }
+                        else { rankText = `Kamu finish di peringkat #${me.rank} dari ${st.ranks.length} pemain!`; }
+                    }
+                }
+                document.getElementById('kcp-fin-emoji').innerText = emoji;
+                document.getElementById('kcp-fin-title').innerText = title;
+                document.getElementById('kcp-fin-rank').innerText = rankText;
+                kcpShowScreen('finish');
+                if (navigator.vibrate) try { navigator.vibrate(200); } catch(e){}
+            }
+        }
+
+        function kcpConnectMQTT() {
+            const broker = KC_BROKERS[kcpBrokerIdx];
+            kcpSetBadge('wait', 'Menghubungkan...');
+            kcpClient = mqtt.connect(broker.url, {
+                clientId: 'fgas_p_' + kcpPlayerId + '_' + Math.floor(Math.random() * 999),
+                clean: true,
+                connectTimeout: 8000,
+                reconnectPeriod: 2000
+            });
+            kcpClient.on('connect', () => {
+                kcpSetBadge('ok', 'Terhubung');
+                kcpClient.subscribe(`fgas2026_kocok/${kcpRoomId}/state`);
+                kcpPublishJoin();
+            });
+            kcpClient.on('reconnect', () => kcpSetBadge('wait', 'Menyambung ulang...'));
+            kcpClient.on('error', () => kcpSetBadge('err', 'Gangguan jaringan'));
+            kcpClient.on('message', (topic, buf) => {
+                try { kcpHandleHostState(JSON.parse(buf.toString())); } catch(e){}
+            });
+        }
+
+        async function kcpJoinGame() {
+            const nameVal = document.getElementById('kcp-player-name').value.trim().toUpperCase();
+            if (!nameVal) { alert('Ketik nama panggilanmu dulu!'); return; }
+            if (!kcpRoomId) {
+                kcpRoomId = document.getElementById('kcp-room-input').value.trim().toUpperCase();
+                if (!kcpRoomId) { alert('Masukkan kode room dari layar LED!'); return; }
+                document.getElementById('kcp-footer-room').innerText = kcpRoomId;
+            }
+            kcpPlayerName = nameVal.substring(0, 16);
+            localStorage.setItem('fgas_kocok_nick', kcpPlayerName);
+            document.getElementById('kcp-lobby-name').innerText = kcpPlayerName;
+            await kcpRequestSensor();
+            if ('wakeLock' in navigator) {
+                try { await navigator.wakeLock.request('screen'); } catch(e){}
+            }
+            kcpPhase = 'LOBBY';
+            kcpShowScreen('lobby');
+            kcpConnectMQTT();
+        }
+
+        // Switch instantly to Mobile Player UI if opened via QR Code (?play=kocok)
+        if (IS_KOCOK_PLAYER) {
+            document.title = 'Games Kocok-Kocok - FGAS 2026';
+            document.body.className = 'kocok-player-mode';
+            const vjRoot = document.getElementById('vj-mode-root');
+            const kpRoot = document.getElementById('kocok-player-root');
+            if (vjRoot) vjRoot.remove();
+            if (kpRoot) kpRoot.classList.remove('hidden');
+            if (!kcpRoomId) {
+                document.getElementById('kcp-room-box').classList.remove('hidden');
+            } else {
+                document.getElementById('kcp-room-input').value = kcpRoomId;
+                document.getElementById('kcp-footer-room').innerText = kcpRoomId;
+            }
+            const savedNick = localStorage.getItem('fgas_kocok_nick') || '';
+            if (savedNick) document.getElementById('kcp-player-name').value = savedNick;
         }
     </script>
 </body>
