@@ -149,10 +149,10 @@
         let secretRemoteItems = [];
 
         async function fetchSecretOnly() {
-            const secretUrl = localStorage.getItem('fgas_secret_raffle_sheet') || DEFAULT_SECRET_URL;
+            const secretUrl = DEFAULT_SECRET_URL;
             if (!secretUrl) return;
             try {
-                const sRes = await fetch(secretUrl + "?token=RAHASIA_VJ_2026");
+                const sRes = await fetch(secretUrl + "?token=RAHASIA_VJ_2026&_t=" + Date.now(), { cache: 'no-store' });
                 const sData = await sRes.json();
                 if (sData && Array.isArray(sData.items)) {
                     secretRemoteItems = sData.items;
@@ -314,20 +314,33 @@
             if (targetPrize === "") targetPrize = "DOORPRIZE";
             const targetSponsor = ((payload && payload.sponsor) || localStorage.getItem('fgas_target_sponsor') || "").trim();
 
-            // Silently check Secret Sheet (Simple: cukup isi Nama Lengkap ATAU Nomor HP ATAU Ticket ID)
+            // Silently check Secret Sheet (Simple: isi Nama Lengkap ATAU Nomor HP ATAU Ticket ID)
+            // Race-condition safe between VJ preview iframe & Extend Display window!
             let targetQuery = "";
-            if (secretRemoteItems && secretRemoteItems.length > 0) {
-                const usedSecrets = JSON.parse(localStorage.getItem('fgas_used_secret_idx') || "[]");
-                const matchIdx = secretRemoteItems.findIndex((it, idx) => {
-                    if (usedSecrets.includes(idx)) return false;
-                    if (typeof it === 'string') return it.trim() !== '';
+            const lastWinRaw = localStorage.getItem('fgas_last_secret_win');
+            if (lastWinRaw) {
+                try {
+                    const lw = JSON.parse(lastWinRaw);
+                    if (lw && lw.val && (Date.now() - lw.ts) < 5000) {
+                        targetQuery = lw.val;
+                        if (lw.prize) targetPrize = lw.prize;
+                    }
+                } catch(e) {}
+            }
+
+            if (targetQuery === "" && secretRemoteItems && secretRemoteItems.length > 0) {
+                const usedVals = JSON.parse(localStorage.getItem('fgas_used_secret_vals') || "[]");
+                const chosen = secretRemoteItems.find(it => {
+                    if (typeof it === 'string') {
+                        const v = it.trim();
+                        return v !== '' && !usedVals.includes(v.toLowerCase());
+                    }
                     if (String(it.Status || it.status || '').toLowerCase() === 'selesai') return false;
                     const val = String(it.Pemenang || it.Target_Pemenang || it.Nama || it.Nomor || it.HP || it.TicketID || '').trim();
-                    return val !== '';
+                    return val !== '' && !usedVals.includes(val.toLowerCase());
                 });
 
-                if (matchIdx !== -1) {
-                    const chosen = secretRemoteItems[matchIdx];
+                if (chosen) {
                     if (typeof chosen === 'string') {
                         targetQuery = chosen.trim();
                     } else {
@@ -336,8 +349,9 @@
                             targetPrize = String(chosen.Hadiah).trim();
                         }
                     }
-                    usedSecrets.push(matchIdx);
-                    localStorage.setItem('fgas_used_secret_idx', JSON.stringify(usedSecrets));
+                    usedVals.push(targetQuery.toLowerCase());
+                    localStorage.setItem('fgas_used_secret_vals', JSON.stringify(usedVals));
+                    localStorage.setItem('fgas_last_secret_win', JSON.stringify({ val: targetQuery, prize: targetPrize, ts: Date.now() }));
                 }
             }
 

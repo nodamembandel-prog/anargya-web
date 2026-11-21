@@ -145,6 +145,8 @@
             if(confirm("Yakin ingin mereset riwayat pemenang undian?")) {
                 localStorage.removeItem('fgas_drawn_tickets');
                 localStorage.removeItem('fgas_used_secret_idx');
+                localStorage.removeItem('fgas_used_secret_vals');
+                localStorage.removeItem('fgas_last_secret_win');
                 alert("Berhasil direset!");
             }
         }
