@@ -77,6 +77,21 @@
             transform: scale(0.9);
             color: #64748b;
         }
+        @keyframes kineticPop {
+            0% { opacity: 0; transform: scale(0.75) translateY(25px); filter: blur(6px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+        }
+        .kinetic-enter {
+            animation: kineticPop 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .kr-word {
+            display: inline-block;
+            margin: 0.12em 0.18em;
+            line-height: 1.05;
+            font-weight: 900;
+            text-transform: uppercase;
+            transition: transform 0.3s ease;
+        }
     </style>
 </head>
 <body class="flex flex-col justify-between bg-cyber relative select-none" ondblclick="toggleFS()">
@@ -153,6 +168,18 @@
                 <p id="kr-next-line" class="lyric-line text-[2vw] font-bold min-h-[2.8vw]"></p>
             </div>
         </div>
+    </div>
+
+    <!-- MODE 4B: KARAOKE FULL LAYAR / RANDOM UKURAN FONT (KINETIC VJ) -->
+    <div id="karaoke-full-view" class="hidden fixed inset-0 z-50 bg-cyber flex flex-col justify-between items-center p-8 md:p-14">
+        <div class="w-full flex justify-between items-center opacity-60 text-[1.1vw] tracking-[0.3em] uppercase">
+            <span id="krf-title" class="text-cyan-300 font-bold truncate max-w-[60%]">JUDUL LAGU</span>
+            <span id="krf-artist" class="text-orange-400 font-bold truncate max-w-[35%] text-right">PENYANYI</span>
+        </div>
+        <div id="krf-stage" class="flex-grow w-full flex flex-col items-center justify-center text-center px-4 overflow-hidden">
+            <div id="krf-curr-box" class="w-full leading-tight"></div>
+        </div>
+        <div id="krf-next-line" class="w-full text-center text-[1.6vw] text-slate-400/60 font-bold tracking-wider truncate min-h-[2.2vw]"></div>
     </div>
 
     <div id="sponsor-logos" class="w-full flex justify-center items-center gap-8 z-20 px-10 pb-6 flex-wrap"></div>
@@ -265,16 +292,18 @@
             if(audioCtx.state === 'suspended') audioCtx.resume();
         }
 
-        function playDrumroll() {
+        function playDrumroll(durationSec) {
+            const dur = Math.max(2, parseFloat(durationSec) || 15);
             initAudio();
             if(oscillator) return;
             oscillator = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
             oscillator.type = 'square';
             oscillator.frequency.setValueAtTime(50, audioCtx.currentTime);
-            oscillator.frequency.linearRampToValueAtTime(250, audioCtx.currentTime + 15);
+            oscillator.frequency.linearRampToValueAtTime(260, audioCtx.currentTime + dur);
             gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            for(let i = 0; i < 150; i++) {
+            const beats = Math.ceil(dur * 10);
+            for(let i = 0; i < beats; i++) {
                 gainNode.gain.setValueAtTime(0.35, audioCtx.currentTime + (i * 0.1));
                 gainNode.gain.setValueAtTime(0.01, audioCtx.currentTime + (i * 0.1) + 0.05);
             }
@@ -304,6 +333,7 @@
             document.getElementById('podium-view').classList.add('hidden');
             document.getElementById('tebak-gambar-view').classList.add('hidden');
             document.getElementById('karaoke-view').classList.add('hidden');
+            document.getElementById('karaoke-full-view').classList.add('hidden');
             document.getElementById('raffle-view').classList.remove('hidden');
         }
 
@@ -372,13 +402,19 @@
             document.getElementById('winner-name').style.textShadow = '0 0 25px rgba(6,182,212,0.8)';
             document.getElementById('winner-ticket').classList.add('opacity-0');
 
-            try { playDrumroll(); } catch(e){}
+            let durationSec = (payload && payload.durationSec !== undefined)
+                ? parseFloat(payload.durationSec)
+                : parseFloat(localStorage.getItem('fgas_raffle_seconds') || "15");
+            if (isNaN(durationSec) || durationSec < 2) durationSec = 2;
+            if (durationSec > 120) durationSec = 120;
+
+            try { playDrumroll(durationSec); } catch(e){}
 
             interval = setInterval(() => {
                 document.getElementById('winner-name').innerText = participantNames[Math.floor(Math.random() * participantNames.length)];
             }, 60);
 
-            setTimeout(() => { stopRaffle(stock, payload); }, 15000);
+            setTimeout(() => { stopRaffle(stock, payload); }, durationSec * 1000);
         }
 
         function normalizePhone(p) {
@@ -519,6 +555,7 @@
             document.getElementById('raffle-view').classList.add('hidden');
             document.getElementById('tebak-gambar-view').classList.add('hidden');
             document.getElementById('karaoke-view').classList.add('hidden');
+            document.getElementById('karaoke-full-view').classList.add('hidden');
             document.getElementById('podium-view').classList.remove('hidden');
             document.getElementById('podium-lomba').innerText = (payload.lomba || 'LOMBA FGAS 2026').toUpperCase();
             document.getElementById('n1').innerText = payload.j1 || '-';
@@ -562,6 +599,7 @@
             document.getElementById('raffle-view').classList.add('hidden');
             document.getElementById('podium-view').classList.add('hidden');
             document.getElementById('karaoke-view').classList.add('hidden');
+            document.getElementById('karaoke-full-view').classList.add('hidden');
             document.getElementById('tebak-gambar-view').classList.remove('hidden');
 
             const imgData = payload.image || localStorage.getItem('fgas_tg_image') || '';
@@ -605,18 +643,69 @@
             confetti({ particleCount: 180, spread: 120, origin: { y: 0.4 } });
         }
 
-        // --- KARAOKE / LIRIK LAGU LOGIC ---
+        // --- KARAOKE / LIRIK LAGU LOGIC (NORMAL / FULLSCREEN / RANDOM KINETIC) ---
         function showKaraoke(payload) {
             document.getElementById('raffle-view').classList.add('hidden');
             document.getElementById('podium-view').classList.add('hidden');
             document.getElementById('tebak-gambar-view').classList.add('hidden');
-            document.getElementById('karaoke-view').classList.remove('hidden');
 
-            if (payload.title !== undefined) document.getElementById('kr-song-title').innerText = (payload.title || 'KARAOKE').toUpperCase();
-            if (payload.artist !== undefined) document.getElementById('kr-song-artist').innerText = (payload.artist || '').toUpperCase();
-            if (payload.prev !== undefined) document.getElementById('kr-prev-line').innerText = payload.prev;
-            if (payload.curr !== undefined) document.getElementById('kr-curr-line').innerText = payload.curr;
-            if (payload.next !== undefined) document.getElementById('kr-next-line').innerText = payload.next;
+            const mode = payload.mode || localStorage.getItem('fgas_kr_mode') || 'normal';
+            const title = (payload.title || 'KARAOKE').toUpperCase();
+            const artist = (payload.artist || '').toUpperCase();
+            const prev = payload.prev || '';
+            const curr = payload.curr || '♪ ♪ ♪';
+            const next = payload.next || '';
+
+            if (mode === 'normal') {
+                document.getElementById('karaoke-full-view').classList.add('hidden');
+                document.getElementById('karaoke-view').classList.remove('hidden');
+                document.getElementById('kr-song-title').innerText = title;
+                document.getElementById('kr-song-artist').innerText = artist;
+                document.getElementById('kr-prev-line').innerText = prev;
+                document.getElementById('kr-curr-line').innerText = curr;
+                document.getElementById('kr-next-line').innerText = next;
+                return;
+            }
+
+            // Fullscreen or Random Kinetic mode
+            document.getElementById('karaoke-view').classList.add('hidden');
+            document.getElementById('karaoke-full-view').classList.remove('hidden');
+            document.getElementById('krf-title').innerText = title;
+            document.getElementById('krf-artist').innerText = artist;
+            document.getElementById('krf-next-line').innerText = next ? ('NEXT: ' + next) : '';
+
+            const box = document.getElementById('krf-curr-box');
+            box.className = 'w-full leading-tight kinetic-enter';
+            // Force reflow so animation replays cleanly every line
+            void box.offsetWidth;
+
+            if (mode === 'fullscreen') {
+                box.style.textAlign = 'center';
+                const len = curr.length;
+                const fs = len > 42 ? 'clamp(2.4rem, 5.2vw, 5.8rem)' : (len > 24 ? 'clamp(3rem, 6.8vw, 7.5rem)' : 'clamp(3.6rem, 8.5vw, 9.5rem)');
+                box.innerHTML = `<div style="font-size:${fs}; color:#38bdf8; font-weight:900; text-transform:uppercase; line-height:1.15; text-shadow:0 0 35px rgba(56,189,248,0.9), 0 0 12px rgba(255,255,255,0.6);">${curr.replace(/</g,'&lt;')}</div>`;
+            } else {
+                // Random kinetic font sizes, neon stage colors, subtle tilt & alignment!
+                const aligns = ['center', 'left', 'right'];
+                box.style.textAlign = aligns[Math.floor(Math.random() * aligns.length)];
+                const palette = [
+                    { c: '#ffffff', g: 'rgba(255,255,255,0.75)' },
+                    { c: '#38bdf8', g: 'rgba(56,189,248,0.9)' },
+                    { c: '#facc15', g: 'rgba(250,204,21,0.85)' },
+                    { c: '#fb923c', g: 'rgba(251,146,60,0.85)' },
+                    { c: '#f472b6', g: 'rgba(244,114,182,0.85)' },
+                    { c: '#4ade80', g: 'rgba(74,222,128,0.85)' }
+                ];
+                const words = curr.split(/\s+/).filter(Boolean);
+                const scaleDown = words.length > 8 ? 0.72 : (words.length > 5 ? 0.85 : 1.0);
+                box.innerHTML = words.map(w => {
+                    const sizeVw = ((4.2 + Math.random() * 5.2) * scaleDown).toFixed(2);
+                    const rot = (Math.random() * 6 - 3).toFixed(1);
+                    const p = palette[Math.floor(Math.random() * palette.length)];
+                    const safeW = w.replace(/</g, '&lt;');
+                    return `<span class="kr-word" style="font-size:${sizeVw}vw; color:${p.c}; transform:rotate(${rot}deg); text-shadow:0 0 28px ${p.g};">${safeW}</span>`;
+                }).join(' ');
+            }
         }
 
         function handleCommand(msg) {
