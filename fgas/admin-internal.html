@@ -168,12 +168,24 @@
                 </div>
 
                 <!-- REMOTE SHEET RAHASIA (KHUSUS MASTER ADMIN - TERSEMBUNYI DARI VJ) -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-300">
-                    <h2 class="font-bold text-sm mb-1 text-gray-700"><i class="fas fa-user-secret mr-2"></i>Konfigurasi Sheet Undian Rahasia</h2>
-                    <p class="text-[11px] text-gray-500 mb-3">Tersembunyi dari operator VJ. Tempel URL Web App Sheet Rahasia di sini:</p>
-                    <div class="flex gap-2">
-                        <input type="text" id="secret-sheet-url" class="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-xs" placeholder="https://script.google.com/macros/s/.../exec">
-                        <button onclick="saveSecretSheetUrl()" class="bg-gray-800 text-white px-3 py-2 rounded-lg text-xs font-bold shrink-0 hover:bg-gray-900">Simpan</button>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-purple-300">
+                    <h2 class="font-bold text-sm mb-1 text-purple-800"><i class="fas fa-user-secret mr-2"></i>Kontrol Pemenang Rahasia (V49)</h2>
+                    <p class="text-[11px] text-gray-500 mb-3">Tersembunyi dari VJ. Bisa pakai <b>Link Google Sheet biasa</b> (Share: Siapa saja bisa lihat) <b>ATAU</b> URL Apps Script <code>/exec</code>:</p>
+                    <div class="space-y-2.5">
+                        <div class="flex gap-1.5">
+                            <input type="text" id="secret-sheet-url" class="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-xs" placeholder="Tempel Link Google Sheet Rahasia atau URL /exec">
+                            <button onclick="saveSecretSheetUrl()" class="bg-purple-700 text-white px-3 py-2 rounded-lg text-xs font-bold shrink-0 hover:bg-purple-800">Simpan</button>
+                        </div>
+                        <button onclick="testSecretSheet()" id="btn-test-secret" class="w-full bg-slate-800 text-white py-2 rounded-lg text-xs font-bold hover:bg-slate-900 transition"><i class="fas fa-vial mr-1"></i> TES KONEKSI SHEET RAHASIA</button>
+                        <div id="secret-test-result" class="hidden text-[11px] p-2.5 rounded-lg border font-semibold"></div>
+                        <div class="border-t pt-2.5 mt-2">
+                            <label class="block text-[11px] font-bold text-gray-600 mb-1">Atau Set Cepat Langsung (Tanpa Sheet - Khusus Laptop Ini):</label>
+                            <div class="flex gap-1.5">
+                                <input type="text" id="quick-secret-winner" class="w-full p-2 bg-purple-50 border border-purple-200 rounded-lg text-xs font-bold" placeholder="Ketik FGAS-650603 / Nama / No HP">
+                                <button onclick="saveQuickSecret()" class="bg-green-600 text-white px-3 py-2 rounded-lg text-xs font-bold shrink-0 hover:bg-green-700">Set</button>
+                                <button onclick="clearQuickSecret()" class="bg-red-500 text-white px-2.5 py-2 rounded-lg text-xs font-bold shrink-0 hover:bg-red-600" title="Hapus"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -207,7 +219,8 @@
             document.getElementById('doorprize-stock').value = localStorage.getItem('fgas_doorprize_stock') || "";
             document.getElementById('wa-1').value = localStorage.getItem('fgas_wa_1') || "";
             document.getElementById('wa-2').value = localStorage.getItem('fgas_wa_2') || "";
-            const secEl = document.getElementById('secret-sheet-url'); if(secEl) secEl.value = localStorage.getItem('fgas_secret_raffle_sheet') || '';
+            const secEl = document.getElementById('secret-sheet-url'); if(secEl) secEl.value = localStorage.getItem('fgas_secret_raffle_sheet') || DEFAULT_SECRET_FALLBACK;
+            const qEl = document.getElementById('quick-secret-winner'); if(qEl) qEl.value = localStorage.getItem('fgas_quick_secret_winner') || '';
             document.getElementById('chk-close-pengunjung').checked = localStorage.getItem('fgas_close_pengunjung') === 'true';
             renderData();
             renderQuotaInputs();
@@ -353,11 +366,93 @@
             } catch(e) { console.log("Sync settings error:", e); }
         }
 
+        const DEFAULT_SECRET_FALLBACK = atob('aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J3QTVLNmt4TnUxMXJ5MjJQMzNkZmRKeXkwT3ZCOHJteEVTbGRqc0wxWVdMbHVNTEozLWlVaFIwbmZ0dm1UQmtidmEvZXhlYw==');
+
+        function saveQuickSecret() {
+            const val = document.getElementById('quick-secret-winner').value.trim();
+            localStorage.setItem('fgas_quick_secret_winner', val);
+            alert(val ? ('Pemenang cepat diset: ' + val + ' (langsung aktif di layar LED!)') : 'Pemenang cepat dikosongkan.');
+        }
+
+        function clearQuickSecret() {
+            document.getElementById('quick-secret-winner').value = '';
+            localStorage.removeItem('fgas_quick_secret_winner');
+            alert('Pemenang cepat dihapus. Undian kembali ke Sheet Rahasia / Acak Normal.');
+        }
+
         async function saveSecretSheetUrl() {
             const url = document.getElementById('secret-sheet-url').value.trim();
             localStorage.setItem('fgas_secret_raffle_sheet', url);
             await syncSettingsToSheet({ fgas_secret_raffle_sheet: url });
-            alert('URL Sheet Rahasia berhasil disimpan & disinkronkan (tersembunyi dari VJ)!');
+            alert('Link Sheet Rahasia berhasil disimpan! Klik TES KONEKSI untuk memastikan data terbaca.');
+            testSecretSheet();
+        }
+
+        async function testSecretSheet() {
+            const url = document.getElementById('secret-sheet-url').value.trim() || localStorage.getItem('fgas_secret_raffle_sheet') || DEFAULT_SECRET_FALLBACK;
+            const resBox = document.getElementById('secret-test-result');
+            resBox.className = 'text-[11px] p-2.5 rounded-lg border bg-yellow-50 border-yellow-300 text-yellow-800 font-semibold';
+            resBox.innerText = 'Mengecek koneksi ke Google Sheet Rahasia...';
+            resBox.classList.remove('hidden');
+
+            try {
+                let items = [];
+                const sheetMatch = url.match(/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+                if (sheetMatch) {
+                    const gRes = await fetch(`https://docs.google.com/spreadsheets/d/${sheetMatch[1]}/gviz/tq?tqx=out:json&_t=${Date.now()}`);
+                    const gText = await gRes.text();
+                    const s = gText.indexOf('{'), e = gText.lastIndexOf('}');
+                    const json = JSON.parse(gText.substring(s, e + 1));
+                    const cols = (json.table.cols || []).map(c => String(c.label || '').trim());
+                    const rows = (json.table.rows || []).map(r => (r.c || []).map(cell => cell && cell.v != null ? String(cell.v).trim() : ''));
+                    let headers = cols, startIdx = 0;
+                    if (!cols.some(c => c !== '') && rows.length > 0) { headers = rows[0]; startIdx = 1; }
+                    for (let i = startIdx; i < rows.length; i++) {
+                        if (!rows[i].some(x => x !== '')) continue;
+                        const obj = {};
+                        rows[i].forEach((v, idx) => obj[headers[idx] || ('Col'+idx)] = v);
+                        items.push(obj);
+                    }
+                } else {
+                    const sep = url.includes('?') ? '&' : '?';
+                    const r = await fetch(url + sep + 'token=RAHASIA_VJ_2026&_t=' + Date.now());
+                    const d = await r.json();
+                    items = Array.isArray(d.items) ? d.items : (Array.isArray(d) ? d : []);
+                }
+
+                // Find first active target
+                let targetVal = '';
+                for (const it of items) {
+                    const entries = Object.entries(it);
+                    let st = '', v = '';
+                    for (const [k, rv] of entries) {
+                        const kl = k.toLowerCase();
+                        if (kl.includes('status')) st = String(rv||'').toLowerCase().trim();
+                        else if ((kl.includes('target')||kl.includes('pemenang')||kl.includes('nama')||kl.includes('nomor')||kl.includes('hp')||kl.includes('ticket')) && String(rv||'').trim()) v = String(rv).trim();
+                    }
+                    if (st === 'selesai' || st === 'done') continue;
+                    if (!v) {
+                        const vals = entries.filter(([k]) => !k.toLowerCase().includes('status')).map(([,x]) => String(x||'').trim()).filter(Boolean);
+                        v = vals.find(x => /^fgas-/i.test(x)) || vals.find(x => !/^\d{1,3}$/.test(x)) || '';
+                    }
+                    if (v) { targetVal = v; break; }
+                }
+
+                if (targetVal) {
+                    const allV = JSON.parse(localStorage.getItem('fgas_visitors')) || [];
+                    const qL = targetVal.toLowerCase();
+                    const f = allV.find(x => String(x.TicketID||x.ticketId||'').toLowerCase().trim() === qL || String(x.Nama||x.nama||'').toLowerCase().includes(qL));
+                    const matchInfo = f ? ` ➔ Cocok: ${String(f.Nama||f.nama).toUpperCase()} (${f.TicketID||f.ticketId})` : ' (Tampil langsung apa adanya)';
+                    resBox.className = 'text-[11px] p-2.5 rounded-lg border bg-green-50 border-green-400 text-green-800 font-bold';
+                    resBox.innerText = 'BERHASIL! Target aktif: ' + targetVal + matchInfo;
+                } else {
+                    resBox.className = 'text-[11px] p-2.5 rounded-lg border bg-orange-50 border-orange-300 text-orange-800 font-bold';
+                    resBox.innerText = 'Terhubung ke Sheet, tapi belum ada baris pemenang aktif (items: ' + items.length + '). Pastikan sel Target Pemenang sudah diisi.';
+                }
+            } catch(err) {
+                resBox.className = 'text-[11px] p-2.5 rounded-lg border bg-red-50 border-red-400 text-red-800 font-bold';
+                resBox.innerText = 'GAGAL TERHUBUNG! Pastikan Google Sheet sudah di-Share "Siapa saja yang memiliki link (Pelihat)", lalu tempel link Sheet biasa di kotak atas dan klik Simpan.';
+            }
         }
 
         async function saveClosedStatus() {
