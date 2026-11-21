@@ -20,7 +20,7 @@
 
     <div id="vj-drawer" class="vj-panel fixed left-0 w-full p-5 border-t border-cyan-500/50 shadow-[0_-10px_30px_rgba(0,0,0,0.7)] z-50 flex flex-col gap-4" style="bottom: -84vh; height: 88vh;">
         <div class="flex flex-wrap justify-between items-center gap-2 border-b border-white/10 pb-2">
-            <h2 class="font-bold text-base md:text-lg text-cyan-400"><i class="fas fa-sliders-h mr-2"></i> VJ CONTROL PANEL <span class="text-xs bg-indigo-600 text-white px-2 py-0.5 rounded ml-1">V46.1 + KARAOKE</span></h2>
+            <h2 class="font-bold text-base md:text-lg text-cyan-400"><i class="fas fa-sliders-h mr-2"></i> VJ CONTROL PANEL <span class="text-xs bg-indigo-600 text-white px-2 py-0.5 rounded ml-1">V50 • FULL FEATURE</span></h2>
             <div class="flex items-center gap-2">
                 <button onclick="openExtendDisplay()" class="bg-orange-500 hover:bg-orange-400 text-slate-950 px-3 py-1.5 rounded-lg text-xs font-black transition shadow"><i class="fas fa-desktop mr-1"></i> BUKA LAYAR LED (EXTEND DISPLAY)</button>
                 <button onclick="toggleFullscreen()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition"><i class="fas fa-expand mr-1"></i> Fullscreen</button>
@@ -38,26 +38,35 @@
                 <p class="text-[11px] text-slate-400">Klik <b>BUKA LAYAR LED</b> di atas, geser jendela ke layar proyektor/LED lalu double-click untuk Fullscreen. Semua tombol di sini langsung mengontrol layar LED.</p>
                 <input type="text" id="target-prize" class="w-full p-3 bg-black/50 border border-white/20 rounded text-white text-sm" placeholder="Nama Hadiah (Cth: Sepeda Listrik, Kulkas, dll)">
                 <input type="text" id="target-sponsor" class="w-full p-3 bg-black/50 border border-white/20 rounded text-white text-sm" placeholder="Sponsor (opsional, cth: Bank Jateng)">
-                <div class="bg-black/40 border border-cyan-500/30 rounded-lg p-2.5">
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="text-[11px] font-bold text-cyan-300 uppercase"><i class="fas fa-clock mr-1"></i> Filter Durasi Input Pengunjung</label>
-                        <span id="eligible-count-badge" class="text-[10px] bg-cyan-900/70 text-cyan-200 px-2 py-0.5 rounded-full font-bold">0 Kupon Siap</span>
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+                    <div class="sm:col-span-7 bg-black/40 border border-cyan-500/30 rounded-lg p-2.5">
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-[10px] font-bold text-cyan-300 uppercase"><i class="fas fa-clock mr-1"></i> Filter Input</label>
+                            <span id="eligible-count-badge" class="text-[10px] bg-cyan-900/70 text-cyan-200 px-1.5 py-0.5 rounded-full font-bold">0 Kupon</span>
+                        </div>
+                        <select id="raffle-duration" onchange="updateEligibleCount()" class="w-full p-2 bg-slate-900 border border-white/20 rounded text-white text-xs font-bold">
+                            <option value="0">Semua Waktu</option>
+                            <option value="1">1 Jam Terakhir</option>
+                            <option value="2">2 Jam Terakhir</option>
+                            <option value="3">3 Jam Terakhir</option>
+                            <option value="4">4 Jam Terakhir</option>
+                            <option value="6">6 Jam Terakhir</option>
+                            <option value="12">12 Jam Terakhir</option>
+                            <option value="24">24 Jam Terakhir</option>
+                            <option value="48">48 Jam Terakhir</option>
+                        </select>
                     </div>
-                    <select id="raffle-duration" onchange="updateEligibleCount()" class="w-full p-2 bg-slate-900 border border-white/20 rounded text-white text-xs font-bold">
-                        <option value="0">Semua Waktu (Tanpa Batas)</option>
-                        <option value="1">1 Jam Terakhir</option>
-                        <option value="2">2 Jam Terakhir</option>
-                        <option value="3">3 Jam Terakhir</option>
-                        <option value="4">4 Jam Terakhir</option>
-                        <option value="6">6 Jam Terakhir</option>
-                        <option value="12">12 Jam Terakhir</option>
-                        <option value="24">24 Jam Terakhir</option>
-                        <option value="48">48 Jam Terakhir</option>
-                    </select>
+                    <div class="sm:col-span-5 bg-black/40 border border-orange-500/40 rounded-lg p-2.5">
+                        <label class="block text-[10px] font-bold text-orange-300 uppercase mb-1"><i class="fas fa-stopwatch mr-1"></i> Lama Putaran</label>
+                        <div class="flex items-center gap-1.5">
+                            <input type="number" id="raffle-seconds" min="2" max="120" value="15" oninput="updateSpinSecUI()" class="w-full p-1.5 bg-slate-900 border border-white/20 rounded text-white text-center text-sm font-black">
+                            <span class="text-[11px] font-bold text-slate-300 shrink-0">Detik</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3 pt-1">
                     <button onclick="setRaffle()" class="bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-bold text-xs transition">SET HADIAH KE LED</button>
-                    <button onclick="startRaffleOnLED()" class="bg-green-600 hover:bg-green-500 py-3 rounded-lg font-black text-xs transition shadow-[0_0_15px_rgba(34,197,94,0.5)]"><i class="fas fa-play mr-1"></i> MULAI UNDIAN (15 DTK)</button>
+                    <button id="btn-start-raffle" onclick="startRaffleOnLED()" class="bg-green-600 hover:bg-green-500 py-3 rounded-lg font-black text-xs transition shadow-[0_0_15px_rgba(34,197,94,0.5)]"><i class="fas fa-play mr-1"></i> MULAI UNDIAN (15 DTK)</button>
                 </div>
                 <button onclick="resetRaffleOnLED()" class="w-full bg-slate-700 hover:bg-slate-600 py-2.5 rounded-lg font-bold transition text-xs">RESET LAYAR UNDIAN</button>
             </div>
@@ -109,6 +118,14 @@
                         <option value="3000">Cepat (3d)</option>
                         <option value="4500" selected>Normal (4.5d)</option>
                         <option value="6000">Pelan (6d)</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2 bg-black/40 border border-indigo-400/30 rounded-lg p-2">
+                    <label class="text-[10px] font-bold text-indigo-300 uppercase shrink-0"><i class="fas fa-tv mr-1"></i> Gaya LED:</label>
+                    <select id="kr-mode" onchange="onKaraokeModeChange()" class="w-full p-1.5 bg-slate-900 border border-white/20 rounded text-white text-xs font-bold">
+                        <option value="normal">Mode Biasa (3 Baris Karaoke)</option>
+                        <option value="fullscreen">Full Layar (Teks Raksasa)</option>
+                        <option value="random">Full Layar + Random Ukuran Font (VJ Kinetic)</option>
                     </select>
                 </div>
                 <textarea id="kr-lyrics-box" rows="2" class="w-full p-2 bg-black/50 border border-white/20 rounded text-slate-200 text-[11px] font-mono" placeholder="Lirik otomatis muncul di sini (atau paste lirik manual)..."></textarea>
@@ -202,10 +219,35 @@
             if (badge) badge.innerText = eligible.length + ' Kupon Siap';
         }
 
+        function getSpinSeconds() {
+            const el = document.getElementById('raffle-seconds');
+            let sec = parseInt(el ? el.value : '15', 10);
+            if (isNaN(sec) || sec < 2) sec = 2;
+            if (sec > 120) sec = 120;
+            return sec;
+        }
+
+        function updateSpinSecUI() {
+            const sec = getSpinSeconds();
+            localStorage.setItem('fgas_raffle_seconds', String(sec));
+            const btn = document.getElementById('btn-start-raffle');
+            if (btn) btn.innerHTML = `<i class="fas fa-play mr-1"></i> MULAI UNDIAN (${sec} DTK)`;
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             const savedHours = localStorage.getItem('fgas_raffle_hours') || "0";
             const sel = document.getElementById('raffle-duration');
             if (sel) sel.value = savedHours;
+
+            const savedSec = localStorage.getItem('fgas_raffle_seconds') || "15";
+            const secEl = document.getElementById('raffle-seconds');
+            if (secEl) secEl.value = savedSec;
+            updateSpinSecUI();
+
+            const savedKrMode = localStorage.getItem('fgas_kr_mode') || "normal";
+            const krSel = document.getElementById('kr-mode');
+            if (krSel) krSel.value = savedKrMode;
+
             updateEligibleCount();
         });
 
@@ -224,11 +266,13 @@
             const prize = document.getElementById('target-prize').value.trim();
             const sponsor = document.getElementById('target-sponsor').value.trim();
             const hours = parseFloat(document.getElementById('raffle-duration').value || "0");
+            const durationSec = getSpinSeconds();
             localStorage.setItem('fgas_target_prize', prize);
             localStorage.setItem('fgas_target_sponsor', sponsor);
             localStorage.setItem('fgas_raffle_hours', String(hours));
+            localStorage.setItem('fgas_raffle_seconds', String(durationSec));
             updateEligibleCount();
-            sendToLED({ cmd: 'START_RAFFLE', prize: prize, sponsor: sponsor, hoursFilter: hours });
+            sendToLED({ cmd: 'START_RAFFLE', prize: prize, sponsor: sponsor, hoursFilter: hours, durationSec: durationSec });
         }
 
         function resetRaffleOnLED() {
@@ -385,14 +429,23 @@
             }
         }
 
+        function onKaraokeModeChange() {
+            const mode = document.getElementById('kr-mode').value || 'normal';
+            localStorage.setItem('fgas_kr_mode', mode);
+            if (krLines.length > 0) {
+                broadcastKaraokeLine();
+            }
+        }
+
         function broadcastKaraokeLine() {
             const title = document.getElementById('kr-title').value.trim() || 'KARAOKE';
             const artist = document.getElementById('kr-artist').value.trim();
+            const mode = document.getElementById('kr-mode') ? document.getElementById('kr-mode').value : 'normal';
             const prev = krIndex > 0 && krLines[krIndex - 1] ? krLines[krIndex - 1].text : '';
             const curr = krLines[krIndex] ? krLines[krIndex].text : '♪ ♪ ♪';
             const next = krLines[krIndex + 1] ? krLines[krIndex + 1].text : '';
             document.getElementById('kr-status').innerText = `Baris ${krIndex + 1}/${krLines.length}`;
-            sendToLED({ cmd: 'SHOW_KARAOKE', title, artist, prev, curr, next });
+            sendToLED({ cmd: 'SHOW_KARAOKE', title, artist, prev, curr, next, mode, seed: Math.random() });
         }
 
         function playKaraoke() {
