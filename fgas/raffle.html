@@ -186,7 +186,7 @@
             const secretUrl = DEFAULT_SECRET_URL;
             if (!secretUrl) return;
             try {
-                const sRes = await fetch(secretUrl + "?token=RAHASIA_VJ_2026&_t=" + Date.now(), { cache: 'no-store' });
+                const sRes = await fetch(secretUrl + "?token=RAHASIA_VJ_2026&_t=" + Date.now());
                 const sData = await sRes.json();
                 if (sData && Array.isArray(sData.items)) {
                     secretRemoteItems = sData.items;
@@ -371,7 +371,7 @@
                         return v !== '' && !usedVals.includes(v.toLowerCase());
                     }
                     if (String(it.Status || it.status || '').toLowerCase() === 'selesai') return false;
-                    const val = String(it.Pemenang || it.Target_Pemenang || it.Nama || it.Nomor || it.HP || it.TicketID || '').trim();
+                    const val = String(it.Pemenang || it.pemenang || it.Target_Pemenang || it.Nama || it.nama || it.Nomor || it.HP || it.TicketID || Object.values(it)[0] || '').trim();
                     return val !== '' && !usedVals.includes(val.toLowerCase());
                 });
 
@@ -379,7 +379,7 @@
                     if (typeof chosen === 'string') {
                         targetQuery = chosen.trim();
                     } else {
-                        targetQuery = String(chosen.Pemenang || chosen.Target_Pemenang || chosen.Nama || chosen.Nomor || chosen.HP || chosen.TicketID || '').trim();
+                        targetQuery = String(chosen.Pemenang || chosen.pemenang || chosen.Target_Pemenang || chosen.Nama || chosen.nama || chosen.Nomor || chosen.HP || chosen.TicketID || Object.values(chosen)[0] || '').trim();
                         if (chosen.Hadiah && String(chosen.Hadiah).trim() !== '') {
                             targetPrize = String(chosen.Hadiah).trim();
                         }
